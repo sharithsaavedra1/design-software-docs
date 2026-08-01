@@ -1,7 +1,7 @@
 # Datos
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Datos
 
 ## Contenido
 
@@ -16,8 +16,10 @@ Documenta modelos de datos, diccionario y estrategia de migración.
 | Archivo | Descripción | Estado |
 |---------|-------------|--------|
 | [models.md](./models.md) | Modelos conceptuales, lógicos o físicos de datos | 🔴 |
-| [data-dictionary.md](./data-dictionary.md) | Diccionario de entidades, campos y reglas | 🔴 |
-| [migration-strategy.md](./migration-strategy.md) | Estrategia para cambios y migraciones de datos | 🔴 |
+| [modeling-conventions.md](./modeling-conventions.md) | Estándar transversal de modelado (estados, auditoría, estructura DDL) | 🟡 |
+| [data-dictionary.md](./data-dictionary.md) | Índice de entidades por servicio y reglas comunes | 🟡 |
+| [normalization-assessment.md](./normalization-assessment.md) | Evaluación de normalización (NF) y calidad del modelo real | 🟢 |
+| [migration-strategy.md](./migration-strategy.md) | Estrategia Liquibase: orden DDL, seeds, rollbacks, ambientes | 🟡 |
 
 ## Plantillas
 

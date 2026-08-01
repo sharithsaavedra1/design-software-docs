@@ -181,3 +181,36 @@ status_transition (cat=SCHEDULE):
 - **Nomenclatura de constraints**: `pk_<tabla>`, `uq_<tabla>_<cols>`, `fk_<tabla>_<ref>`, `ck_<tabla>_<regla>`, `ix_<tabla>_<cols>`.
 - **PK**: UUID v4 en todas las tablas.
 - **Timestamps**: siempre `TIMESTAMPTZ` (UTC); la conversión a hora Colombia es de la capa de presentación.
+
+## 7. Estructura DDL y orden de aplicación (Liquibase)
+
+Cada repositorio `*-db` organiza el DDL en carpetas numeradas que **definen el orden de ejecución** de los changelogs. El orden no es cosmético: garantiza que cada objeto se cree cuando sus dependencias ya existen.
+
+```
+01_ddl/
+  00_extensions/   -- CREATE EXTENSION (pgcrypto / gen_random_uuid)
+  01_schemas/      -- CREATE SCHEMA del módulo
+  02_types/        -- DOMAIN / tipos (si aplica)
+  03_tables/       -- CREATE TABLE  (SIN llaves foráneas)
+  04_alter/        -- ALTER TABLE ... ADD CONSTRAINT  (llaves foráneas)  ← ver regla abajo
+  05_views/        -- vistas
+  06_functions/    -- funciones
+  07_procedures/   -- procedimientos
+  08_triggers/     -- triggers
+  10_indexes/      -- índices (incluye un índice por cada FK)
+02_dml/            -- datos semilla (seeds), con control de duplicados
+03_dcl/            -- roles y GRANT/REVOKE (least-privilege)
+04_tcl/            -- tags de versión / release
+05_rollbacks/      -- rollbacks espejo de cada changeset
+```
+
+### Regla: las llaves foráneas van en `04_alter`, no en `03_tables`
+
+**Las tablas se crean primero, sin FKs, en `03_tables`. Las llaves foráneas se agregan después, vía `ALTER TABLE ... ADD CONSTRAINT`, en `04_alter`.**
+
+Motivo: una FK requiere que la tabla referenciada **ya exista**. Si las FKs se declaran inline en `CREATE TABLE`, el orden de creación pasa a importar y aparecen rupturas por dependencias circulares o referencias hacia adelante (`relation "..." does not exist`). Separando la creación de la estructura (`03_tables`) del cableado referencial (`04_alter`) el despliegue es **determinista e independiente del orden entre tablas**.
+
+- `03_tables`: `CREATE TABLE` con PK, columnas, `NOT NULL`, `UNIQUE` y `CHECK` locales. **Sin `REFERENCES`.**
+- `04_alter`: un changeset por grupo de FKs — `ALTER TABLE <hija> ADD CONSTRAINT fk_<tabla>_<ref> FOREIGN KEY (...) REFERENCES <padre> (...) ON UPDATE ... ON DELETE ...`.
+- `10_indexes`: crear el índice de cada columna FK (Postgres **no** lo crea automáticamente).
+- `05_rollbacks`: el rollback de `04_alter` hace `DROP CONSTRAINT`; el de `03_tables`, `DROP TABLE`. Deben ser espejo exacto de sus rutas.
