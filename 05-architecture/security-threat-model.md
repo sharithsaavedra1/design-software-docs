@@ -1,136 +1,128 @@
-# Modelo de Amenazas de Seguridad — SENA Gestión de Horarios
+# Modelo de amenazas de seguridad
 
-> Fase: 03-Design | Agente: A04 (Security) · validación A12 (AppSec gate) | Estado: 🟡 Borrador
-> Fecha: 2026-06-17
-> Prerequisitos: [overview.md](./overview.md) · [authentication.md](../07-api/authentication.md) · [rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md)
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Alcance
+Modelo de amenazas **STRIDE ligero** para el sistema de Gestión de Horarios SENA. Clasifica activos, identifica amenazas por categoría STRIDE y define controles con su estado. Complementa a [overview.md](./overview.md), [cross-cutting.md](./cross-cutting.md) y a [00-governance/security-rules.md](../00-governance/security-rules.md).
 
-Modelo de amenazas STRIDE para la plataforma de microservicios. Cubre los 9 servicios, el API Gateway, el broker de mensajes y el almacenamiento de objetos. Clasifica activos, identifica amenazas por categoría STRIDE y define controles con su estado.
+> **Alcance real:** hoy solo existe la **capa de datos** (PostgreSQL 16 en Docker, migraciones Liquibase, `.env` por ambiente). Por eso la superficie **activa** actual es pequeña (base de datos + secretos de infraestructura). Las amenazas que involucran gateway, JWT, broker o object storage corresponden a la **capa de aplicación aún no construida** y se documentan como diseño previsto. El estado de cada control lo indica.
 
 ---
 
-## Activos a proteger (clasificación)
+## Activos a proteger
 
-| Activo | Clasificación | Servicio dueño | Impacto si se compromete |
-|--------|--------------|----------------|--------------------------|
-| Credenciales de usuario (`password_hash`) | CRÍTICO | iam-service | Acceso total suplantando usuarios |
-| Tokens JWT (access + refresh) | CRÍTICO | iam-service | Suplantación de sesión activa |
+| Activo | Clasificación | Dueño | Impacto si se compromete |
+|--------|--------------|-------|--------------------------|
+| Credenciales de BD (usuario/clave por módulo) | CRÍTICO | Infra / `.env` | Acceso total a los datos del sistema |
 | PII de instructores y aprendices (documento, email, teléfono) | ALTO | actors-service | Violación Ley 1581/2012 (Habeas Data) |
-| Datos de empresas (NIT, contactos) | MEDIO | actors-service | Exposición de aliados comerciales |
-| Horarios publicados | MEDIO | scheduling-service | Manipulación de la operación del centro |
 | Log de auditoría (`audit_record`) | ALTO | audit-service | Pérdida de trazabilidad / encubrimiento |
-| Clave privada RSA (firma JWT) | CRÍTICO | iam-service / Secret Manager | Falsificación de cualquier token |
+| Credenciales de usuario (`password_hash`) | CRÍTICO | iam-service | Suplantación de usuarios (previsto) |
+| Tokens JWT y clave privada RSA | CRÍTICO | iam-service / Secret Manager | Falsificación de sesión o de cualquier token (previsto) |
+| Horarios publicados | MEDIO | scheduling-service | Manipulación de la operación del centro |
 | Catálogos y parámetros del sistema | BAJO | reference-data-service | Alteración de reglas operativas |
 
 ---
 
 ## Superficie de ataque
 
-| Componente | Exposición | Vector principal |
-|------------|-----------|------------------|
-| API Gateway | Pública (Internet) | Inyección, fuerza bruta, DoS |
-| iam-api | Pública (vía gateway) | Credential stuffing, robo de token |
-| Endpoints de consulta (`/instructors/available`, etc.) | Pública (autenticada) | Abuso de scope, scraping de PII |
-| Broker de mensajes | Interna (red privada) | Inyección de eventos falsos, replay |
-| Bases de datos PostgreSQL (×9) | Interna | SQL injection, acceso lateral |
-| Object Storage (S3/MinIO) | Interna + URLs firmadas | URLs firmadas filtradas, enumeración |
-| Secret Manager | Interna restringida | Escalamiento de privilegios |
+| Componente | Exposición | Estado | Vector principal |
+|------------|-----------|--------|------------------|
+| **PostgreSQL 16** (una BD, schema por módulo) | Interna | **Existe** | Acceso con credencial filtrada; acceso lateral entre schemas; SQL injection (cuando exista la capa app) |
+| **Archivos `.env.*`** | Repositorio / infra | **Existe** | Secretos versionados en git |
+| **Runners Liquibase** | Interna (efímeros) | Existe | Migración maliciosa; changeset sin revisar |
+| API Gateway | Pública | Previsto | Inyección, fuerza bruta, DoS |
+| iam-api / endpoints autenticados | Pública | Previsto | Credential stuffing, abuso de scope, scraping de PII |
+| Broker de mensajes | Interna | Previsto | Inyección de eventos falsos, replay |
+| Object Storage (S3/MinIO) | Interna + URLs firmadas | Previsto | URLs firmadas filtradas, enumeración |
 
 ---
 
 ## Amenazas STRIDE
 
-### S — Spoofing (Suplantación de identidad)
+Prob. = probabilidad; los IDs se referencian desde otros documentos. "(previsto)" marca amenazas que solo aplican cuando exista la capa de aplicación.
 
-| ID | Amenaza | Componente | Prob. | Impacto | Control mitigante |
-|----|---------|-----------|-------|---------|-------------------|
-| S-01 | Robo de access_token vía XSS y reuso | Cliente web / gateway | Media | Alto | access_token en memoria (no localStorage); CSP estricta; TTL 15 min |
-| S-02 | Robo de refresh_token | Cliente web | Media | Alto | refresh_token en cookie HttpOnly+Secure+SameSite=Strict |
-| S-03 | Falsificación de JWT con clave comprometida | Todos los servicios | Baja | Crítico | RSA 2048 asimétrico; clave privada solo en Secret Manager; rotación trimestral |
-| S-04 | Inyección de evento falso en el broker | Broker | Baja | Alto | Red privada; autenticación mutua TLS entre servicios y broker; `source_service` verificado |
-| S-05 | Credential stuffing con credenciales filtradas | iam-api | Alta | Alto | Bloqueo por intentos (RN-IAM-01); rate limiting por IP; (2FA en V2) |
+### S — Spoofing (Suplantación)
 
-### T — Tampering (Manipulación de datos)
+| ID | Amenaza | Prob. | Impacto | Control |
+|----|---------|-------|---------|---------|
+| S-01 | Uso de credenciales de BD filtradas desde un `.env` versionado | **Alta hoy** | Crítico | Sacar secretos de git (ver §Secretos); rotar credenciales; Secret Manager |
+| S-02 | Falsificación de JWT con clave comprometida | Baja | Crítico | RSA asimétrico; clave privada solo en Secret Manager; rotación periódica (previsto) |
+| S-03 | Credential stuffing en login | Alta | Alto | Bloqueo por intentos (RN-IAM-01); rate limiting; 2FA en V2 (previsto) |
+| S-04 | Inyección de evento falso en el broker | Baja | Alto | Red privada; TLS mutuo servicio↔broker; `source_service` verificado (previsto) |
 
-| ID | Amenaza | Componente | Prob. | Impacto | Control mitigante |
-|----|---------|-----------|-------|---------|-------------------|
-| T-01 | Modificación de datos en tránsito | Todos los canales | Baja | Alto | TLS 1.2+ obligatorio en todos los canales (cliente↔gateway↔servicios) |
-| T-02 | Manipulación de horario publicado (debe ser inmutable) | scheduling-service | Baja | Medio | Invariante de dominio RN-SCH-01: `PUBLISHED` inmutable; cambios crean nueva versión |
-| T-03 | Alteración del log de auditoría | audit-service | Baja | Alto | `audit_record` solo INSERT (RN-CROSS-01); sin endpoint de UPDATE/DELETE; permisos de BD restringidos |
-| T-04 | SQL Injection | Todas las APIs | Media | Crítico | Queries parametrizadas / ORM; nunca concatenación de SQL; validación de entrada |
-| T-05 | Replay de eventos del broker | Consumers | Media | Medio | Idempotencia por `event_id` (UNIQUE en audit_record y consumers) |
+### T — Tampering (Manipulación)
+
+| ID | Amenaza | Prob. | Impacto | Control |
+|----|---------|-------|---------|---------|
+| T-01 | Changeset Liquibase malicioso o erróneo aplicado a un ambiente compartido | Media | Alto | Revisión en PR; forward-only en qa/staging/main; tags de release para contingencia |
+| T-02 | Alteración del log de auditoría | Baja | Alto | `audit_record` solo INSERT (append-only, ADR-004); sin UPDATE/DELETE; permisos de BD restringidos |
+| T-03 | SQL Injection | Media | Crítico | Queries parametrizadas; nunca concatenación de SQL; validación de entrada (capa app, previsto) |
+| T-04 | Replay de eventos del broker | Media | Medio | Idempotencia por `event_id` UNIQUE (ver [cross-cutting.md](./cross-cutting.md) §6) (previsto) |
+| T-05 | Manipulación de horario publicado | Baja | Medio | Invariante de dominio: `PUBLISHED` inmutable; cambios crean nueva versión |
 
 ### R — Repudiation (Repudio)
 
-| ID | Amenaza | Componente | Prob. | Impacto | Control mitigante |
-|----|---------|-----------|-------|---------|-------------------|
-| R-01 | Usuario niega haber publicado un horario | scheduling-service | Media | Medio | `published_by` + `published_at` registrados; evento `scheduling.schedule.published` con actor_id en audit |
-| R-02 | Falta de trazabilidad de cambios sensibles | Todos | Media | Alto | audit-service consume todos los topics; `actor_id` extraído del payload |
-| R-03 | Negación de intentos de acceso fallidos | iam-service | Baja | Medio | `audit_login` registra todos los intentos con IP y outcome |
+| ID | Amenaza | Prob. | Impacto | Control |
+|----|---------|-------|---------|---------|
+| R-01 | Falta de trazabilidad de cambios sensibles | Media | Alto | Estándar de auditoría ADR-004 (`created_by`/`updated_by`/`deleted_by`); `audit-service` consume todos los topics (previsto) |
+| R-02 | Acción del sistema indistinguible de acción humana | Baja | Medio | UUID de actor reservado para acciones automáticas (ADR-004) |
 
-### I — Information Disclosure (Divulgación de información)
+### I — Information Disclosure (Divulgación)
 
-| ID | Amenaza | Componente | Prob. | Impacto | Control mitigante |
-|----|---------|-----------|-------|---------|-------------------|
-| I-01 | Exposición de PII en logs | Todos los servicios | Media | Alto | RN-CROSS-02: PII nunca en logs, solo IDs; logs estructurados sin campos sensibles |
-| I-02 | Fuga de PII por scope mal aplicado | Servicios con datos de actor | Media | Alto | RBAC scope obligatorio (TRAINING_CENTER/OWN_*); error `SCOPE_VIOLATION` si se viola |
-| I-03 | Enumeración de usuarios en login/reset | iam-api | Media | Bajo | Respuestas genéricas: login 401 igual para usuario inexistente; reset siempre 202 |
-| I-04 | URLs firmadas de Object Storage filtradas | document-service | Media | Medio | URLs firmadas con expiración corta (5 min); scope verificado antes de firmar |
-| I-05 | Mensajes de error con stack trace | Todas las APIs | Media | Medio | Formato de error estándar sin detalles internos; `trace_id` para correlación interna |
-| I-06 | Acceso lateral entre BDs de servicios | PostgreSQL ×9 | Baja | Alto | Una BD por servicio con credenciales propias; sin usuario compartido; red segmentada |
+| ID | Amenaza | Prob. | Impacto | Control |
+|----|---------|-------|---------|---------|
+| I-01 | Exposición de PII en logs | Media | Alto | PII nunca en logs, solo IDs (ver [cross-cutting.md](./cross-cutting.md) §3) (previsto) |
+| I-02 | Fuga de PII por scope mal aplicado | Media | Alto | RBAC scope obligatorio (`TRAINING_CENTER`/`OWN_*`); filtro por centro en cada query (previsto) |
+| I-03 | Acceso lateral entre schemas/BDs | Media | Alto | Credenciales propias por módulo; sin usuario compartido; al separar instancias, red segmentada |
+| I-04 | URLs firmadas de object storage filtradas | Media | Medio | URLs firmadas con expiración corta (5 min); scope verificado antes de firmar (ADR-003) (previsto) |
+| I-05 | Mensajes de error con detalles internos | Media | Medio | Formato de error estándar sin stack trace; `trace_id` interno (previsto) |
 
-### D — Denial of Service (Denegación de servicio)
+### D — Denial of Service
 
-| ID | Amenaza | Componente | Prob. | Impacto | Control mitigante |
-|----|---------|-----------|-------|---------|-------------------|
-| D-01 | Saturación de endpoints públicos | API Gateway | Alta | Medio | Rate limiting por IP y por usuario; circuit breaker |
-| D-02 | Query costosa de disponibilidad sin límite | training-environment / actors | Media | Medio | Índices optimizados (<300 ms); paginación obligatoria; timeout 5 s |
-| D-03 | Saturación del broker por evento masivo | Broker | Baja | Alto | Backpressure; DLQ; particionamiento de topics |
-| D-04 | Agotamiento del pool de conexiones a BD | Cualquier servicio | Media | Alto | Connection pooling con límite; circuit breaker; health checks |
+| ID | Amenaza | Prob. | Impacto | Control |
+|----|---------|-------|---------|---------|
+| D-01 | Saturación de endpoints públicos | Alta | Medio | Rate limiting por IP y usuario; circuit breaker (previsto) |
+| D-02 | Agotamiento del pool de conexiones a BD | Media | Alto | Connection pooling con límite; health checks (previsto) |
+| D-03 | Query costosa sin límite | Media | Medio | Índices (incluido uno por FK); paginación obligatoria; timeout 5 s |
 
-### E — Elevation of Privilege (Elevación de privilegios)
+### E — Elevation of Privilege
 
-| ID | Amenaza | Componente | Prob. | Impacto | Control mitigante |
-|----|---------|-----------|-------|---------|-------------------|
-| E-01 | Usuario accede a features no asignados | Todos los servicios | Media | Alto | Verificación de `feature` en JWT en cada endpoint; features pre-calculados firmados |
-| E-02 | Escalamiento horizontal (coordinador ve otro centro) | Servicios con scope TRAINING_CENTER | Media | Alto | Filtro `WHERE training_center_id = jwt.training_center_id` obligatorio |
-| E-03 | Manipulación del JWT para agregar features | Cliente | Baja | Crítico | Firma RSA verificada en cada servicio; payload no modificable sin clave privada |
-| E-04 | Propagación de privilegios en cadena de servicios | Service-to-service | Media | Alto | Se propaga el JWT del usuario, no un token de servicio elevado (least privilege) |
-| E-05 | Abuso de `UserScopeOverride` para acceso permanente | iam-service | Baja | Medio | Overrides requieren `reason` y `granted_by`; soportan `expires_at`; auditados |
+| ID | Amenaza | Prob. | Impacto | Control |
+|----|---------|-------|---------|---------|
+| E-01 | Usuario accede a features no asignados | Media | Alto | Verificación de `feature` del JWT en cada endpoint (previsto) |
+| E-02 | Escalamiento horizontal (coordinador ve otro centro) | Media | Alto | Filtro `WHERE training_center_id = jwt.training_center_id` obligatorio (previsto) |
+| E-03 | Manipulación del JWT para agregar features | Baja | Crítico | Firma RSA verificada en cada servicio (previsto) |
 
 ---
 
-## Controles de seguridad — Resumen y estado
+## Secretos — Riesgo real y prioritario hoy
 
-### Autenticación y autorización
+> **Hallazgo actual:** los archivos de entorno `.env.<ambiente>` pueden contener **credenciales reales versionadas en git**. Esto es la mayor exposición de seguridad **hoy**, porque la capa de datos ya existe y sus credenciales viven en esos archivos.
+
+- **Impacto:** cualquiera con acceso al repositorio (o a su historial) obtiene credenciales de base de datos → acceso directo a los datos, incluida PII sujeta a Ley 1581.
+- **Regla:** los `.env.*` **no deben contener contraseñas reales**. Usar `.env.example` como plantilla y mantener los valores reales fuera de git (ver [10-devops/local-setup.md](../10-devops/local-setup.md) §Nota de secretos y [10-devops/environments.md](../10-devops/environments.md)).
+- **Remediación (orden):**
+  1. Rotar de inmediato cualquier credencial que haya estado versionada (**rotar primero, avisar después**, [security-rules.md](../00-governance/security-rules.md)).
+  2. Sacar los `.env.*` del control de versiones; versionar solo `.env.example` con valores ficticios.
+  3. Evaluar limpieza del historial de git si el secreto quedó registrado.
+  4. Estado objetivo: mover credenciales a un **Secret Manager** cuando exista la capa de aplicación.
+
+---
+
+## Controles — Resumen y estado
 
 | Control | Implementación | Estado |
 |---------|----------------|--------|
-| Autenticación | JWT RS256 con refresh token | ✅ Diseñado |
-| Autorización | RBAC por Feature + Scope (matriz completa) | ✅ Diseñado |
-| MFA | TOTP para COORDINATOR y CENTER_DIRECTOR | 🔴 V2 |
-| Session timeout | access 15 min / refresh 7 días | ✅ Diseñado |
-| Bloqueo por fuerza bruta | 5 intentos → 15 min; 10 → 24 h | ✅ Diseñado |
-
-### Protección de datos
-
-| Control | Dato protegido | Mecanismo | Estado |
-|---------|----------------|-----------|--------|
-| Cifrado en tránsito | Todo | TLS 1.2+ | 🟡 Por implementar |
-| Cifrado en reposo | PII + credenciales | AES-256 a nivel de BD | 🟡 Por implementar |
-| Hash de contraseñas | Credenciales | Bcrypt cost 12 | ✅ Diseñado |
-| Secrets management | Claves, credenciales BD | Secret Manager (Vault/SSM) | 🟡 Por definir proveedor |
-| Anonimización en logs | PII | Solo IDs en logs | ✅ Regla definida |
-
-### Protección perimetral
-
-| Regla | Límite | Respuesta | Estado |
-|-------|--------|-----------|--------|
-| Rate limit por IP | 1000 req/hora | 429 + Retry-After | 🟡 Por implementar |
-| Rate limit por usuario | 300 req/min | 429 | 🟡 Por implementar |
-| Login fallido | 5 intentos | Bloqueo 15 min | ✅ Diseñado |
-| Reset de contraseña | 3 solicitudes / 24 h | 429 | ✅ Diseñado |
+| Auditoría append-only + soft delete | Estándar ADR-004 en el modelo | ✅ En el modelo |
+| Estados y transiciones parametrizables | `status`/`status_transition` por servicio | ✅ En el modelo |
+| Aislamiento por schema/módulo | Un schema por módulo; tracking Liquibase por módulo | ✅ Existe |
+| Índice por cada FK (rendimiento y anti-DoS) | `10_indexes` en cada repo `*-db` | ✅ Existe |
+| Secretos fuera de git | `.env.example` + Secret Manager | 🔴 **Pendiente (riesgo real)** |
+| Autenticación JWT RS256 | iam-service | 🟡 Diseñado (capa app) |
+| Autorización RBAC (Feature + Scope) | iam-service + cada servicio | 🟡 Diseñado (capa app) |
+| Cifrado en tránsito (TLS 1.2+) | Todos los canales | 🟡 Por implementar |
+| Rate limiting | API Gateway | 🟡 Por implementar |
+| 2FA (TOTP) | Roles de coordinación | 🔴 V2 |
 
 ---
 
@@ -138,24 +130,9 @@ Modelo de amenazas STRIDE para la plataforma de microservicios. Cubre los 9 serv
 
 | Norma | Aplicación | Cómo se cumple |
 |-------|-----------|----------------|
-| Ley 1581 de 2012 (Habeas Data Colombia) | PII de aprendices, instructores, empresas | Marcación PII, cifrado en reposo, retención definida, acceso por scope |
+| Ley 1581 de 2012 (Habeas Data) | PII de aprendices, instructores, empresas | Auditoría de acceso, soft delete con trazabilidad, acceso por scope, secretos protegidos |
 | Ley 1273 de 2009 (Delitos informáticos) | Acceso no autorizado | RBAC, auditoría append-only, autenticación fuerte |
-| Decreto 1377 de 2013 (Reglamenta Habeas Data) | Tratamiento de datos personales | Políticas de retención por entidad; derecho a actualización |
-| OWASP Top 10 (2021) | Toda la aplicación | Ver mapeo abajo |
-
-### Mapeo OWASP Top 10 (2021)
-
-| Riesgo OWASP | Amenazas relacionadas | Control |
-|--------------|----------------------|---------|
-| A01 Broken Access Control | E-01, E-02, I-02 | RBAC Feature+Scope, verificación en cada servicio |
-| A02 Cryptographic Failures | S-03, T-01, I-01 | TLS 1.2+, AES-256, bcrypt, RSA 2048 |
-| A03 Injection | T-04 | Queries parametrizadas, validación de entrada |
-| A04 Insecure Design | Todas | Threat model (este documento), pattern-guide |
-| A05 Security Misconfiguration | I-05, I-06 | Errores genéricos, segmentación de red, BD por servicio |
-| A07 Identification/Auth Failures | S-01, S-05 | Bloqueo de cuenta, rate limiting, MFA (V2) |
-| A08 Data Integrity Failures | T-02, T-03, T-05 | Inmutabilidad de horario/audit, idempotencia |
-| A09 Logging/Monitoring Failures | R-02, R-03 | audit-service, audit_login, observabilidad |
-| A10 SSRF | D-02 | Validación de inputs, sin fetch de URLs de usuario |
+| OWASP Top 10 (2021) | Toda la aplicación | Access control (E-01/E-02/I-02), inyección (T-03), fallos criptográficos y de configuración (S-01 secretos) |
 
 ---
 
@@ -163,20 +140,18 @@ Modelo de amenazas STRIDE para la plataforma de microservicios. Cubre los 9 serv
 
 | # | Acción | Responsable | Prioridad |
 |---|--------|-------------|-----------|
-| 1 | Definir proveedor de Secret Manager (Vault vs SSM) | Arquitectura | Alta |
-| 2 | Implementar rate limiting en API Gateway | DevOps | Alta |
-| 3 | Configurar cifrado en reposo en PostgreSQL | DevOps | Alta |
-| 4 | Definir CSP y headers de seguridad en el frontend | Frontend | Media |
+| 1 | Sacar `.env.*` de git, rotar credenciales versionadas | DevOps / Arquitectura | **Crítica** |
+| 2 | Definir proveedor de Secret Manager | Arquitectura | Alta |
+| 3 | Restringir permisos de BD por módulo (sin superusuario compartido) | DevOps | Alta |
+| 4 | Diseñar rate limiting y TLS en el gateway (capa app) | DevOps | Media |
 | 5 | Diseñar rotación de claves RSA (proceso operativo) | Seguridad | Media |
 | 6 | Especificar 2FA TOTP para V2 | Seguridad | Baja (V2) |
 
----
-
 ## Referencias
 
-- [non-functional.md](../04-requirements/non-functional.md)
-- [authentication.md](../07-api/authentication.md)
-- [rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md)
-- [security-rules.md](../00-governance/security-rules.md)
+- [cross-cutting.md](./cross-cutting.md) — controles transversales (IAM, auditoría, idempotencia)
+- [ADR-003](./decisions/records/ADR-003-object-storage.md) — URLs firmadas (I-04) · [ADR-004](./decisions/records/ADR-004-status-parametrization-and-audit-standard.md) — auditoría (T-02, R-01)
+- [00-governance/security-rules.md](../00-governance/security-rules.md) — reglas documentales de seguridad
+- [10-devops/environments.md](../10-devops/environments.md) — `.env` por ambiente y advertencia de secretos
 - OWASP Top 10: https://owasp.org/www-project-top-ten/
 - Ley 1581 de 2012: https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981

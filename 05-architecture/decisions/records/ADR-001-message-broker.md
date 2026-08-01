@@ -2,7 +2,7 @@
 
 **Estado:** PROPOSED
 **Fecha:** 2026-06-17
-**Autores:** Equipo de Arquitectura
+**Autores:** Jesús Ariel González Bonilla (Arquitecto)
 **Equipos involucrados:** Arquitectura, DevOps, Backend
 
 ---

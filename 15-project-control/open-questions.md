@@ -1,7 +1,7 @@
 # Preguntas abiertas
 
 > Estado: 🟡 En progreso | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Arquitectura / Gestión
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura / Gestión
 
 ## Flujo de resolución
 

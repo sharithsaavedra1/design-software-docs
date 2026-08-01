@@ -1,18 +1,20 @@
 # API
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 ## Contenido
 
 Define lineamientos de API, autenticación y ubicación de contratos OpenAPI.
 
+> ⚠️ Las APIs de los servicios **aún no están implementadas**: hoy sólo existe la capa de datos (repos `*-db`). Esta carpeta contiene el estándar de diseño que cada servicio deberá cumplir al construir su capa de aplicación. Ver plan por fases en [technical-backlog.md](../15-project-control/technical-backlog.md).
+
 ## Archivos
 
 | Archivo | Descripción | Estado |
 |---------|-------------|--------|
-| [guidelines.md](./guidelines.md) | Convenciones de diseño de APIs | 🔴 |
-| [authentication.md](./authentication.md) | Estrategia de autenticación y autorización | 🔴 |
+| [guidelines.md](./guidelines.md) | Convenciones de diseño de APIs | 🟡 |
+| [authentication.md](./authentication.md) | Estrategia de autenticación y autorización | 🟡 |
 | [contracts/openapi/](./contracts/openapi/) | Contratos OpenAPI validados y publicables | 🔴 |
 
 ## Dónde va cada contrato

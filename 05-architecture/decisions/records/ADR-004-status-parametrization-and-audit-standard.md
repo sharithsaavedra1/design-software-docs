@@ -2,7 +2,7 @@
 
 **Estado:** PROPOSED
 **Fecha:** 2026-06-17
-**Autores:** Equipo de Arquitectura + Datos
+**Autores:** Jesús Ariel González Bonilla (Arquitecto) + Equipo de Datos
 **Equipos involucrados:** Arquitectura, Datos, Backend (todos los servicios)
 
 ---

@@ -1,19 +1,30 @@
 # Producto
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 ## Contenido
 
-Documenta la intención del producto, evolución esperada y backlog funcional de alto nivel.
+Documenta la intención del producto **SENA Gestión de Horarios**: qué problema resuelve, para quién, cómo evoluciona y qué se construye en qué orden. Es el puente entre el descubrimiento ([discovery-brief.md](./discovery-brief.md), [problem-framing.md](./problem-framing.md)) y los requisitos ejecutables ([04-requirements/](../04-requirements/)).
 
 ## Archivos
 
 | Archivo | Descripción | Estado |
 |---------|-------------|--------|
-| [vision.md](./vision.md) | Visión, objetivos de producto y propuesta de valor | 🔴 |
-| [roadmap.md](./roadmap.md) | Hitos, fases y evolución planificada | 🔴 |
-| [product-backlog.md](./product-backlog.md) | Backlog priorizado de producto | 🔴 |
+| [vision.md](./vision.md) | Visión, objetivos, usuarios, propuesta de valor y alcance MVP vs. futuro | 🟡 |
+| [roadmap.md](./roadmap.md) | Fases (0–4), entregables por fase y dependencias | 🟡 |
+| [product-backlog.md](./product-backlog.md) | Backlog priorizado por épicas (EPC-NN) con MoSCoW | 🟡 |
+| [discovery-brief.md](./discovery-brief.md) | Discovery: contexto, problema, MVP y hallazgos por dominio | 🟡 |
+| [problem-framing.md](./problem-framing.md) | Definición del problema, 5 Whys y criterios de éxito | 🟡 |
+
+## Cómo se relacionan
+
+```
+discovery-brief ─▶ problem-framing ─▶ vision ─▶ roadmap ─▶ product-backlog
+                                                                │
+                                                                ▼
+                                          04-requirements (functional / user-stories / traceability)
+```
 
 ## Plantillas
 
