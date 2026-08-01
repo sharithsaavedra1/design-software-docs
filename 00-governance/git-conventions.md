@@ -1,19 +1,20 @@
 # Convenciones de Git
 
-> Estado: 🟡 En progreso | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟢 Estable | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Por definir
 
 Este repositorio usa ramas protegidas, Pull Requests y Conventional Commits para mantener trazabilidad documental.
 
 ## Ramas protegidas
 
-`dev`, `qa` y `main` representan ambientes padre y no se trabajan directamente.
+`develop`, `qa`, `staging` y `main` representan ambientes padre y no se trabajan directamente.
 
 | Rama | Propósito | Regla |
 |------|-----------|-------|
-| `dev` | Integración de trabajo en desarrollo | Recibe PRs desde ramas hijas |
-| `qa` | Validación funcional y técnica | Recibe PRs o cherry-picks aprobados desde `dev` |
-| `main` | Producción / documentación estable | Recibe solo PRs desde `release/*` |
+| `develop` | Integración de trabajo en desarrollo | Recibe PRs desde ramas hijas |
+| `qa` | Validación funcional y técnica | Recibe PRs o cherry-picks aprobados desde `develop` |
+| `staging` | Preproducción / validación previa al release | Recibe PRs o cherry-picks aprobados desde `qa` |
+| `main` | Producción / documentación estable | Recibe solo PRs desde `release/*` (promovidos desde `staging`) |
 
 ## Ramas documentales
 
@@ -30,17 +31,18 @@ El tipo de rama describe intención. El tipo del commit sigue Conventional Commi
 
 | Caso | Rama base | Formato | Ejemplo |
 |------|-----------|---------|---------|
-| Desarrollo de HU | `dev` | `hu-<numero>-dev` | `hu-01-dev` |
+| Desarrollo de HU | `develop` | `hu-<numero>-dev` | `hu-01-dev` |
 | Ajuste o validación QA | `qa` | `hu-<numero>-qa` | `hu-01-qa` |
+| Validación en staging | `staging` | `hu-<numero>-staging` | `hu-01-staging` |
 | Release de iteración | `main` | `release/<iteracion>` | `release/iteration-01` |
 
 Las ramas `hu-*` son un caso especial para trazabilidad por historia. No siguen el formato `<tipo>/doc-*`.
 
-## Flujo hacia dev
+## Flujo hacia develop
 
 ```bash
-git checkout dev
-git pull origin dev
+git checkout develop
+git pull origin develop
 git checkout -b hu-01-dev
 
 git add <archivos>
@@ -48,7 +50,7 @@ git commit -m "docs(04-requirements): add scheduling availability user story"
 git push origin hu-01-dev
 ```
 
-Abrir PR de `hu-01-dev` hacia `dev`.
+Abrir PR de `hu-01-dev` hacia `develop`.
 
 ## Flujo hacia qa
 
@@ -75,6 +77,20 @@ git push origin hu-01-qa
 ```
 
 Abrir PR de `hu-01-qa` hacia `qa`.
+
+## Flujo hacia staging
+
+Una vez validado en `qa`, promover a `staging` (preproducción) con merge o cherry-pick:
+
+```bash
+git checkout staging
+git pull origin staging
+git checkout -b hu-01-staging
+git merge origin/hu-01-qa
+git push origin hu-01-staging
+```
+
+Abrir PR de `hu-01-staging` hacia `staging`.
 
 ## Release hacia main
 
@@ -154,7 +170,7 @@ git commit -m "fix(07-api): correct broken endpoint reference in contract"
 git push origin fix/doc-broken-api-contract
 ```
 
-Abrir PR directo de `fix/doc-*` hacia `main`. Una vez mergeado, aplicar el mismo fix a `qa` y `dev` con cherry-pick:
+Abrir PR directo de `fix/doc-*` hacia `main`. Una vez mergeado, aplicar el mismo fix a `staging`, `qa` y `develop` con cherry-pick:
 
 ```bash
 git checkout qa

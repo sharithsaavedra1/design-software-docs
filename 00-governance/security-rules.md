@@ -1,7 +1,7 @@
 # Seguridad documental
 
-> Estado: 🟡 En progreso | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟢 Estable | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Por definir
 
 Este repositorio puede ser consultado por varios equipos. La documentación debe usar ejemplos seguros y evitar exposición de información sensible.
 

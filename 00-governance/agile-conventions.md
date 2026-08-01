@@ -1,7 +1,7 @@
 # Convenciones ágiles
 
-> Estado: 🟡 En progreso | Última actualización: 2026-06-16
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟢 Estable | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Por definir
 
 Este documento define cómo nombrar, estructurar y referenciar los artefactos ágiles del proyecto. **Este repositorio no persiste las historias de usuario**: el tracker externo (Jira, Trello, GitHub Projects, Azure DevOps u otro) es la fuente de verdad para el seguimiento. Aquí solo viven las convenciones y plantillas.
 
