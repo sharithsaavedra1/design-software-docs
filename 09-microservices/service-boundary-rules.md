@@ -1,50 +1,29 @@
-# Reglas de frontera de servicios
+# Reglas de frontera de servicio
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Define las reglas que gobiernan cómo los microservicios interactúan entre sí y cómo se mantienen los bounded contexts.
+Reglas que preservan el desacople entre los 9 microservicios. Son **agnósticas de lenguaje**: aplican a cualquier backend.
 
-## Reglas de propiedad de datos
+## 1. Una base de datos por servicio
+Cada servicio es dueño exclusivo de su esquema. Hoy conviven como **un schema por módulo** en una sola instancia PostgreSQL; el estado objetivo separa a instancia/credencial por servicio. Ningún servicio accede al schema de otro.
 
-| # | Regla | Justificación |
-|---|-------|--------------|
-| R01 | Cada entidad tiene un único servicio propietario (ver [data-ownership-matrix.md](./data-ownership-matrix.md)) | Evitar escrituras concurrentes desde múltiples servicios |
-| R02 | Ningún servicio accede directamente a la BD de otro | Permite despliegue y escalado independiente |
-| R03 | Los IDs externos se guardan como campos simples (no FK de BD) | Las FKs cruzadas entre BDs no existen |
-| R04 | Si un servicio necesita datos de otro con frecuencia alta, crea un read model local | Reducir latencia y desacoplamiento |
+## 2. Propiedad de datos (data ownership)
+Cada entidad tiene **un único servicio dueño** (ver [data-ownership-matrix.md](./data-ownership-matrix.md)). Los demás la referencian, no la copian como fuente de verdad.
 
-## Reglas de comunicación
+## 3. Prohibido el join cross-servicio
+No se hacen `JOIN` entre tablas de servicios distintos. La composición de datos se hace en la capa de aplicación (llamando a la API del dueño) o mediante **read models** locales alimentados por eventos ([ADR-002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md)).
 
-| # | Regla | Justificación |
-|---|-------|--------------|
-| R05 | Llamadas síncronas (REST) solo para operaciones que necesitan respuesta inmediata | Las llamadas síncronas crean acoplamiento de disponibilidad |
-| R06 | Un servicio no puede encadenar más de 2 llamadas síncronas para completar una operación | Evitar el antipatrón de "cadena de servicios" |
-| R07 | Mutaciones que no requieren respuesta inmediata se propagan como eventos | Desacopla la escritura del resultado |
-| R08 | El `audit-service` recibe todos los eventos; nunca se llama síncronamente | Es un consumidor pasivo de toda mutación |
+## 4. Referencias cross-servicio por UUID sin FK física
+Una referencia a una entidad de otro servicio se guarda como `UUID` **sin** `FOREIGN KEY` en la BD. La integridad se garantiza por contrato/evento, no por el motor. **Esto es correcto en microservicios**, no una violación de diseño.
 
-## Reglas de despliegue
+## 5. Comunicación solo por API o eventos
+- **Síncrono:** REST sobre el contrato publicado del servicio dueño (máx. ~2 dependencias síncronas por operación, ADR-002).
+- **Asíncrono:** eventos por el broker (at-least-once, idempotencia por `event_id`). Ver [communication-patterns.md](./communication-patterns.md).
+- Nunca acceso directo a la BD ajena.
 
-| # | Regla | Justificación |
-|---|-------|--------------|
-| R09 | Cada servicio se despliega y escala independientemente | Principio fundamental de microservicios |
-| R10 | Un cambio de schema en la BD de un servicio no puede requerir despliegue coordinado con otro | Autonomía de equipos |
-| R11 | Las versiones de API deben soportar al menos una versión anterior durante el periodo de transición | Permite despliegue sin big bang |
+## 6. Contratos versionados
+Cambios de contrato (API o evento) son **retrocompatibles** o versionados (`/api/v1`, versión de evento). Un cambio incompatible requiere ADR.
 
-## Reglas de creación de nuevo servicio
-
-| # | Regla |
-|---|-------|
-| R12 | Debe existir ADR aprobada antes de crear la carpeta del servicio |
-| R13 | El bounded context debe estar documentado en [data-ownership-matrix.md](./data-ownership-matrix.md) antes de crear código |
-| R14 | El servicio debe aparecer en [service-catalog.md](./service-catalog.md) con owner definido |
-| R15 | Al menos un componente debe tener `contract.md` completado antes de ser consumido por otro servicio |
-
-## Antipatrones a evitar
-
-| Antipatrón | Señal de alerta | Solución |
-|-----------|----------------|---------|
-| Módulo disfrazado | El servicio no tiene BD propia | Asignarle BD o fusionarlo con otro |
-| Omnibus service | Más de 15 entidades propias | Dividir por sub-dominio |
-| Llamada en cadena | A llama a B que llama a C que llama a D | Introducir evento o saga |
-| BD compartida | Dos servicios escriben en la misma tabla | Asignar propietario único |
-| Sync en cascada | Una request HTTP dispara > 2 llamadas HTTP | Introducir read model o caché |
+## 7. Naming
+Eventos y contratos en **inglés** (`<service>.<entity>.<action>`); el dominio y la UI en español.

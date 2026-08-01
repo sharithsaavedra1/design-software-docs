@@ -1,53 +1,25 @@
-# actors-service — Instructores, aprendices y empresas
+# actors-service
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Responsabilidad
+Gestiona los **actores** de la formación: instructores, aprendices y empresas, con sus contratos, áreas, asignaciones de competencia y etapas productivas.
 
-Gestiona los actores del proceso formativo: instructores (con sus contratos, competencias y disponibilidad), aprendices (con su matrícula y seguimiento) y empresas (para etapa productiva). Es la fuente de verdad sobre quién es quién en el sistema.
+> **Estado real:** existe la **capa de datos** ([data-model.md](./data-model.md)). La capa de aplicación es **diseño previsto — no construido**. Documentación agnóstica de lenguaje.
 
-## Bounded context
+## Módulo
+M7 (actores).
 
-| Entidad | Descripción |
-|---------|-------------|
-| `instructor` | Docente del SENA con perfil técnico y pedagógico |
-| `aprendiz` | Estudiante matriculado en un programa de formación |
-| `empresa` | Empresa patrocinadora o receptora de aprendices en etapa productiva |
-| `vinculacion_instructor` | Tipo y vigencia de contrato del instructor |
-| `asignacion_competencia` | Competencias que el instructor está habilitado para dictar |
-| `bitacora` | Registro de actividades pedagógicas del instructor |
-| `etapa_productiva` | Periodo de práctica del aprendiz en empresa |
-| `visita_empresa` | Visita de seguimiento del instructor a la empresa |
-| `plan_mejoramiento_actor` | Plan de mejora asignado a un instructor o aprendiz |
+## Componentes previstos
+| Componente | Tipo | Responsabilidad |
+|------------|------|-----------------|
+| [`actors-api`](./components/actors-api/) | `-api` | CRUD de instructores, aprendices, empresas y asignaciones |
 
-## Módulo de origen
+## Datos
+Schema `actors_parameterization`. Entidades: `instructor`, `learner`, `company`, `instructor_area`, `instructor_contract`, `learner_ficha_enrollment`, `competency_assignment`, `productive_stage`, y el patrón de estados parametrizables (`status`/`status_category`/`status_transition`, ADR-004). Ver [data-model.md](./data-model.md).
 
-M7 — Actores (Instructores y Aprendices)
+## Eventos publicados
+`actors.instructor.availability_changed`, `actors.learner.enrolled` (ver [event-catalog.md](../../event-catalog.md)) — consumidos por `scheduling` y `monitoring`.
 
 ## Dependencias
-
-| Servicio | Tipo | Motivo |
-|----------|------|--------|
-| `iam-service` | auth | Validación de JWT |
-| `academic-management-service` | sync | Consultar competencias válidas al asignar instructor |
-| `reference-data-service` | sync | Tipos de contrato, categorías de actor, sede |
-
-## Componentes desplegables
-
-| Componente | Sufijo | Descripción |
-|------------|--------|-------------|
-| `actors-api` | `-api` | REST API: CRUD de instructores, aprendices, empresas, asignaciones y bitácoras |
-
-## Base de datos
-
-- Nombre lógico: `actors_db`
-- Motor: PostgreSQL
-
-## Links
-
-- Repo: (pendiente)
-- Data model: [data-model.md](./data-model.md)
-- Eventos: [events.md](./events.md)
-- Runbook: [runbook.md](./runbook.md)
-- Decisiones internas: [decisions.md](./decisions.md)
+reference-data (centro, catálogos), academic (fichas) e iam. Referencias cross-servicio por `UUID` sin FK física.

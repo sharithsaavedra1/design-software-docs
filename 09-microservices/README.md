@@ -1,11 +1,21 @@
 # Microservicios
 
-> Estado: 🟡 En progreso | Última actualización: 2026-06-17
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 ## Contenido
 
 Centraliza el catálogo de microservicios, reglas de frontera, eventos y documentación por servicio.
+
+## Alcance de la documentación por servicio
+
+> **Estado real del sistema (alcance declarado):** hoy cada servicio existe únicamente como su **capa de datos** (repo `*-db`, Liquibase/PostgreSQL). Las **capas de aplicación** — componentes `*-api`, `*-worker`, `*-workflow` y sus contratos — **aún no están construidas como código**.
+>
+> Por eso, dentro de `services/<servicio>/`:
+> - **`data-model.md` está completo (🟢)** y verificado 1:1 contra las tablas reales — es el entregable vigente.
+> - Los documentos de componentes de aplicación (`components/*`, `contract.md`, etc.) permanecen en **🔴 por diseño**: son **plantillas a completar cuando se construya el servicio**, no deuda documental oculta.
+>
+> Ver [service-catalog.md](./service-catalog.md) para el mapeo servicio → repo y [service-readiness-checklist.md](./service-readiness-checklist.md) para los niveles de madurez (doc → dev → qa → prod).
 
 ## Archivos raíz
 

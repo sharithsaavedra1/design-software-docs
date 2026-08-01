@@ -1,58 +1,36 @@
 # Checklist de madurez de servicio
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Criterios que un microservicio debe cumplir antes de pasar de documentación a implementación,
-y luego antes de pasar a cada ambiente. Aplica a todos los servicios del catálogo.
+Criterios de madurez por nivel. Agnóstico de lenguaje. Hoy los 9 servicios están en el nivel **Datos** (capa de datos lista; capa de aplicación pendiente).
 
-## Nivel 0 — Documentación aprobada (antes de escribir código)
+## Niveles
 
-- [ ] Bounded context documentado en `README.md` del servicio
-- [ ] Entidades propias registradas en [data-ownership-matrix.md](./data-ownership-matrix.md)
-- [ ] Dependencias (sync/async) registradas en [dependency-map.md](./dependency-map.md)
-- [ ] Al menos un componente con `contract.md` completado
-- [ ] Eventos publicados y consumidos en `events.md`
-- [ ] ADR aprobada si el servicio introduce un patrón arquitectónico nuevo
-- [ ] Servicio registrado en [service-catalog.md](./service-catalog.md) con owner definido
+### Nivel 0 — Doc
+- [ ] Servicio registrado en [service-catalog.md](./service-catalog.md) con owner y repo.
+- [ ] ADR de creación aprobada (ver [microservices-documentation.md](../00-governance/microservices-documentation.md)).
 
-## Nivel 1 — Listo para DEV
+### Nivel 1 — Datos (estado actual de los 9)
+- [x] `data-model.md` completo y verificado contra el esquema real.
+- [x] Migraciones Liquibase con rollback espejo y schema propio.
+- [x] Estados y auditoría según [ADR-004](../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md).
 
-- [ ] `data-model.md` con entidades y campos completos
-- [ ] Variables de entorno documentadas en el `README.md` del componente
-- [ ] Healthcheck implementado (`GET /health`)
-- [ ] Logs estructurados (JSON) con `trace_id` en cada línea
-- [ ] Tests de contrato básicos pasando
+### Nivel 2 — Dev (aplicación)
+- [ ] Contratos de componente (`README.md` + `contract.md`) definidos.
+- [ ] API/worker/workflow implementados (cualquier backend).
+- [ ] Pruebas unitarias y de contrato (ver [11-quality/testing-strategy.md](../11-quality/testing-strategy.md)).
+- [ ] Publicación/consumo de eventos con idempotencia.
 
-## Nivel 2 — Listo para QA
+### Nivel 3 — QA
+- [ ] Pruebas de integración y e2e en ambiente `qa`.
+- [ ] Observabilidad: logs estructurados, métricas RED, trazas ([13-operations/observability.md](../13-operations/observability.md)).
+- [ ] Runbook operativo por componente.
 
-- [ ] `runbook.md` completado con alertas y procedimientos de reinicio
-- [ ] `decisions.md` con al menos las 3 decisiones de diseño más importantes
-- [ ] Cobertura de tests >= 70 %
-- [ ] Errores retornan formato estándar `{ error_code, message, trace_id }`
-- [ ] Rate limiting configurado en el componente `-api`
-- [ ] Dead letter queue configurada para workers
-- [ ] Métricas RED expuestas (Rate, Errors, Duration)
+### Nivel 4 — Prod
+- [ ] Backup/restore probado ([13-operations/backup-and-recovery.md](../13-operations/backup-and-recovery.md)).
+- [ ] Secretos fuera de git (Secret Manager).
+- [ ] Alertas y SLO definidos; instancia/credencial de BD separada por servicio.
 
-## Nivel 3 — Listo para producción
-
-- [ ] SLO definido en [13-operations/_template-sla-slo-sli.md](../13-operations/_template-sla-slo-sli.md)
-- [ ] Alertas configuradas en plataforma de observabilidad
-- [ ] Backup configurado con RPO/RTO documentado
-- [ ] Rollback plan documentado
-- [ ] Revisión de seguridad completada (ver [STRIDE](../05-architecture/_template-security-threat-model.md))
-- [ ] Postmortem template listo para el equipo
-- [ ] Review de Definition of Done superado
-
-## Estado actual por servicio
-
-| Servicio | Nivel 0 | Nivel 1 | Nivel 2 | Nivel 3 |
-|----------|---------|---------|---------|---------|
-| `iam-service` | 🔴 | — | — | — |
-| `reference-data-service` | 🔴 | — | — | — |
-| `academic-management-service` | 🔴 | — | — | — |
-| `training-environment-service` | 🔴 | — | — | — |
-| `scheduling-service` | 🔴 | — | — | — |
-| `actors-service` | 🔴 | — | — | — |
-| `document-service` | 🔴 | — | — | — |
-| `monitoring-service` | 🔴 | — | — | — |
-| `audit-service` | 🔴 | — | — | — |
+## Estado por servicio (resumen)
+Los 9 servicios: **Nivel 1 (Datos) alcanzado**; Nivel 2+ pendiente de construcción de la capa de aplicación.

@@ -1,23 +1,34 @@
 # training-environment-api
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
+
+> **Diseño previsto — no implementado.** Agnóstico de lenguaje.
 
 ## Tipo de componente
-
-`-api` — REST API sincrónica
+`-api` — REST API sincrónica.
 
 ## Responsabilidad
-
-Gestiona ambientes físicos, inventario, mantenimiento y disponibilidad. El endpoint de disponibilidad es el más crítico: `scheduling-service` lo consulta síncronamente al crear cada sesión.
+Exponer la gestión de ambientes de formación, sus reglas de disponibilidad, reservas e inventario.
 
 ## Tecnologías
+| Capa | Tecnología |
+|------|-----------|
+| Runtime | Agnóstico — cualquier backend (a definir) |
+| Framework | A definir |
+| Persistencia | PostgreSQL 16 · schema `training_environment` |
+| Autenticación | JWT de `iam-service` |
 
-| Capa | Tecnología | Versión |
-|------|-----------|---------|
-| Runtime | (pendiente) | |
-| BD | PostgreSQL — `env_db` | |
-| Caché | Redis (para disponibilidad) | |
+## Variables de entorno (genéricas)
+| Variable | Descripción |
+|----------|-------------|
+| `SERVICE_PORT` | Puerto de escucha |
+| `DB_URL` | Conexión a PostgreSQL |
+| `JWT_PUBLIC_KEY` | Verificación del token |
+| `BROKER_URL` | Publicación de eventos de disponibilidad |
+
+## Escalado, salud y observabilidad
+Stateless; `GET /health`; la restricción `EXCLUDE` anti-solape de reservas se garantiza en BD (no en la app); publica eventos vía Outbox.
 
 ## Contrato
-
-Ver [contract.md](./contract.md)
+Ver [contract.md](./contract.md) · [data-model.md](../../data-model.md)

@@ -1,49 +1,24 @@
 # Almacenamiento y documentos
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Define la estrategia de almacenamiento de datos estructurados, archivos binarios y documentos generados.
+Estrategia de almacenamiento del sistema. Agnóstica de lenguaje.
 
-## Regla fundamental
+## Tres tipos de almacenamiento
 
-Cada microservicio tiene su **propia base de datos**. Ningún servicio lee ni escribe directamente en la BD de otro.
+| Tipo | Tecnología | Qué guarda | Regla |
+|------|-----------|------------|-------|
+| **Relacional** | PostgreSQL 16 (un schema por servicio) | Datos estructurados y metadatos | Fuente de verdad transaccional; una BD por servicio |
+| **Object storage** | S3-compatible (MinIO DEV/QA, S3 PROD) | Binarios: PDFs generados por `document-service` | **Binarios nunca en la BD**; solo metadatos + `storage_key` ([ADR-003](../05-architecture/decisions/records/ADR-003-object-storage.md)) |
+| **Caché** (previsto) | Redis | Consultas de alta frecuencia (catálogos, disponibilidad) | Por consumidor; invalidación por evento |
 
-## Bases de datos por servicio
+## Documentos (document-service)
+- La BD guarda `document`, `document_template`, `document_version` (metadatos, estado, versión, ruta).
+- El binario PDF vive en object storage bajo una `storage_key` determinista; se sirve por **URL firmada** temporal, no por proxy del servicio.
+- Ver adaptador en [services/07-document-service/storage-adapters.md](./services/07-document-service/storage-adapters.md).
 
-| Servicio | BD lógica | Motor | Notas |
-|----------|-----------|-------|-------|
-| `iam-service` | `iam_db` | PostgreSQL | Credenciales y tokens; encriptación en reposo |
-| `reference-data-service` | `ref_db` | PostgreSQL | Alta lectura, baja escritura; candidato a Redis como capa de caché |
-| `academic-management-service` | `academic_db` | PostgreSQL | Malla curricular + fichas |
-| `training-environment-service` | `env_db` | PostgreSQL | Inventario y reservas |
-| `scheduling-service` | `scheduling_db` | PostgreSQL | Core del sistema; requiere consistencia fuerte |
-| `actors-service` | `actors_db` | PostgreSQL | Instructores, aprendices, empresas |
-| `document-service` | `document_db` | PostgreSQL | Solo metadatos; binarios en object storage |
-| `monitoring-service` | `monitoring_db` | PostgreSQL | Series temporales de KPIs; considerar TimescaleDB |
-| `audit-service` | `audit_db` | PostgreSQL | Append-only; nunca UPDATE ni DELETE |
-
-## Almacenamiento de archivos binarios
-
-Los archivos binarios (PDFs, evidencias, plantillas) son responsabilidad de `document-service`.
-
-| Tipo | Donde vive | Servicio responsable |
-|------|-----------|----------------------|
-| PDFs generados (horarios, reportes) | Object storage (S3 / MinIO) | `document-service` |
-| Plantillas de documentos | Object storage | `document-service` |
-| Evidencias de seguimiento | Object storage | `document-service` (vía API) |
-| Logos e imágenes institucionales | Object storage | `document-service` |
-
-> Ningún servicio guarda archivos binarios en su propia BD. Se llama a la API de `document-service`
-> y se guarda el `document_id` como referencia.
-
-## Estrategia de caché
-
-| Candidato | Tipo de caché | TTL sugerido | Motivo |
-|-----------|--------------|-------------|--------|
-| Catálogos y parámetros (ref_db) | Redis / in-memory | 10 min | Alta frecuencia de lectura, baja volatilidad |
-| Disponibilidad de ambientes | Redis | 30 s | Consultado en cada creación de horario |
-| Token de sesión | Redis | = duración del token | Revocación rápida |
-
-## Backups
-
-Ver [backup-and-recovery.md](../13-operations/backup-and-recovery.md) para RPO/RTO por base de datos.
+## Principios
+- **Portabilidad:** el acceso a object storage se hace por un adaptador S3-compatible único, de modo que el código sea idéntico entre MinIO (DEV/QA) y S3 (PROD).
+- **Retención:** los binarios siguen la política de retención del `document-lifecycle-worker`.
+- **Auditoría:** los eventos de creación/cambio de documento se auditan vía `audit-service` (append-only).

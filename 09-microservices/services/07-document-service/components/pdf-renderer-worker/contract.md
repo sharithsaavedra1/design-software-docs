@@ -1,31 +1,35 @@
 # Contrato — pdf-renderer-worker
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Topic / Queue consumido
+> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
 
-`document-generation-queue`
+## Evento consumido
+| Evento | Origen | Acción |
+|--------|--------|--------|
+| `document.render.requested` | document-api | Renderizar PDF de un `document_version` |
 
-## Payload de entrada
+## Evento producido
+| Evento | Descripción |
+|--------|-------------|
+| `document.render.completed` | PDF generado y almacenado; incluye la ruta en object storage |
+| `document.render.failed` | Falló el render (tras reintentos) |
 
+## Envelope
 ```json
 {
-  "documento_id": "uuid",
-  "tipo": "HORARIO_PDF | REPORTE_EXCEL | CONSTANCIA",
-  "plantilla_id": "uuid",
-  "datos": {}
+  "event_id": "uuid",
+  "event_type": "document.render.completed",
+  "occurred_at": "2026-08-01T14:00:00Z",
+  "payload": { "document_id": "uuid", "version_number": 2, "storage_key": "documents/uuid/v2.pdf" }
 }
 ```
 
-## Acción que ejecuta
+## Salida (efectos)
+1. Sube el binario al bucket (`OBJECT_STORAGE_BUCKET`) con una `storage_key` determinista.
+2. Actualiza los metadatos del `document_version` (ruta, tamaño, hash).
+3. Publica `document.render.completed`.
 
-1. Descarga plantilla desde object storage
-2. Renderiza con datos recibidos (Jinja2 / XLSX template)
-3. Genera PDF / XLSX
-4. Sube a object storage con clave `<dominio>/<año>/<mes>/<entity_id>/<uuid>.<ext>`
-5. Actualiza `documento.estado = DISPONIBLE` y `documento.storage_key` en `document_db`
-6. Publica `document.documento.generated`
-
-## Dead letter queue
-
-`document-generation-queue.dlq` — mensajes fallidos después de 3 reintentos.
+## Idempotencia y errores
+`event_id` único; re-render evitado si ya existe el binario. Fallo persistente → DLQ `pdf-renderer.dlq` + `document.render.failed`.

@@ -1,60 +1,30 @@
 # Contrato — scheduling-engine-workflow
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Tipo de componente
+> **Diseño previsto — no implementado.** Orquestación (saga) a nivel de protocolo, agnóstica de lenguaje.
 
-`-workflow`
+## Propósito
+Orquestar la generación de un horario para una ficha: recolectar insumos, asignar sesiones a franjas/ambientes/instructores sin solape, y publicar el resultado. Mantiene read models locales (CQRS-lite, [ADR-002](../../../../../05-architecture/decisions/records/ADR-002-scheduling-read-models.md)).
 
-## Input
+## Disparador
+Comando `POST /api/v1/schedules/{ficha_id}/generate` (schedules-api) o evento `academic.enrollment_ficha.created`.
 
-Disparado por `schedules-api` al crear o asistir un horario:
+## Pasos de la saga (con compensación)
+| # | Paso | Compensación |
+|---|------|--------------|
+| 1 | Cargar insumos (programa/competencias, disponibilidad de instructores y ambientes desde read models) | — (solo lectura) |
+| 2 | Calcular asignación de `class_session` sin solape | — |
+| 3 | Persistir `schedule` + `class_session` (estado `DRAFT`) | `DELETE`/marcar `CANCELLED` |
+| 4 | Solicitar validación de conflictos (evento a `conflict-validator-worker`) | — |
+| 5 | Si no hay conflictos, publicar `scheduling.schedule.published`; si hay, dejar en `DRAFT` con conflictos | revertir a `DRAFT` |
 
-```json
-{
-  "workflow_id": "uuid-v4",
-  "horario_id": "uuid",
-  "ficha_id": "uuid",
-  "periodo": "2026-1",
-  "opciones": {
-    "preferir_instructor_titular": true,
-    "respetar_disponibilidad_existente": true
-  }
-}
-```
+## Read models (ADR-002)
+Se sincronizan al recibir `environment.availability.changed`, `environment.maintenance.started`, `actors.instructor.availability_changed`. Reducen las dependencias síncronas a ≤ 2.
 
-## Output
+## Eventos producidos
+`scheduling.schedule.published`, `scheduling.class_session.created/updated`.
 
-```json
-{
-  "workflow_id": "uuid-v4",
-  "estado": "COMPLETADO | FALLIDO | PARCIAL",
-  "sesiones_creadas": 18,
-  "conflictos_detectados": 2,
-  "sesiones": [
-    {
-      "sesion_id": "uuid",
-      "competencia_id": "uuid",
-      "instructor_id": "uuid",
-      "ambiente_id": "uuid",
-      "dia_semana": 1,
-      "hora_inicio": "07:00",
-      "hora_fin": "10:00"
-    }
-  ],
-  "conflictos": [
-    {
-      "tipo": "INSTRUCTOR_DOBLE",
-      "descripcion": "Instructor asignado en otra ficha en el mismo bloque"
-    }
-  ]
-}
-```
-
-## Timeouts
-
-| Step | Timeout |
-|------|---------|
-| Consulta de disponibilidad (actors) | 5 s |
-| Consulta de disponibilidad (environments) | 5 s |
-| Total del workflow | 30 s |
+## Idempotencia
+La generación es idempotente por `(ficha_id, period)`; una re-ejecución no duplica el horario publicado (índice único parcial `uq_schedule_ficha_id_period_published`).

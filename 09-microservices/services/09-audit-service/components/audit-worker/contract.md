@@ -1,32 +1,34 @@
 # Contrato — audit-worker
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Topics consumidos
+> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
 
-Todos los topics del sistema (fan-out o wildcard según el bus de mensajes elegido):
+## Suscripción
+Fan-out a **todos** los topics del broker (`#` / wildcard). El worker no filtra por origen: audita todo.
 
-- `iam-events`
-- `reference-events`
-- `academic-events`
-- `environment-events`
-- `scheduling-events`
-- `actors-events`
-- `document-events`
-- `monitoring-events`
+## Envelope de evento consumido (estándar)
+```json
+{
+  "event_id": "uuid",
+  "event_type": "<service>.<entity>.<action>",
+  "source_service": "scheduling-service",
+  "occurred_at": "2026-08-01T14:00:00Z",
+  "actor_id": "uuid",
+  "entity_type": "class_session",
+  "entity_id": "uuid",
+  "payload": { }
+}
+```
 
-## Acción que ejecuta
+## Efecto (persistencia)
+Inserta un `audit_record` extrayendo `event_type`, `source_service`, `actor_id`, `entity_type`, `entity_id` y `occurred_at` para indexar, y conserva el `payload` completo como `JSONB` (schema-on-read).
 
-Por cada mensaje recibido:
-1. Extrae `event_id`, `event_type`, `source_service`, `timestamp`, `payload`
-2. Extrae `actor_id` del payload si existe (campo `user_id`, `created_by`, o equivalente)
-3. INSERT en `audit_record` (nunca UPDATE ni DELETE)
-4. ACK al broker
+## Reglas
+- **Append-only:** solo `INSERT`. Sin `UPDATE`/`DELETE` ni endpoint de escritura externo.
+- **Idempotencia:** `event_id` UNIQUE; conflicto → se ignora (no error).
+- **Sin FKs:** el registro es autónomo (sink desacoplado entre servicios).
 
-## Garantía de entrega
-
-At-least-once. La PK `event_id` previene duplicados (el segundo INSERT falla silenciosamente por constraint UNIQUE en `event_id`).
-
-## Dead letter queue
-
-`audit-events.dlq` — mensajes que no pudieron persistirse después de 5 reintentos.
+## Errores
+Fallo de persistencia → reintento; agotado → DLQ `audit.dlq` (no se pierde el evento).

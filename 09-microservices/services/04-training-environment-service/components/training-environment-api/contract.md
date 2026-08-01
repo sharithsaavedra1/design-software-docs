@@ -1,34 +1,36 @@
 # Contrato — training-environment-api
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
+
+> **Diseño previsto — no implementado.** Contrato REST/JSON, agnóstico de lenguaje.
 
 ## Autenticación
-
-Bearer JWT emitido por `iam-service`.
+`Authorization: Bearer <JWT>` de `iam-service`; feature + scope.
 
 ## Base URL
-
 `/api/v1`
 
-## Endpoints principales
+## Endpoints (entidades reales)
+| Método | Path | Descripción | Feature |
+|--------|------|-------------|---------|
+| `GET` | `/environments` | Listar ambientes (filtros: tipo, centro) | `ENV_READ` |
+| `GET` | `/environments/{id}` | Detalle | `ENV_READ` |
+| `POST` | `/environments` | Crear ambiente | `ENV_MANAGE` |
+| `GET` | `/environments/{id}/availability` | Reglas de disponibilidad | `ENV_READ` |
+| `POST` | `/environments/{id}/availability-rules` | Definir regla recurrente | `ENV_MANAGE` |
+| `GET` | `/environments/{id}/reservations?from=&to=` | Reservas en rango | `ENV_READ` |
+| `POST` | `/reservations` | Crear reserva (rechaza solapamiento) | `ENV_MANAGE` |
+| `POST` | `/environments/{id}/maintenance` | Registrar mantenimiento | `ENV_MANAGE` |
+| `GET` | `/environments/{id}/inventory` | Inventario del ambiente | `ENV_READ` |
 
-| Método | Path | Descripción | Roles |
-|--------|------|-------------|-------|
-| `GET` | `/ambientes` | Listar ambientes | `*` |
-| `GET` | `/ambientes/{id}` | Detalle de ambiente | `*` |
-| `GET` | `/ambientes/{id}/disponibilidad` | Disponibilidad por día y franja | `*` |
-| `GET` | `/ambientes/disponibles` | Ambientes disponibles en una franja | `coordinador`, `sistema` |
-| `POST` | `/ambientes` | Registrar ambiente | `admin` |
-| `PUT` | `/ambientes/{id}` | Actualizar ambiente | `admin` |
-| `POST` | `/ambientes/{id}/mantenimiento` | Registrar mantenimiento | `admin`, `coordinador` |
-| `POST` | `/ambientes/{id}/reservas` | Crear reserva puntual | `coordinador` |
-| `GET` | `/inventario` | Listar elementos de inventario | `admin` |
-| `POST` | `/inventario` | Registrar elemento | `admin` |
+## Regla de negocio clave
+`POST /reservations` puede fallar con `409 CONFLICT` (`error_code: RESERVATION_OVERLAP`) porque la BD impone no-solapamiento por ambiente (`EXCLUDE`). El cliente debe manejar ese caso.
 
-## Endpoint crítico para scheduling
-
+## Formato de error estándar
+```json
+{ "error_code": "RESERVATION_OVERLAP", "message": "El ambiente ya está reservado en ese rango", "trace_id": "uuid-v4" }
 ```
-GET /ambientes/disponibles?dia_semana=1&hora_inicio=07:00&hora_fin=10:00&tipo_ambiente=LAB
-```
 
-Retorna lista de ambientes disponibles para esa franja. Debe responder en < 300 ms.
+## Eventos publicados
+`environment.availability.changed`, `environment.maintenance.started` (ver [event-catalog.md](../../../../event-catalog.md)).

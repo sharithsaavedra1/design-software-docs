@@ -1,7 +1,7 @@
 # iam-service — Autenticación, autorización e identidad
 
 > Estado: 🟡 Revisión | Última actualización: 2026-06-17
-> Autor: Por definir | Equipo: Por definir
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 ## Responsabilidad
 

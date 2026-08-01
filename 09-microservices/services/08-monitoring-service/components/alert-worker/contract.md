@@ -1,22 +1,27 @@
 # Contrato — alert-worker
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Topics consumidos
+> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
 
-- `academic-events` (ficha.opened, ficha.closed)
-- `scheduling-events` (sesion_clase.created, sesion_clase.cancelled, conflict.detected, horario.published)
-- `actors-events` (instructor.assigned, aprendiz.status_changed, etapa_productiva.started)
+## Eventos consumidos
+| Evento | Origen | Acción |
+|--------|--------|--------|
+| `academic.enrollment_ficha.status_changed` | academic | Recalcular seguimiento de ficha |
+| `scheduling.schedule.published` | scheduling | Evaluar cobertura/KPIs de horario |
+| `monitoring.kpi.tick` | scheduler | Evaluación periódica de umbrales |
 
-## Acción que ejecuta
+## Evento producido
+| Evento | Descripción |
+|--------|-------------|
+| `monitoring.alert.generated` | Se creó un `generated_alert` (nivel de riesgo, KPI, ficha) |
 
-Por cada evento recibido:
-1. Carga las reglas de alerta aplicables al tipo de evento
-2. Evalúa las reglas contra el payload del evento y el estado actual en `monitoring_db`
-3. Si se supera un umbral: crea `alerta_generada` y actualiza KPI correspondiente
-4. Publica tarea a `notification-dispatch-queue` para `notification-worker`
-5. Publica `monitoring.alerta.triggered` al bus de eventos
+## Efecto
+Inserta `generated_alert` y actualiza `ficha_tracking`; el conteo de alertas activas se mantiene de forma consistente (derivado/trigger, no columna redundante — ver [normalization-assessment.md](../../../../../06-data/normalization-assessment.md)).
 
-## Dead letter queue
+## Idempotencia
+`event_id` único; misma condición evaluada no crea alertas duplicadas.
 
-`monitoring-alert-processing.dlq` — 3 reintentos antes de DLQ.
+## Errores
+Fallo persistente → DLQ `alert-worker.dlq`.

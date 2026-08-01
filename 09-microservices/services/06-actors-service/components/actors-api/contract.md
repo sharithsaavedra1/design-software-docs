@@ -1,36 +1,44 @@
 # Contrato — actors-api
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
+
+> **Diseño previsto — no implementado.** Contrato REST/JSON, agnóstico de lenguaje.
 
 ## Autenticación
-
-Bearer JWT emitido por `iam-service`.
+`Authorization: Bearer <JWT>` de `iam-service`; feature + scope.
 
 ## Base URL
-
 `/api/v1`
 
-## Endpoints principales
+## Endpoints (entidades reales)
+| Método | Path | Descripción | Feature |
+|--------|------|-------------|---------|
+| `GET` | `/instructors` | Listar instructores (filtros: área, centro) | `ACT_READ` |
+| `GET` | `/instructors/{id}` | Detalle + áreas + contrato vigente | `ACT_READ` |
+| `POST` | `/instructors` | Crear instructor | `ACT_MANAGE` |
+| `GET` | `/instructors/{id}/availability` | Disponibilidad y excepciones | `ACT_READ` |
+| `PUT` | `/instructors/{id}/availability` | Actualizar disponibilidad | `ACT_MANAGE` |
+| `GET` | `/instructors/{id}/competencies` | Competencias asignadas | `ACT_READ` |
+| `GET` | `/learners` | Listar aprendices (filtro: ficha) | `ACT_READ` |
+| `POST` | `/companies` | Registrar empresa | `ACT_MANAGE` |
+| `POST` | `/productive-stages` | Registrar etapa productiva | `ACT_MANAGE` |
 
-| Método | Path | Descripción | Roles |
-|--------|------|-------------|-------|
-| `GET` | `/instructores` | Listar instructores | `coordinador`, `admin` |
-| `GET` | `/instructores/{id}` | Detalle de instructor | `*` |
-| `GET` | `/instructores/{id}/competencias` | Competencias habilitadas del instructor | `coordinador`, `sistema` |
-| `GET` | `/instructores/disponibles` | Instructores disponibles para una competencia y franja | `sistema` |
-| `POST` | `/instructores` | Registrar instructor | `admin` |
-| `PUT` | `/instructores/{id}` | Actualizar datos del instructor | `admin` |
-| `POST` | `/instructores/{id}/competencias` | Asignar competencia | `coordinador`, `admin` |
-| `GET` | `/aprendices` | Listar aprendices (filtrable por ficha) | `coordinador`, `admin`, `instructor` |
-| `GET` | `/aprendices/{id}` | Detalle de aprendiz | `*` |
-| `POST` | `/aprendices` | Registrar aprendiz | `admin` |
-| `GET` | `/empresas` | Listar empresas | `coordinador`, `admin` |
-| `POST` | `/empresas` | Registrar empresa | `admin` |
-
-## Endpoint crítico para scheduling
-
+## Ejemplo de respuesta (instructor)
+```json
+{
+  "id": "uuid",
+  "full_name": "…",
+  "areas": ["uuid"],
+  "is_current_contract": true,
+  "status_id": "uuid"
+}
 ```
-GET /instructores/disponibles?competencia_id=uuid&dia_semana=1&hora_inicio=07:00&hora_fin=10:00
+
+## Formato de error estándar
+```json
+{ "error_code": "VALIDATION_ERROR", "message": "…", "trace_id": "uuid-v4" }
 ```
 
-Retorna instructores habilitados para la competencia y sin conflicto en esa franja.
+## Eventos publicados
+`actors.instructor.availability_changed`, `actors.learner.enrolled`. Ver [event-catalog.md](../../../../event-catalog.md).

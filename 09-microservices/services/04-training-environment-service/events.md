@@ -211,6 +211,6 @@ Los consumidores deben implementar procesamiento **idempotente**: el `event_id` 
 
 ## Nota para scheduling-service
 
-`scheduling-service` mantiene read models locales de disponibilidad de ambientes (ver [ADR-002](../../../../../05-architecture/decisions/records/ADR-002-scheduling-read-models.md)). Debe re-sincronizar su read model al recibir `environment.availability.changed` o `environment.maintenance.started`.
+`scheduling-service` mantiene read models locales de disponibilidad de ambientes (ver [ADR-002](../../../05-architecture/decisions/records/ADR-002-scheduling-read-models.md)). Debe re-sincronizar su read model al recibir `environment.availability.changed` o `environment.maintenance.started`.
 
 Para el poblado inicial del read model (bootstrap), `training-environment-service` expone un endpoint de snapshot en `training-environment-api`. Consultar el [contrato de la API](./components/training-environment-api/contract.md) para los detalles del endpoint.

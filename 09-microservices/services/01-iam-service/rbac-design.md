@@ -1,7 +1,7 @@
 # Diseño RBAC — iam-service
 
 > Fase: 03-Design | Estado: 🟡 Borrador | Fecha: 2026-06-17
-> Prerequisito: [data-model.md](./data-model.md) · [overview.md](../../../../05-architecture/overview.md)
+> Prerequisito: [data-model.md](./data-model.md) · [overview.md](../../../05-architecture/overview.md)
 
 ## Problema que resuelve este diseño
 

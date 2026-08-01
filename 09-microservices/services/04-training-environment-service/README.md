@@ -1,51 +1,25 @@
-# training-environment-service — Ambientes de formación e inventario
+# training-environment-service
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
-> Autor: Por definir | Equipo: Por definir
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Responsabilidad
+Gestiona los **ambientes físicos de formación**, su inventario, mantenimiento, reglas de disponibilidad y reservas.
 
-Gestiona los ambientes físicos de formación (aulas, laboratorios, talleres), su inventario, mantenimiento y disponibilidad por franja horaria. El servicio de horarios consulta disponibilidad antes de asignar una sesión de clase.
+> **Estado real:** existe la **capa de datos** ([data-model.md](./data-model.md)). La capa de aplicación es **diseño previsto — no construido**. Documentación agnóstica de lenguaje.
 
-## Bounded context
+## Módulo
+M3 (ambientes).
 
-| Entidad | Descripción |
-|---------|-------------|
-| `ambiente` | Espacio físico de formación (aula, lab, taller) |
-| `tipo_ambiente` | Categoría del ambiente según tipo de formación |
-| `elemento_inventario` | Equipo o recurso asociado al ambiente |
-| `mantenimiento` | Registro de mantenimiento que bloquea disponibilidad |
-| `reserva` | Reserva temporal de un ambiente para un uso específico |
-| `disponibilidad_ambiente` | Franjas horarias disponibles por ambiente y día |
-| `regla_disponibilidad` | Regla de negocio que define la disponibilidad base |
+## Componentes previstos
+| Componente | Tipo | Responsabilidad |
+|------------|------|-----------------|
+| [`training-environment-api`](./components/training-environment-api/) | `-api` | CRUD de ambientes, disponibilidad, reservas, inventario |
 
-## Módulo de origen
+## Datos
+Schema `training_environment`. Entidades: `environment`, `environment_type`, `availability_rule`, `reservation` (con `EXCLUDE` anti-solape), `inventory_item`, `maintenance`. Ver [data-model.md](./data-model.md).
 
-M3 — Infraestructura, Ambientes e Inventario
+## Eventos publicados
+`environment.availability.changed`, `environment.maintenance.started` — consumidos por `scheduling-service` para re-sincronizar sus read models (ver [ADR-002](../../../05-architecture/decisions/records/ADR-002-scheduling-read-models.md)).
 
 ## Dependencias
-
-| Servicio | Tipo | Motivo |
-|----------|------|--------|
-| `iam-service` | auth | Validación de JWT |
-| `reference-data-service` | sync | Tipo de ambiente, sede (unidad_institucional) |
-
-## Componentes desplegables
-
-| Componente | Sufijo | Descripción |
-|------------|--------|-------------|
-| `training-environment-api` | `-api` | REST API: CRUD de ambientes, inventario, mantenimiento, reservas y consulta de disponibilidad |
-
-## Base de datos
-
-- Nombre lógico: `env_db`
-- Motor: PostgreSQL
-- Nota: la disponibilidad es consultada con alta frecuencia por `scheduling-service` — considerar caché Redis con TTL corto (30 s)
-
-## Links
-
-- Repo: (pendiente)
-- Data model: [data-model.md](./data-model.md)
-- Eventos: [events.md](./events.md)
-- Runbook: [runbook.md](./runbook.md)
-- Decisiones internas: [decisions.md](./decisions.md)
+reference-data (centro/sede) e iam. Referencias cross-servicio por `UUID` sin FK física.

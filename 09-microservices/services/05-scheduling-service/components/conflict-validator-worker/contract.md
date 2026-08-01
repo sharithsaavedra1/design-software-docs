@@ -1,35 +1,36 @@
 # Contrato — conflict-validator-worker
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Tipo de componente
+> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
 
-`-worker`
+## Eventos consumidos
+| Evento | Origen | Acción |
+|--------|--------|--------|
+| `scheduling.class_session.created` | scheduling-engine | Revalidar solapes de la sesión |
+| `scheduling.class_session.updated` | scheduling-engine | Revalidar |
+| `environment.availability.changed` | training-environment | Recalcular conflictos de ambiente |
+| `actors.instructor.availability_changed` | actors | Recalcular conflictos de instructor |
 
-## Topic / Queue consumido
+## Eventos producidos
+| Evento | Descripción |
+|--------|-------------|
+| `scheduling.conflict.detected` | Se registró un `scheduling_conflict` (tipo: instructor/ambiente/ficha) |
+| `scheduling.conflict.resolved` | Un conflicto previamente detectado ya no aplica |
 
-`scheduling-conflict-validation-queue`
-
-## Payload de entrada
-
+## Envelope (estándar)
 ```json
 {
-  "event_type": "scheduling.horario.published",
-  "payload": {
-    "horario_id": "uuid",
-    "ficha_id": "uuid",
-    "periodo": "2026-1"
-  }
+  "event_id": "uuid",
+  "event_type": "scheduling.conflict.detected",
+  "occurred_at": "2026-08-01T14:00:00Z",
+  "payload": { "conflict_id": "uuid", "session_a_id": "uuid", "session_b_id": "uuid", "type": "INSTRUCTOR" }
 }
 ```
 
-## Acción que ejecuta
+## Idempotencia
+`event_id` único por evento; un evento reprocesado no crea un `scheduling_conflict` duplicado.
 
-1. Carga todas las sesiones del horario publicado
-2. Verifica conflictos contra todos los horarios publicados del mismo periodo
-3. Registra conflictos encontrados en `conflicto_detectado`
-4. Si hay conflictos: publica `scheduling.conflict.detected` por cada uno
-
-## Dead letter queue
-
-`scheduling-conflict-validation-queue.dlq` — mensajes fallidos después de 3 reintentos.
+## Errores
+Fallo de procesamiento → reintento con backoff; agotados los reintentos → **DLQ** `conflict-validator.dlq`.

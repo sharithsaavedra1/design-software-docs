@@ -1,34 +1,27 @@
 # Contrato — notification-worker
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Queue consumida
+> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
 
-`notification-dispatch-queue`
+## Evento consumido
+| Evento | Origen | Acción |
+|--------|--------|--------|
+| `monitoring.alert.generated` | alert-worker | Enviar notificación al destinatario |
 
-## Payload de entrada
+## Evento producido (opcional)
+| Evento | Descripción |
+|--------|-------------|
+| `monitoring.notification.sent` | Notificación entregada (para trazabilidad/auditoría) |
 
-```json
-{
-  "alerta_id": "uuid",
-  "destinatario_id": "uuid",
-  "canal": "EMAIL | PUSH | SMS",
-  "plantilla": "ALERTA_KPI | CONFLICTO_HORARIO | PLAN_MEJORA",
-  "datos": {
-    "nombre_destinatario": "...",
-    "descripcion_alerta": "..."
-  }
-}
-```
+## Efecto
+1. Resuelve destinatario y canal.
+2. Crea `sent_notification` en estado `PENDING`.
+3. Invoca el proveedor saliente; actualiza a `SENT` o `FAILED`.
 
-## Acción que ejecuta
+## Idempotencia y reintentos
+`event_id` único; un envío ya `SENT` no se repite. Fallos → reintento con backoff; agotado → `FAILED` + DLQ `notification-worker.dlq`.
 
-1. Obtiene datos del destinatario (nombre, email/token) desde `iam-service` o caché local
-2. Renderiza el mensaje con la plantilla
-3. Envía por el canal indicado (proveedor de email / FCM / SMS gateway)
-4. Registra resultado en `notificacion_enviada`
-5. Publica `monitoring.notificacion.sent`
-
-## Dead letter queue
-
-`notification-dispatch-queue.dlq` — 3 reintentos antes de DLQ.
+## Privacidad
+No se registran datos personales en logs, solo identificadores; el contenido va al canal, no al log (ver [13-operations/observability.md](../../../../../13-operations/observability.md)).

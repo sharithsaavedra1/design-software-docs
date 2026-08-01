@@ -1,29 +1,27 @@
 # Contrato — document-lifecycle-worker
 
-> Estado: 🔴 Pendiente | Última actualización: 2026-06-17
+> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-## Tipo de componente
+> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
 
-`-worker` (tarea periódica, no consumidor de cola)
+## Eventos consumidos
+| Evento | Origen | Acción |
+|--------|--------|--------|
+| `document.render.completed` | pdf-renderer-worker | Marcar documento como `EMITIDO` |
+| `document.lifecycle.tick` | scheduler | Evaluar retención/expiración periódica |
 
-## Frecuencia de ejecución
+## Eventos producidos
+| Evento | Descripción |
+|--------|-------------|
+| `document.status.changed` | El documento cambió de estado |
+| `document.archived` | Documento archivado por política de retención |
 
-Diaria — en horario de baja carga (ej: 02:00 a.m.)
+## Transiciones de estado (documento)
+`DRAFT → EMITIDO → ARCHIVADO`. El borrado es lógico (soft delete); el binario en object storage se marca para expiración según `RETENTION_POLICY`.
 
-## Acciones que ejecuta
+## Idempotencia
+`event_id` único; una transición hacia un estado ya alcanzado es no-op.
 
-| Acción | Condición |
-|--------|-----------|
-| Marcar como `EXPIRADO` | `documento.created_at < NOW() - política_retención` |
-| Mover a cold storage | Documentos `ARCHIVADO` con más de 2 años |
-| Limpiar huérfanos | `storage_key` en object storage sin `documento` correspondiente |
-
-## Política de retención
-
-| Tipo de documento | Retención activa | Archivado |
-|-------------------|-----------------|-----------|
-| Horarios PDF | 2 años | 5 años |
-| Constancias | 5 años | 10 años |
-| Reportes Excel | 6 meses | 2 años |
-
-> Valores pendientes de confirmar con requisitos legales del SENA.
+## Errores
+Fallo persistente → DLQ `document-lifecycle.dlq`.
