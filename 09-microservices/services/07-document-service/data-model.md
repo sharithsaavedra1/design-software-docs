@@ -89,3 +89,13 @@ Historial de versiones de un documento.
 | `document` | `(owner_service, owner_entity_id)` | B-Tree | Documentos por entidad de negocio |
 | `document` | `status` | B-Tree | Filtro por estado |
 | `document_version` | `(document_id, version_number)` | UNIQUE | Versión única por documento |
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+Cierre de brechas contrato↔BD (la BD no tenía **ningún** CHECK). Vía changeset nuevo
+`remediation-document-960` (no se modifica ningún changeset corrido; se preserva el trabajo previo):
+- **CHECKs** documentados ahora implementados: `output_type IN ('PDF','EXCEL','WORD')`,
+  `domain IN ('SCHEDULE','FICHA','CERTIFICATE','ACTOR','REPORT')`,
+  `status IN ('GENERATING','AVAILABLE','ARCHIVED','EXPIRED','GENERATION_FAILED')`, `size_bytes >= 0`.
+- `document_template.is_active BOOLEAN NOT NULL DEFAULT true` (exigido por el contrato; complementa a `state`).
+- `created_by`/`updated_by`: `VARCHAR(100)` → `UUID` (referencia lógica a iam-service) en las 3 tablas.
