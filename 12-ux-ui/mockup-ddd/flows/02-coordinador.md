@@ -38,15 +38,19 @@ halts_registrados: ninguno
 **Propósito:** vista de aterrizaje que resume el estado operativo del centro y prioriza los
 conflictos sin resolver, para que el coordinador actúe primero sobre lo crítico.
 
-**Layout:** header de página "Inicio" con saludo (`user.full_name`); fila de 3 tarjetas KPI —
-**Fichas activas** (conteo `enrollment_ficha` con `status=EXECUTION`), **Horarios en borrador**
-(conteo `schedule` con `status=DRAFT`) y **Conflictos pendientes** (conteo `scheduling_conflict`
-con `is_resolved=false`) — esta última es el **widget destacado**: mayor tamaño, primer lugar
-cuando su conteo es `> 0`, color crítico + icono de alerta + texto (nunca solo color). Debajo, dos
-listas: "Horarios recientes en borrador" (columnas `ficha_id` [referencia], `period`, `name`,
-`updated_at`, botón "Continuar edición") y "Conflictos pendientes" (columnas `conflict_type`,
-`schedule_id` [referencia], `detected_at`, botón "Ver panel"). Accesos directos a Horarios,
-Disponibilidad y Fichas.
+**Layout (revisado v2 — sin redundancia):**
+1. **Header** "Inicio" + saludo breve (`user.full_name`) + **un único** botón primario "Crear horario" (arriba a la derecha).
+2. **Sección destacada de CONFLICTOS (única representación):** banda ancha "Conflictos pendientes (N)"
+   en color crítico + icono; lista los **top 3** conflictos (`conflict_type` con icono, `schedule_id`
+   [referencia], `detected_at`, enlace "Ver panel"); pie **"mostrando 3 de N · Ver todos"** → Panel
+   (Pantalla 4). Si `N=0` → estado positivo "Sin conflictos pendientes" (check verde). **No** existe,
+   además, una tarjeta KPI de conflictos (se elimina la duplicación de v1).
+3. **Fila de 2 tarjetas KPI** (solo conteo, nunca conflictos): **Fichas activas** (`enrollment_ficha`
+   `status=EXECUTION`) y **Horarios en borrador** (`schedule` `status=DRAFT`); cada tarjeta con **un
+   solo** enlace "Ver todos".
+4. **Widget "Horarios recientes en borrador":** top 3–5 filas (`ficha_id` [ref], `period`, `name`,
+   `updated_at`, "Continuar edición") + pie **"mostrando X de N · Ver todos"**.
+5. **Sin** fila inferior de accesos directos (las acciones ya están en la nav lateral + botón "Crear horario"). El rol/usuario **solo** en el menú superior.
 
 **Acciones:**
 | Control | Endpoint | Resultado |
@@ -64,20 +68,29 @@ de primera clase").
 
 ```text
 PROMPT STITCH
-Pantalla "Inicio" del Coordinador Académico en la plataforma SENA — Gestión de Horarios, en
-español, dentro del app shell (barra superior + nav lateral: Inicio, Horarios, Disponibilidad,
-Fichas). Encabezado "Inicio" con saludo "Hola, María García". Debajo, tres tarjetas KPI en fila:
-"Fichas activas" (número grande + icono de carpeta), "Horarios en borrador" (número + icono de
-documento), y una tercera tarjeta más grande y destacada "Conflictos pendientes" en color crítico
-(rojo/naranja institucional) con icono de alerta triangular y el número de conflictos sin
-resolver — esta tarjeta va primero si tiene conflictos. Debajo, dos columnas: a la izquierda una
-lista "Horarios recientes en borrador" con filas (ficha, período, nombre, última edición, botón
-"Continuar edición"); a la derecha una lista "Conflictos pendientes" con filas (tipo de conflicto
-con icono distintivo — instructor doble-asignado / ambiente doble-asignado / sesiones solapadas —,
-horario afectado, fecha detectada, botón "Ver panel"). Mostrar el estado vacío de conflictos como
-un mensaje positivo con icono de check verde: "Sin conflictos pendientes". Estilo institucional
-sobrio, WCAG AA, tarjetas con sombra sutil y esquinas suaves. Responsive: en móvil las tarjetas KPI
-se apilan verticalmente y la de conflictos queda arriba.
+Pantalla "Inicio" del Coordinador Académico en la plataforma SENA — Gestión de Horarios, en español,
+dentro del app shell (barra superior con marca + campana de notificaciones + menú de usuario que
+muestra nombre y rol; nav lateral: Inicio, Horarios, Disponibilidad, Fichas). Encabezado "Inicio" con
+saludo breve "Hola, María García" y UN solo botón primario arriba a la derecha: "Crear horario".
+
+Orden vertical, con UNA sola representación de cada cosa (no duplicar nada):
+1) Sección destacada "Conflictos pendientes (4)" en color crítico con icono de alerta: lista los 3
+   conflictos más recientes; cada fila con un icono según el tipo (instructor doble-asignado /
+   ambiente doble-asignado / sesiones solapadas), el horario afectado, la fecha y un enlace "Ver
+   panel". Al pie: "Mostrando 3 de 4 · Ver todos". Es la ÚNICA parte que muestra conflictos: NO crear
+   además una tarjeta KPI de conflictos.
+2) Fila con SOLO 2 tarjetas KPI de conteo: "Fichas activas: 12" y "Horarios en borrador: 3", cada una
+   con un único enlace "Ver todos".
+3) Sección "Horarios recientes en borrador": tabla breve de 3 filas (ficha, período, nombre, última
+   edición, botón "Continuar edición"), con pie "Mostrando 3 de 3 · Ver todos".
+
+Reglas estrictas: NO agregar una fila inferior de accesos directos ni repetir botones que ya estén en
+la nav lateral o en las tarjetas (una sola vez cada acción). El nombre y el rol del usuario van SOLO
+en el menú superior, no en el sidebar ni en el saludo. Los números deben ser coherentes con las
+listas (si el contador dice 4, o se muestran 4 o el pie dice "Mostrando 3 de 4"). Estado vacío de
+conflictos: mensaje positivo con check verde "Sin conflictos pendientes". Estilo institucional sobrio,
+alto contraste WCAG AA, sombras sutiles, densidad moderada sin sobrecargar. Responsive: en móvil todo
+se apila y la sección de conflictos queda primero.
 ```
 
 **Mockup:** _(pendiente — se guardará en `../mockups/02-coordinador/dashboard.png` y se enlazará aquí)_
