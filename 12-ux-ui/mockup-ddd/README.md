@@ -12,10 +12,20 @@ halts_registrados: ninguno
 
 # DDD — Design-Driven Document (mockup con Google Stitch)
 
+> **ESTADO: PRELIMINAR (v0 · mockup-first · design-driven discovery).** Este mockup es un
+> **instrumento de descubrimiento y feedback**, no un diseño final ni objeto construible. Se
+> busca **precisión** (derivar cada pantalla de los contratos + data-model reales) para que el
+> feedback sea de calidad, pero se espera iterar.
+>
+> **Las HU se construirán mucho más adelante** — todavía faltan varios frentes por comprender
+> antes de escribir HU. Por eso el DDD **NO depende de HU**: la trazabilidad a **endpoint + tabla
+> es completa ya** (eso lo tenemos 100%); la trazabilidad a **HU se cierra después**. Donde exista
+> una `HU-##` en `04-requirements/user-stories.md` se cita; si no, se marca `HU: pendiente`.
+
 **Qué es:** el documento que **dirige la generación del mockup** de todo el sistema con
 [Google Stitch](https://stitch.withgoogle.com/). Traduce el conocimiento ya existente
-(design-system + contratos de API + modelo de datos + HU) en **prompts listos para pegar en
-Stitch**, pantalla por pantalla.
+(design-system + contratos de API + modelo de datos + navegación) en **prompts listos para pegar
+en Stitch**, pantalla por pantalla.
 
 ## Regla de ubicación (decidida)
 
