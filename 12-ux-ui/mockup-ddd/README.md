@@ -43,6 +43,11 @@ en Stitch**, pantalla por pantalla.
 | [micro-frontends.md](micro-frontends.md) | arquitectura "por debajo": dominio → micro-frontend → pantalla |
 | [screen-inventory.md](screen-inventory.md) | inventario maestro de las 45 pantallas (por flujo y por MFE) + estado |
 | [component-inventory.md](component-inventory.md) | componentes compartidos (design-system) + patrones por MFE |
+| [sitemap.md](sitemap.md) | mapa de rutas por rol + matriz de visibilidad RBAC |
+| [design-tokens.md](design-tokens.md) | tokens ratificados (color/tipografía/espaciado) locked para el mockup |
+| [ux-flows.md](ux-flows.md) | journeys end-to-end que conectan las pantallas |
+| [ux-copy.md](ux-copy.md) | microcopy canónica (errores, vacíos, confirmaciones, labels) |
+| [acceptance-and-states.md](acceptance-and-states.md) | estados obligatorios por tipo + Definition of Done |
 | [discovery-findings.md](discovery-findings.md) | vacíos de contrato/RBAC detectados (feedback) |
 | `flows/01-auth.md … 06-backoffice.md` | las pantallas con su `PROMPT STITCH` (por flujo/rol) |
 
