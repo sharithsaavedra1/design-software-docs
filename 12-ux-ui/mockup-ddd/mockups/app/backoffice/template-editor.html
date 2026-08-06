@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de plantilla - SENA Backoffice</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        .back-link { color: var(--color-text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 16px; font-size: 0.9rem; }
+        .back-link:hover { color: var(--color-text); }
+
+        .editor-header { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 16px; }
+        .editor-header-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: end; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); box-sizing: border-box; }
+        .form-group input:disabled { background: var(--color-surface-muted); color: var(--color-text-muted); cursor: not-allowed; }
+        .version-tag { font-size: 0.85rem; color: var(--color-text-muted); }
+        .tooltip-hint { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 4px; }
+
+        .toggle-row { display: flex; align-items: center; gap: 8px; }
+
+        .code-editor-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 88px; }
+        .code-editor-header { background: var(--color-surface-muted); padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+        .code-editor { display: flex; }
+        .code-lines { background: var(--color-surface-muted); color: var(--color-text-muted); font-family: monospace; font-size: 0.85rem; padding: 16px 8px; text-align: right; user-select: none; line-height: 1.6; min-width: 40px; }
+        textarea.code-body { flex: 1; border: none; outline: none; resize: vertical; font-family: monospace; font-size: 0.85rem; line-height: 1.6; padding: 16px; min-height: 420px; }
+
+        .editor-footer { position: sticky; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 16px 0; display: flex; justify-content: flex-end; gap: 12px; margin-top: -1px; }
+
+        /* Preview modal specific layout */
+        #modal-preview .modal { max-width: 960px; width: 95%; }
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .preview-grid textarea { width: 100%; min-height: 260px; font-family: monospace; font-size: 0.8rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 12px; box-sizing: border-box; }
+        .preview-render { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: white; min-height: 260px; padding: 12px; overflow: auto; font-size: 0.85rem; }
+        .missing-placeholders { margin-top: 12px; background: var(--color-warning-surface); color: var(--color-warning); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 0.85rem; display: flex; gap: 8px; align-items: flex-start; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">SENA - Diseño de Software</div>
+        <div class="user-menu">
+            <div class="user-info">Carlos Mendoza — Soporte</div>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav>
+                <a href="documents.html">Documentos</a>
+                <a href="templates.html" class="active">Plantillas</a>
+                <a href="audit.html">Auditoría</a>
+                <a href="parametrization.html">Parametrización</a>
+            </nav>
+        </aside>
+
+        <main class="app-content">
+            <a href="templates.html" class="back-link">‹ Volver a Plantillas</a>
+
+            <header class="content-header" style="margin-bottom:16px;">
+                <h1>Editor de plantilla — SCHEDULE_CERTIFICATE</h1>
+            </header>
+
+            <div class="editor-header">
+                <div class="editor-header-grid">
+                    <div class="form-group">
+                        <label>Código</label>
+                        <input type="text" value="SCHEDULE_CERTIFICATE" disabled title="El código no se puede modificar después de creado">
+                        <div class="tooltip-hint">El código no se puede modificar después de creado.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" value="Constancia de horario">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de salida</label>
+                        <select>
+                            <option selected>PDF</option>
+                            <option>Excel</option>
+                            <option>Word</option>
+                        </select>
+                    </div>
+                    <div class="form-group toggle-row">
+                        <input type="checkbox" id="tpl-active" checked style="width:auto;">
+                        <label for="tpl-active" style="margin:0;">Activa</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Versión actual</label>
+                        <div class="version-tag">Versión 4 (se incrementará al guardar)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-editor-wrap">
+                <div class="code-editor-header">Cuerpo de la plantilla (HTML / Handlebars)</div>
+                <div class="code-editor">
+                    <div class="code-lines">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12</div>
+                    <textarea class="code-body">&lt;div class="certificate"&gt;
+  &lt;h1&gt;Constancia de Horario&lt;/h1&gt;
+  &lt;p&gt;Ficha: {{ficha_id}}&lt;/p&gt;
+  &lt;p&gt;Aprendiz: {{aprendiz_nombre}}&lt;/p&gt;
+  &lt;p&gt;Período: {{periodo}}&lt;/p&gt;
+  &lt;table&gt;
+    {{#each sesiones}}
+    &lt;tr&gt;&lt;td&gt;{{this.dia}}&lt;/td&gt;&lt;td&gt;{{this.hora_inicio}}-{{this.hora_fin}}&lt;/td&gt;&lt;/tr&gt;
+    {{/each}}
+  &lt;/table&gt;
+  &lt;p&gt;Emitido: {{fecha_emision}}&lt;/p&gt;
+&lt;/div&gt;</textarea>
+                </div>
+            </div>
+
+            <div class="editor-footer">
+                <button class="btn btn--secondary" data-toggle="modal" data-target="modal-preview">Previsualizar</button>
+                <button class="btn btn--primary">Guardar</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Previsualización de plantilla -->
+    <div id="modal-preview" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Previsualizar plantilla</h2>
+                <button class="modal-close" data-dismiss="modal" aria-label="Cerrar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-grid">
+                    <div>
+                        <label class="form-label">Datos de muestra (JSON)</label>
+                        <textarea>{
+  "ficha_id": "2589341",
+  "aprendiz_nombre": "Laura Gómez",
+  "periodo": "2026-1",
+  "sesiones": [
+    { "dia": "Lunes", "hora_inicio": "07:00", "hora_fin": "10:00" },
+    { "dia": "Miércoles", "hora_inicio": "13:00", "hora_fin": "16:00" }
+  ]
+}</textarea>
+                        <button class="btn btn--secondary" style="margin-top:8px;">Renderizar</button>
+                    </div>
+                    <div>
+                        <label class="form-label">Resultado renderizado</label>
+                        <div class="preview-render">
+                            <h3 style="margin-top:0;">Constancia de Horario</h3>
+                            <p>Ficha: 2589341</p>
+                            <p>Aprendiz: Laura Gómez</p>
+                            <p>Período: 2026-1</p>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <tr><td style="border:1px solid #EAECF0; padding:4px;">Lunes</td><td style="border:1px solid #EAECF0; padding:4px;">07:00-10:00</td></tr>
+                                <tr><td style="border:1px solid #EAECF0; padding:4px;">Miércoles</td><td style="border:1px solid #EAECF0; padding:4px;">13:00-16:00</td></tr>
+                            </table>
+                            <p>Emitido: {{fecha_emision}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="missing-placeholders">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <span>Placeholders sin valor: <code>fecha_emision</code></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>
