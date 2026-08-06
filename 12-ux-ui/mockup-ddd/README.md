@@ -72,9 +72,15 @@ El DDD **no inventa** dominio ni datos; deriva del SSOT:
 2. **Coherencia numérica.** Si un contador dice "N", los ítems listados **deben ser N**; si se
    muestran menos, usar explícito **"mostrando X de N · Ver todos"**. Nunca un número que no calce
    con lo listado (v1 decía "4 conflictos" y listaba 3 — prohibido).
-3. **Paginación / conteo en toda lista.** Pantallas de **lista** → **paginación real**
-   (`page`/`page_size` del contrato) con **"mostrando X–Y de N"**. **Widgets** de resumen
-   (dashboard) → **"top X de N"** + un solo enlace "Ver todos" (no una tabla completa sin fin).
+3. **Paginación / conteo en toda lista.**
+   - **Pantallas de LISTA** (Horarios, Documentos, Auditoría, Usuarios, Fichas, etc.) →
+     **paginación REAL y visible**: barra de paginación (‹ anterior · 1 2 3 … › siguiente),
+     **selector de tamaño de página** (`page_size`: 10/20/50) y texto **"Mostrando X–Y de N"**,
+     alineado a los parámetros `page`/`page_size` del contrato (o `cursor`/`limit` donde el
+     contrato use cursor: audit, sessions). Nunca una tabla infinita sin control.
+   - **WIDGETS de resumen** (dashboard) → **NO** llevan paginación; muestran **"top N · Ver
+     todos"** con "Mostrando X de N" (como el dashboard v2). El "Ver todos" navega a la pantalla
+     de lista real (que sí pagina).
 4. **Densidad controlada / jerarquía.** Máx **3–4** tarjetas KPI; **una** sección principal por
    pantalla; **sin** filas de accesos directos que dupliquen la nav lateral o los enlaces de las
    tarjetas. Evitar repetir muchos elementos del mismo tipo (no sobrecargar).
@@ -85,16 +91,34 @@ El DDD **no inventa** dominio ni datos; deriva del SSOT:
 7. **Sin tercera capa de navegación.** Las acciones viven en la nav lateral + los botones primarios
    de la página; no agregar una capa extra que repita esos destinos.
 
-### Coletilla de calidad (pegar al FINAL de cada `PROMPT STITCH`)
+## Contrato de entrega (output de CADA prompt) — tool-agnóstico
+
+Independiente de la herramienta (Google Stitch **o** ChatGPT/GPT u otra), **cada prompt debe
+ENTREGAR SIEMPRE**:
+
+1. **Un ZIP** autocontenido con:
+   - **Imágenes PNG** por pantalla: **una desktop (~1440px de ancho)** y **una móvil (~390px)**.
+   - **HTML iterativo y funcional** (HTML + CSS + JS), autocontenido o con `assets/` locales, que
+     abra en el navegador y refleje los estados (loading/empty/error/interacciones básicas).
+2. **Datos de ejemplo realistas** — nombres, fichas, fechas, conteos verosímiles y **coherentes**
+   entre sí; **muy cercano a la realidad** del dominio SENA (no lorem ipsum, no cifras absurdas).
+3. **Fidelidad al design-system** (tokens, WCAG AA) y a estas reglas de calidad.
+
+> Si la herramienta no exporta ZIP directamente, entregar los mismos artefactos (PNG desktop+móvil
+> + HTML) y empaquetarlos. El HTML es la fuente iterativa; los PNG son el render de referencia.
+
+### Coletilla de calidad + entrega (pegar al FINAL de cada `PROMPT STITCH`)
 
 ```text
 Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
-ya están en la nav lateral o en las tarjetas; no agregues una fila extra de accesos directos). Nombre
-y rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
-moderada, no sobrecargar con muchos elementos iguales. Toda lista larga con paginación y "Mostrando
-X–Y de N"; los widgets de resumen muestran "top X de N · Ver todos". Los números deben calzar con lo
-listado (si el contador dice N, muestra N o di "Mostrando X de N"). Datos de ejemplo realistas y
-proporcionados.
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ## Cómo se usa este DDD con Stitch (workflow)
