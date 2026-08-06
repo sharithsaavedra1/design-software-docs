@@ -1234,7 +1234,7 @@ components:
         training_modality:
           type: string
           enum: [IN_PERSON, VIRTUAL, HYBRID]
-        max_capacity: { type: integer, minimum: 0, description: Número máximo de aprendices. }
+        max_capacity: { type: integer, minimum: 1, description: Número máximo de aprendices. }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 
@@ -1255,7 +1255,7 @@ components:
         training_modality:
           type: string
           enum: [IN_PERSON, VIRTUAL, HYBRID]
-        max_capacity: { type: integer, minimum: 0 }
+        max_capacity: { type: integer, minimum: 1 }
 
     FichaUpdate:
       type: object
@@ -1272,7 +1272,7 @@ components:
         training_modality:
           type: string
           enum: [IN_PERSON, VIRTUAL, HYBRID]
-        max_capacity: { type: integer, minimum: 0 }
+        max_capacity: { type: integer, minimum: 1 }
 
     FichaStatusChange:
       type: object

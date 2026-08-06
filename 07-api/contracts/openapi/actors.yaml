@@ -42,7 +42,7 @@ paths:
           required: false
           description: Filtra por número de identificación tributaria.
           schema: { type: string }
-        - name: municipality_id
+        - name: city_id
           in: query
           required: false
           description: Filtra por municipio (reference-data-service).
@@ -619,12 +619,13 @@ paths:
           required: false
           description: Filtra por ficha activa (learner_ficha_enrollment.is_current = true).
           schema: { type: string, format: uuid }
-        - name: enrollment_status
+        - name: enrollment_status_id
           in: query
           required: false
-          schema:
-            type: string
-            enum: [ACTIVE, DROPOUT, TRANSFERRED, GRADUATED, CANCELLED]
+          description: >-
+            Filtra por el estado de la inscripción vigente
+            (learner_ficha_enrollment.enrollment_status_id, is_current = true).
+          schema: { type: string, format: uuid }
       responses:
         '200':
           description: Página de aprendices.
@@ -724,7 +725,9 @@ paths:
     delete:
       operationId: deleteLearner
       tags: [learners]
-      summary: Cancela la vinculación del aprendiz (soft delete, enrollment_status = CANCELLED).
+      summary: >-
+        Cancela la vinculación del aprendiz (soft delete; transita
+        learner_ficha_enrollment.enrollment_status_id vigente al estado CANCELLED).
       x-required-feature: ACT_LEARNER_MANAGE
       responses:
         '204':
@@ -822,12 +825,11 @@ paths:
           in: query
           required: false
           schema: { type: string, format: uuid }
-        - name: status
+        - name: status_id
           in: query
           required: false
-          schema:
-            type: string
-            enum: [ACTIVE, COMPLETED, INTERRUPTED, CANCELLED]
+          description: Filtra por estado (FK a actors_parameterization.status).
+          schema: { type: string, format: uuid }
       responses:
         '200':
           description: Página de etapas productivas.
@@ -1007,12 +1009,11 @@ paths:
           in: query
           required: false
           schema: { type: string, format: uuid }
-        - name: status
+        - name: status_id
           in: query
           required: false
-          schema:
-            type: string
-            enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
+          description: Filtra por estado (FK a actors_parameterization.status).
+          schema: { type: string, format: uuid }
       responses:
         '200':
           description: Página de planes de mejoramiento.
@@ -1246,7 +1247,7 @@ components:
           description: Actividad económica principal (CIIU).
         address:
           type: [string, 'null']
-        municipality_id:
+        city_id:
           type: [string, 'null']
           format: uuid
           description: Referencia lógica a Municipality en reference-data-service (sin FK física).
@@ -1273,7 +1274,7 @@ components:
         trade_name: { type: string, maxLength: 200 }
         economic_activity: { type: string, maxLength: 100 }
         address: { type: string }
-        municipality_id: { type: string, format: uuid }
+        city_id: { type: string, format: uuid }
         contact_name: { type: string, maxLength: 200 }
         contact_email: { type: string, format: email }
         contact_phone: { type: string, maxLength: 20 }
@@ -1285,7 +1286,7 @@ components:
         trade_name: { type: string, maxLength: 200 }
         economic_activity: { type: string, maxLength: 100 }
         address: { type: string }
-        municipality_id: { type: string, format: uuid }
+        city_id: { type: string, format: uuid }
         contact_name: { type: string, maxLength: 200 }
         contact_email: { type: string, format: email }
         contact_phone: { type: string, maxLength: 20 }
@@ -1504,7 +1505,11 @@ components:
 
     Learner:
       type: object
-      required: [id, user_id, document_type, document_number, first_name, last_name, email, enrollment_status, enrollment_date, created_at]
+      required: [id, user_id, document_type, document_number, first_name, last_name, email, created_at]
+      description: >-
+        El estado de vinculación (enrollment_status_id) y la fecha de vinculación
+        (enrollment_date) NO viven en esta entidad — pertenecen a la inscripción
+        de ficha vigente; ver LearnerFichaEnrollment.
       properties:
         id: { type: string, format: uuid }
         user_id:
@@ -1528,18 +1533,11 @@ components:
         birth_date:
           type: [string, 'null']
           format: date
-        enrollment_status:
-          type: string
-          enum: [ACTIVE, DROPOUT, TRANSFERRED, GRADUATED, CANCELLED]
-        enrollment_date:
-          type: string
-          format: date
-          description: Fecha de vinculación a la ficha.
         created_at: { type: string, format: date-time }
 
     LearnerCreate:
       type: object
-      required: [user_id, document_type, document_number, first_name, last_name, email, enrollment_date]
+      required: [user_id, document_type, document_number, first_name, last_name, email]
       properties:
         user_id: { type: string, format: uuid }
         document_type:
@@ -1551,11 +1549,6 @@ components:
         email: { type: string, format: email }
         phone: { type: string, maxLength: 20 }
         birth_date: { type: string, format: date }
-        enrollment_status:
-          type: string
-          enum: [ACTIVE, DROPOUT, TRANSFERRED, GRADUATED, CANCELLED]
-          default: ACTIVE
-        enrollment_date: { type: string, format: date }
 
     LearnerUpdate:
       type: object
@@ -1569,13 +1562,10 @@ components:
         email: { type: string, format: email }
         phone: { type: string, maxLength: 20 }
         birth_date: { type: string, format: date }
-        enrollment_status:
-          type: string
-          enum: [ACTIVE, DROPOUT, TRANSFERRED, GRADUATED, CANCELLED]
 
     LearnerFichaEnrollment:
       type: object
-      required: [id, learner_id, ficha_id, stage, enrollment_date, is_current, created_at]
+      required: [id, learner_id, ficha_id, enrollment_status_id, stage, enrollment_date, is_current, created_at]
       properties:
         id: { type: string, format: uuid }
         learner_id: { type: string, format: uuid }
@@ -1583,6 +1573,12 @@ components:
           type: string
           format: uuid
           description: Referencia lógica a enrollment_ficha.id en academic-management-service (sin FK física).
+        enrollment_status_id:
+          type: string
+          format: uuid
+          description: >-
+            FK a actors_parameterization.status (status_category del dominio de
+            inscripción de aprendices). Reemplaza el enum plano legado.
         stage:
           type: string
           enum: [INDUCTION, LECTURE, PRODUCTIVE]
@@ -1613,7 +1609,7 @@ components:
       type: object
       required:
         [id, learner_id, company_id, supervisor_instructor_id, start_date, planned_end_date,
-         total_hours_required, total_hours_completed, status, created_at]
+         total_hours_required, total_hours_completed, status_id, created_at]
       properties:
         id: { type: string, format: uuid }
         learner_id: { type: string, format: uuid }
@@ -1629,12 +1625,13 @@ components:
           format: date
         total_hours_required: { type: integer, minimum: 0 }
         total_hours_completed: { type: integer, minimum: 0 }
-        status:
+        status_id:
           type: string
-          enum: [ACTIVE, COMPLETED, INTERRUPTED, CANCELLED]
+          format: uuid
+          description: FK a actors_parameterization.status. Reemplaza el enum plano legado.
         interruption_reason:
           type: [string, 'null']
-          description: Solo si status = INTERRUPTED.
+          description: Solo si el status vigente corresponde a INTERRUPTED.
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 
@@ -1655,9 +1652,7 @@ components:
         planned_end_date: { type: string, format: date }
         actual_end_date: { type: string, format: date }
         total_hours_completed: { type: integer, minimum: 0 }
-        status:
-          type: string
-          enum: [ACTIVE, COMPLETED, INTERRUPTED, CANCELLED]
+        status_id: { type: string, format: uuid }
         interruption_reason: { type: string }
 
     CompanyVisit:
@@ -1724,7 +1719,7 @@ components:
 
     ActorImprovementPlan:
       type: object
-      required: [id, origin, description, specific_goals, due_date, status, created_by, created_at]
+      required: [id, origin, description, specific_goals, due_date, status_id, created_by, created_at]
       properties:
         id: { type: string, format: uuid }
         instructor_id:
@@ -1747,9 +1742,10 @@ components:
           type: string
           description: Metas específicas y verificables.
         due_date: { type: string, format: date }
-        status:
+        status_id:
           type: string
-          enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
+          format: uuid
+          description: FK a actors_parameterization.status. Reemplaza el enum plano legado.
         created_by:
           type: string
           format: uuid
@@ -1782,9 +1778,7 @@ components:
         description: { type: string }
         specific_goals: { type: string }
         due_date: { type: string, format: date }
-        status:
-          type: string
-          enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
+        status_id: { type: string, format: uuid }
         completed_at: { type: string, format: date-time }
 
     LearnerTrackingReportEntry:

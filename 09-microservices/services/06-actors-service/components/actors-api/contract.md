@@ -36,7 +36,7 @@ CRUD completo, soft delete vía `is_active`.
 
 | Método | Path | Descripción | Feature |
 |--------|------|-------------|---------|
-| `GET/POST` | `/companies` | Listar (filtros `nit`, `municipality_id`, `is_active`) / registrar empresa | `ACT_COMPANY_VIEW` / `ACT_COMPANY_MANAGE` |
+| `GET/POST` | `/companies` | Listar (filtros `nit`, `city_id`, `is_active`) / registrar empresa | `ACT_COMPANY_VIEW` / `ACT_COMPANY_MANAGE` |
 | `GET/PUT/PATCH/DELETE` | `/companies/{id}` | Detalle / reemplazar / actualizar parcial / desactivar | `ACT_COMPANY_VIEW` / `ACT_COMPANY_MANAGE` |
 
 ### Instructores
