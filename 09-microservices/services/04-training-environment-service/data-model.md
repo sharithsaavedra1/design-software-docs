@@ -134,3 +134,23 @@ Esta protección a nivel de BD **complementa, no reemplaza**, la validación de 
 | `maintenance` | `(environment_id, start_date, end_date)` | B-Tree | Overlap con franjas solicitadas |
 | `reservation` | `(environment_id, reservation_date)` | B-Tree | Overlap con nuevas reservas |
 | `reservation` | `(requester_id, created_at)` | B-Tree | historial por usuario |
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+Cierre de brechas contrato↔BD detectadas en la evaluación de congruencia
+([CONGRUENCIA-contratos-docs-bd.md](../../../../../../delivery/status/CONGRUENCIA-contratos-docs-bd.md)).
+Se implementa vía **changeset nuevo** `remediation-training-960` (no se modifica ningún
+changeset corrido). Columnas agregadas (todas nullable o con default → seguras sobre datos existentes):
+
+| Tabla | Columna nueva | Tipo | Justificación |
+|-------|---------------|------|---------------|
+| `environment_type` | `code` | `VARCHAR(30)` UNIQUE (nullable) | Identificador semántico del catálogo (LAB, CLASSROOM…) que el contrato usa; faltaba en el DDL. |
+| `environment` | `is_active` | `BOOLEAN NOT NULL DEFAULT true` | Estado operativo (ciclo de vida técnico). |
+| `environment` | `updated_at` | `TIMESTAMPTZ NOT NULL DEFAULT now()` | Auditoría de actualización. |
+| `availability_rule` | `effective_from` / `effective_until` | `DATE` (nullable) | Vigencia de la regla de disponibilidad. |
+| `reservation` | `reason` | `VARCHAR(255)` (nullable) | Motivo de la reserva (expuesto por el contrato). |
+| `reservation` | `updated_at` | `TIMESTAMPTZ NOT NULL DEFAULT now()` | Auditoría de actualización. |
+
+**Reconciliación de naming (fix de contrato, sin cambio de BD):** la columna real de
+`maintenance` es **`reason`** (nullable); el contrato decía `description` (NOT NULL) → se
+corrigió el contrato a `reason`.

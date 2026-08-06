@@ -766,15 +766,15 @@ components:
 
     Maintenance:
       type: object
-      required: [id, environment_id, start_date, end_date, description, created_by, created_at]
+      required: [id, environment_id, start_date, end_date, created_by, created_at]
       properties:
         id: { type: string, format: uuid }
         environment_id: { type: string, format: uuid }
         start_date: { type: string, format: date }
         end_date: { type: string, format: date }
-        description:
-          type: string
-          description: Motivo del mantenimiento.
+        reason:
+          type: [string, 'null']
+          description: Motivo del mantenimiento (columna real `reason`, nullable).
         created_by:
           type: string
           format: uuid
@@ -783,11 +783,11 @@ components:
 
     MaintenanceCreate:
       type: object
-      required: [start_date, end_date, description]
+      required: [start_date, end_date]
       properties:
         start_date: { type: string, format: date }
         end_date: { type: string, format: date }
-        description: { type: string }
+        reason: { type: [string, 'null'] }
 
     Reservation:
       type: object
