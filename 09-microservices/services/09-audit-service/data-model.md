@@ -64,3 +64,16 @@ Para mantener rendimiento con retención de 7 años, se recomienda particionar `
 La clave de particionamiento se alinea con la consulta dominante (recuperación por ventana temporal de recepción y archivado mensual a cold storage): se confirma **`received_at` como clave de partición RANGE mensual**.
 
 > **Nota sobre `event_id` UNIQUE:** en tablas particionadas de Postgres, un índice UNIQUE global solo es posible si la clave de partición forma parte del índice; como `event_id` es independiente de `received_at`, la unicidad se implementa o bien como **índice único global** mediante un esquema que incluya la clave de partición / verificación externa, o bien como **índice único por-partición** (uniqueness garantizada dentro de cada partición), según la estrategia adoptada. La idempotencia at-least-once exige la garantía global, por lo que se prefiere la opción que la asegure.
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+Implementación efectiva (changesets nuevos, sin modificar los corridos):
+- **`remediation-audit-960`:** `audit_record` ahora es **tabla particionada** (`PARTITION BY
+  RANGE (received_at)`, particiones mensuales + `DEFAULT`). La PK pasa a `(id, received_at)` y el
+  `UNIQUE(event_id)` a `(event_id, received_at)` (per-partición, requisito de Postgres). Además,
+  índices renombrados `idx_` → `ix_` (convención transversal).
+- **`remediation-audit-961`:** para preservar la **garantía global** de `event_id` (idempotencia
+  at-least-once, la opción preferida arriba) se agrega la tabla NO particionada
+  `audit_event_seen (event_id UUID PRIMARY KEY, received_at TIMESTAMPTZ)`: el `audit-worker`
+  inserta ahí primero (`ON CONFLICT DO NOTHING`) para deduplicar globalmente antes de escribir en
+  `audit_record`.
