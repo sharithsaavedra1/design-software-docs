@@ -35,6 +35,17 @@ en Stitch**, pantalla por pantalla.
   construye contra los **contratos** (`09-microservices/**/openapi.yaml`) y el design-system,
   no contra estos artefactos. El mockup es insumo de diseño/validación, no dependencia de código.
 
+## Índice del spec del mockup
+
+| Documento | Qué contiene |
+|---|---|
+| **README.md** (este) | framework, reglas de calidad/anti-patrón, contrato de entrega, brief global |
+| [micro-frontends.md](micro-frontends.md) | arquitectura "por debajo": dominio → micro-frontend → pantalla |
+| [screen-inventory.md](screen-inventory.md) | inventario maestro de las 45 pantallas (por flujo y por MFE) + estado |
+| [component-inventory.md](component-inventory.md) | componentes compartidos (design-system) + patrones por MFE |
+| [discovery-findings.md](discovery-findings.md) | vacíos de contrato/RBAC detectados (feedback) |
+| `flows/01-auth.md … 06-backoffice.md` | las pantallas con su `PROMPT STITCH` (por flujo/rol) |
+
 ## Fuente única de verdad (de dónde deriva cada pantalla)
 
 El DDD **no inventa** dominio ni datos; deriva del SSOT:
