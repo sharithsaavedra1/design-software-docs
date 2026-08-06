@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones - SENA</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        .notification-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .notification-card { display: block; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; background: var(--color-surface); text-decoration: none; color: inherit; }
+        .notification-card:hover { border-color: var(--color-brand); }
+        .notif-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .notif-title { font-weight: 600; font-size: 1rem; color: var(--color-text); }
+        .notif-time { color: var(--color-text-muted); font-size: 0.85rem; white-space: nowrap; margin-left: 12px; }
+        .notif-body { color: var(--color-text-muted); font-size: 0.95rem; margin-bottom: 12px; }
+        
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .badge.success { background: var(--color-success-surface); color: var(--color-success); }
+        .badge.danger { background: var(--color-danger-surface); color: var(--color-danger); }
+        
+        .pagination { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--color-border); padding-top: 16px; flex-wrap: wrap; gap: 16px; }
+        .cursor-nav { display: flex; gap: 8px; }
+        .cursor-nav button { background: none; border: 1px solid var(--color-border); padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; }
+        .page-info { color: var(--color-text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">SENA - Diseño de Software</div>
+        <div class="user-menu">
+            <div class="bell" title="Notificaciones">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span class="badge">2</span>
+            </div>
+            <div class="user-info">Santiago Muñoz — Aprendiz</div>
+        </div>
+    </header>
+    
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav>
+                <a href="my-schedule.html">Mi horario</a>
+                <a href="notifications.html" class="active">Notificaciones</a>
+            </nav>
+        </aside>
+        
+        <main class="app-content">
+            <header class="content-header">
+                <h1>Notificaciones</h1>
+            </header>
+            
+            <div class="notification-list">
+                <a href="notification-detail.html" class="notification-card">
+                    <div class="notif-header">
+                        <div class="notif-title">Cambio en tu horario: sesión del jueves reprogramada</div>
+                        <div class="notif-time">Hace 1 hora</div>
+                    </div>
+                    <div class="notif-body">Tu sesión de Desarrollo web del jueves 13 feb fue reprogramada al Aula 305.</div>
+                    <div class="badge success">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enviado
+                    </div>
+                </a>
+
+                <a href="notification-detail.html" class="notification-card">
+                    <div class="notif-header">
+                        <div class="notif-title">Tu horario de la semana del 10 feb está disponible</div>
+                        <div class="notif-time">Hace 2 días</div>
+                    </div>
+                    <div class="badge success">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enviado
+                    </div>
+                </a>
+
+                <a href="notification-detail.html" class="notification-card">
+                    <div class="notif-header">
+                        <div class="notif-title">Sesión cancelada: Pruebas de software miércoles 12 feb</div>
+                        <div class="notif-time">Hace 3 días</div>
+                    </div>
+                    <div class="badge success">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enviado
+                    </div>
+                </a>
+
+                <a href="notification-detail.html" class="notification-card">
+                    <div class="notif-header">
+                        <div class="notif-title">Recordatorio: Evaluación de avance el viernes 14 feb</div>
+                        <div class="notif-time">Hace 5 días</div>
+                    </div>
+                    <div class="badge success">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enviado
+                    </div>
+                </a>
+
+                <a href="notification-detail.html" class="notification-card">
+                    <div class="notif-header">
+                        <div class="notif-title">Actualización de horario período 2026-1</div>
+                        <div class="notif-time">Hace 1 semana</div>
+                    </div>
+                    <div class="badge danger">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        No se pudo entregar
+                    </div>
+                </a>
+
+                <a href="notification-detail.html" class="notification-card">
+                    <div class="notif-header">
+                        <div class="notif-title">Bienvenido al período 2026-1</div>
+                        <div class="notif-time">Hace 2 semanas</div>
+                    </div>
+                    <div class="badge success">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enviado
+                    </div>
+                </a>
+            </div>
+            
+            <div class="pagination">
+                <div class="cursor-nav">
+                    <button disabled>‹ anterior</button>
+                    <button>siguiente ›</button>
+                </div>
+                <div class="page-size">
+                    <select>
+                        <option value="10">10 por página</option>
+                        <option value="20">20 por página</option>
+                        <option value="50">50 por página</option>
+                    </select>
+                </div>
+                <div class="page-info">Mostrando 6 de 11</div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>

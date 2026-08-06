@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parametrización - SENA Backoffice</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        .tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--color-border); margin-bottom: 24px; }
+        .tab { padding: 12px 4px; cursor: pointer; color: var(--color-text-muted); border-bottom: 2px solid transparent; font-weight: 500; }
+        .tab.active { color: var(--color-brand); border-bottom-color: var(--color-brand); }
+        
+        .master-detail { display: flex; gap: 24px; height: calc(100vh - 200px); }
+        .master { flex: 0 0 300px; display: flex; flex-direction: column; border-right: 1px solid var(--color-border); padding-right: 16px; }
+        .detail { flex: 1; overflow-y: auto; }
+        
+        .list-group { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
+        .list-item { padding: 12px 16px; border-bottom: 1px solid var(--color-border); cursor: pointer; font-size: 0.9rem; }
+        .list-item:hover { background: var(--color-surface-muted); }
+        .list-item.active { background: var(--color-brand); color: white; border-radius: var(--radius-sm); }
+        
+        .search-box { padding: 8px; width: 100%; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: var(--radius-sm); margin-bottom: 12px; }
+        
+        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .btn-primary { padding: 8px 16px; background: var(--color-brand); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; }
+        
+        table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 0.9rem; }
+        th { background: var(--color-surface-muted); font-weight: 600; color: var(--color-text-muted); }
+        
+        .action-link { color: var(--color-brand); text-decoration: none; font-weight: 500; cursor: pointer; margin-right: 8px; }
+        .action-link.danger { color: var(--color-danger); }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">SENA - Diseño de Software</div>
+        <div class="user-menu">
+            <div class="user-info">Carlos Mendoza — Soporte</div>
+        </div>
+    </header>
+    
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav>
+                <a href="documents.html">Documentos</a>
+                <a href="templates.html">Plantillas</a>
+                <a href="audit.html">Auditoría</a>
+                <a href="parametrization.html" class="active">Parametrización</a>
+            </nav>
+        </aside>
+        
+        <main class="app-content">
+            <header class="content-header">
+                <h1>Parametrización</h1>
+            </header>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('catalogos')">Catálogos</div>
+                <div class="tab" onclick="switchTab('parametros')">Parámetros del sistema</div>
+            </div>
+            
+            <div id="catalogos" class="tab-content">
+                <div class="master-detail">
+                    <div class="master">
+                        <input type="text" class="search-box" placeholder="Buscar catálogo...">
+                        <button class="btn-primary" style="width:100%; margin-bottom:12px;" data-toggle="modal" data-target="modal-catalog">Nuevo catálogo</button>
+                        <ul class="list-group">
+                            <li class="list-item active">MODALITY</li>
+                            <li class="list-item">SHIFT</li>
+                            <li class="list-item">ENVIRONMENT_TYPE</li>
+                            <li class="list-item">EXCEPTION_TYPE</li>
+                            <li class="list-item">ACTOR_TYPE</li>
+                        </ul>
+                        <div style="font-size: 0.8rem; color: var(--color-text-muted); padding-top: 12px; text-align: center;">1-5 de 24</div>
+                    </div>
+                    
+                    <div class="detail">
+                        <div class="detail-header">
+                            <div>
+                                <h2>MODALITY <span class="action-link" style="font-size:0.8rem; font-weight:500;" data-toggle="modal" data-target="modal-catalog">Editar</span></h2>
+                                <div style="color: var(--color-text-muted); font-size: 0.9rem;">Modalidades de formación soportadas.</div>
+                            </div>
+                            <button class="btn-primary" data-toggle="modal" data-target="modal-catalog-detail">Agregar valor</button>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr><th>Código</th><th>Etiqueta</th><th>Orden</th><th>Activo</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>PRESENTIAL</td><td>Presencial</td><td>1</td><td>Sí</td><td><span class="action-link" data-toggle="modal" data-target="modal-catalog-detail">Editar</span><span class="action-link danger">Desactivar</span></td></tr>
+                                <tr><td>VIRTUAL</td><td>Virtual</td><td>2</td><td>Sí</td><td><span class="action-link" data-toggle="modal" data-target="modal-catalog-detail">Editar</span><span class="action-link danger">Desactivar</span></td></tr>
+                                <tr><td>DISTANCE</td><td>A distancia</td><td>3</td><td>Sí</td><td><span class="action-link" data-toggle="modal" data-target="modal-catalog-detail">Editar</span><span class="action-link danger">Desactivar</span></td></tr>
+                                <tr><td>MIXED</td><td>Mixta</td><td>4</td><td>Sí</td><td><span class="action-link" data-toggle="modal" data-target="modal-catalog-detail">Editar</span><span class="action-link danger">Desactivar</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="parametros" class="tab-content" style="display: none;">
+                <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                    <button class="btn-primary" data-toggle="modal" data-target="modal-parameter">Nuevo parámetro</button>
+                </div>
+                <table>
+                    <thead><tr><th>Clave</th><th>Valor</th><th>Tipo</th><th>Descripción</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                        <tr><td>MAX_HOURS_PER_WEEK</td><td>40</td><td>Integer</td><td>Horas máximas semanales por instructor</td><td><span class="action-link" data-toggle="modal" data-target="modal-parameter">Editar</span></td></tr>
+                        <tr><td>MIN_ATTENDANCE_PERCENTAGE</td><td>80</td><td>Integer</td><td>Porcentaje mínimo de asistencia</td><td><span class="action-link" data-toggle="modal" data-target="modal-parameter">Editar</span></td></tr>
+                        <tr><td>SESSION_TIMEOUT_MINUTES</td><td>30</td><td>Integer</td><td>Tiempo de expiración de sesión inactiva</td><td><span class="action-link" data-toggle="modal" data-target="modal-parameter">Editar</span></td></tr>
+                        <tr><td>ENABLE_AUTO_SCHEDULING</td><td>true</td><td>Boolean</td><td>Habilitar generación automática de horarios</td><td><span class="action-link" data-toggle="modal" data-target="modal-parameter">Editar</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal: Nuevo/editar catálogo (flows/06 Pantalla 9.1) -->
+    <div id="modal-catalog" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo catálogo</h2>
+                <button class="modal-close" data-dismiss="modal" aria-label="Cerrar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Código</label>
+                    <input type="text" class="form-input" placeholder="Ej. MODALITY">
+                    <span class="form-hint">Inmutable después de creado.</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-input" placeholder="Ej. Modalidad">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción</label>
+                    <textarea class="form-textarea" rows="3" placeholder="Opcional"></textarea>
+                </div>
+                <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="catalog-active" checked>
+                    <label class="form-label" for="catalog-active" style="margin:0;">Activo</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn--primary" data-dismiss="modal">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo/editar valor de catálogo (flows/06 Pantalla 9.2) -->
+    <div id="modal-catalog-detail" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo valor de catálogo</h2>
+                <button class="modal-close" data-dismiss="modal" aria-label="Cerrar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="background: var(--color-surface-muted); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.85rem; margin-bottom: 16px;">
+                    Catálogo: <strong>MODALITY — Modalidad</strong>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Código</label>
+                    <input type="text" class="form-input" placeholder="Ej. IN_PERSON">
+                    <span class="form-hint">Inmutable después de creado.</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Etiqueta</label>
+                    <input type="text" class="form-input" placeholder="Ej. Presencial">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Orden</label>
+                    <input type="number" class="form-input" placeholder="Opcional">
+                </div>
+                <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="catalog-detail-active" checked>
+                    <label class="form-label" for="catalog-detail-active" style="margin:0;">Activo</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn--primary" data-dismiss="modal">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo/editar parámetro (flows/06 Pantalla 9.3) -->
+    <div id="modal-parameter" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo parámetro</h2>
+                <button class="modal-close" data-dismiss="modal" aria-label="Cerrar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Clave</label>
+                    <input type="text" class="form-input" placeholder="Ej. MAX_HOURS_PER_WEEK">
+                    <span class="form-hint">Inmutable después de creada.</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tipo de valor</label>
+                    <select class="form-select">
+                        <option>integer</option>
+                        <option>string</option>
+                        <option>boolean</option>
+                        <option>json</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Valor</label>
+                    <input type="text" class="form-input" placeholder="Ej. 40">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción</label>
+                    <input type="text" class="form-input" placeholder="Opcional">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn--primary" data-dismiss="modal">Actualizar valor</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            event.target.classList.add('active');
+            document.getElementById(tabId).style.display = 'block';
+        }
+    </script>
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>

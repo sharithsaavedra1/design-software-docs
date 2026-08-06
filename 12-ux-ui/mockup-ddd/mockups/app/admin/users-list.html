@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios - SENA Admin</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        .top-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .filters { display: flex; gap: 16px; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); }
+        .filter-group select { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+        .btn-primary { padding: 8px 16px; background: var(--color-brand); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; }
+        
+        table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--color-border); }
+        th { background: var(--color-surface-muted); font-weight: 600; font-size: 0.9rem; color: var(--color-text-muted); }
+        tbody tr:hover { background: var(--color-surface-muted); }
+        
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .badge.success { background: var(--color-success-surface); color: var(--color-success); }
+        .badge.inactive { background: var(--color-surface-muted); color: var(--color-text-muted); }
+        
+        .action-link { color: var(--color-brand); text-decoration: none; font-weight: 500; cursor: pointer; }
+
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; flex-wrap: wrap; gap: 16px; }
+        .page-numbers { display: flex; gap: 4px; }
+        .page-numbers button { border: 1px solid var(--color-border); background: var(--color-surface); padding: 4px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+        .page-numbers button.active { background: var(--color-brand); color: white; border-color: var(--color-brand); }
+
+        /* Modal form fields (el contenedor .modal-overlay/.modal/.modal-header/.modal-body/.modal-footer
+           viene de css/design-system.css) */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); box-sizing: border-box; }
+        .btn-secondary { padding: 8px 16px; background: white; color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">SENA - Diseño de Software</div>
+        <div class="user-menu">
+            <div class="user-info">Roberto Díaz — Director</div>
+        </div>
+    </header>
+    
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav>
+                <a href="kpi-dashboard.html">Indicadores</a>
+                <div class="nav-group">
+                    <span>Administración</span>
+                    <a href="users-list.html" class="active">Usuarios</a>
+                    <a href="reference-data.html">Datos de referencia</a>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="app-content">
+            <header class="content-header">
+                <h1>Administración — Usuarios</h1>
+            </header>
+            
+            <div class="top-actions">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Rol</label>
+                        <select>
+                            <option>Todos</option>
+                            <option>Coordinador</option>
+                            <option>Instructor</option>
+                            <option>Aprendiz</option>
+                            <option>Director</option>
+                            <option>Soporte</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Estado</label>
+                        <select>
+                            <option>Todos</option>
+                            <option>Activo</option>
+                            <option>Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary" data-toggle="modal" data-target="newUserModal">+ Nuevo usuario</button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre completo</th>
+                        <th>Correo</th>
+                        <th>Tipo de actor</th>
+                        <th>Estado</th>
+                        <th>Último acceso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>María García</td>
+                        <td>maria.garcia@sena.edu.co</td>
+                        <td>Instructor</td>
+                        <td><span class="badge success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Activo</span></td>
+                        <td>06 ago 2026</td>
+                        <td><a class="action-link" href="user-detail.html?id=1">Ver</a></td>
+                    </tr>
+                    <tr>
+                        <td>Juan Pérez</td>
+                        <td>juan.perez@sena.edu.co</td>
+                        <td>Instructor</td>
+                        <td><span class="badge success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Activo</span></td>
+                        <td>06 ago 2026</td>
+                        <td><a class="action-link" href="user-detail.html?id=2">Ver</a></td>
+                    </tr>
+                    <tr>
+                        <td>Ana Martínez</td>
+                        <td>ana.martinez@sena.edu.co</td>
+                        <td>Instructor</td>
+                        <td><span class="badge success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Activo</span></td>
+                        <td>05 ago 2026</td>
+                        <td><a class="action-link" href="user-detail.html?id=3">Ver</a></td>
+                    </tr>
+                    <tr>
+                        <td>Santiago Muñoz</td>
+                        <td>santiago.munoz@sena.edu.co</td>
+                        <td>Aprendiz</td>
+                        <td><span class="badge success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Activo</span></td>
+                        <td>06 ago 2026</td>
+                        <td><a class="action-link" href="user-detail.html?id=4">Ver</a></td>
+                    </tr>
+                    <tr>
+                        <td>Laura Ramírez</td>
+                        <td>laura.ramirez@sena.edu.co</td>
+                        <td>Instructor</td>
+                        <td><span class="badge inactive"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg> Inactivo</span></td>
+                        <td>20 jul 2026</td>
+                        <td><a class="action-link" href="user-detail.html?id=5">Ver</a></td>
+                    </tr>
+                    <!-- Add more rows to simulate 20 -->
+                    <tr><td>Carlos López</td><td>carlos.lopez@sena.edu.co</td><td>Instructor</td><td><span class="badge success">Activo</span></td><td>04 ago 2026</td><td><a class="action-link" href="user-detail.html?id=6">Ver</a></td></tr>
+                    <tr><td>Diana Gómez</td><td>diana.gomez@sena.edu.co</td><td>Aprendiz</td><td><span class="badge success">Activo</span></td><td>06 ago 2026</td><td><a class="action-link" href="user-detail.html?id=7">Ver</a></td></tr>
+                    <tr><td>Andrés Castro</td><td>andres.castro@sena.edu.co</td><td>Aprendiz</td><td><span class="badge success">Activo</span></td><td>05 ago 2026</td><td><a class="action-link" href="user-detail.html?id=8">Ver</a></td></tr>
+                    <tr><td>Patricia Silva</td><td>patricia.silva@sena.edu.co</td><td>Coordinador</td><td><span class="badge success">Activo</span></td><td>06 ago 2026</td><td><a class="action-link" href="user-detail.html?id=9">Ver</a></td></tr>
+                    <tr><td>Luis Herrera</td><td>luis.herrera@sena.edu.co</td><td>Aprendiz</td><td><span class="badge inactive">Inactivo</span></td><td>15 may 2026</td><td><a class="action-link" href="user-detail.html?id=10">Ver</a></td></tr>
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <span class="page-info">Mostrando 1–20 de 84</span>
+                <div class="page-numbers">
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>4</button>
+                    <button>5</button>
+                </div>
+                <select>
+                    <option value="10">10 por página</option>
+                    <option value="20" selected>20 por página</option>
+                    <option value="50">50 por página</option>
+                </select>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal: Nuevo usuario (Pantalla 4, modo alta) -->
+    <div id="newUserModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo usuario</h3>
+                <button class="modal-close" data-dismiss="modal" aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Correo</label>
+                    <input type="email" placeholder="ejemplo@sena.edu.co">
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de actor</label>
+                    <select><option>Instructor</option><option>Aprendiz</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Actor vinculado (UUID opcional)</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>Rol inicial</label>
+                    <select><option>INSTRUCTOR</option><option>LEARNER</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Centro de formación (opcional)</label>
+                    <select><option>Centro de Gestión Industrial</option></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn-primary" data-dismiss="modal" onclick="alert('Contraseña temporal generada: Xk9#mPz2\nCaduca en 72 horas.')">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>
