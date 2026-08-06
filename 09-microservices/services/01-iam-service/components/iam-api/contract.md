@@ -1,6 +1,23 @@
+<!-- RESUMEN-EJECUTIVO
+agente: Jesús Ariel González Bonilla (PM + Arquitecto)
+capacidad: contrato de API (OpenAPI 3.1)
+fase: diseño (api-first)
+estado: accepted
+dependencias_entrada: 09-microservices/services/01-iam-service/data-model.md, 07-api/guidelines.md, 07-api/contracts/openapi/_shared.yaml
+consumidores_siguientes: backend iam-service, frontend, pruebas de contrato
+tldr: Autenticación JWT + RBAC (users/roles/features/scope-overrides/sessions) con paginación y reporte login-audit por cursor. La fuente de verdad es openapi.yaml.
+decisiones_clave: OpenAPI publicable en 07-api/contracts/openapi/iam.yaml; envelope de error estándar (guidelines §7); reportes por servicio
+halts_registrados: ninguno
+-->
+
 # Contrato — iam-api
 
-> Estado: 🟡 Revisión | Última actualización: 2026-06-17
+> Estado: 🟢 Aceptado | Última actualización: 2026-08-06
+
+> **Fuente de verdad (normativa):** el spec OpenAPI 3.1 en
+> [`07-api/contracts/openapi/iam.yaml`](../../../../../07-api/contracts/openapi/iam.yaml).
+> Este documento es la **narrativa** que lo explica; ante cualquier diferencia, **manda el
+> `openapi.yaml`**. Convenciones transversales en [07-api/guidelines.md](../../../../../07-api/guidelines.md).
 
 ## Base URL
 
@@ -268,16 +285,37 @@ Revoca un override.
 
 ---
 
+## Reportes (dominio propio)
+
+### `GET /reports/login-audit`
+
+Auditoría de intentos de login sobre la tabla `audit_login`. **Solo lectura**, paginación por
+**cursor** (colección grande/continua, guidelines §6).
+
+- **Feature requerido:** `IDENTITY_AUDIT_VIEW`.
+- **Filtros:** `user_id`, `email`, `outcome`, `from`, `to`.
+- **Inventario:** Usuarios: seguridad/administración · Frecuencia: on-demand · Formato: JSON · Fuente: `identity_audit.audit_login`.
+
+---
+
 ## Formato de error estándar
+
+Aplica el **envelope estándar de la plataforma** ([guidelines §7](../../../../../07-api/guidelines.md) /
+`_shared.yaml#/components/schemas/Error`):
 
 ```json
 {
-  "error_code": "INSUFFICIENT_PERMISSIONS",
-  "message": "No tiene acceso a este recurso",
-  "required_feature": "SCH_PUBLISH",
-  "trace_id": "uuid-v4"
+  "error": {
+    "code": "INSUFFICIENT_PERMISSIONS",
+    "message": "No tiene acceso a este recurso",
+    "details": [ { "field": "required_feature", "issue": "SCH_PUBLISH" } ],
+    "trace_id": "uuid-v4"
+  }
 }
 ```
+
+> El campo `required_feature` del borrador anterior se transporta ahora dentro de `details`
+> para no romper el envelope común. Los **códigos** de dominio siguen vigentes:
 
 ## Códigos de error propios
 
