@@ -1,7 +1,25 @@
+<!-- RESUMEN-EJECUTIVO
+agente: Jesús Ariel González Bonilla (PM + Arquitecto)
+capacidad: contrato de API (OpenAPI 3.1)
+fase: diseño (api-first)
+estado: accepted
+dependencias_entrada: 09-microservices/services/07-document-service/data-model.md, 07-api/guidelines.md, 07-api/contracts/openapi/_shared.yaml
+consumidores_siguientes: backend document-service, pdf-renderer-worker, servicios propietarios (scheduling/ficha/certificate/actors), frontend
+tldr: CRUD de documentos + versiones (multipart upload), generación asíncrona desde plantilla, descarga por URL firmada y reporte de inventario por estado. La fuente de verdad es document.yaml.
+decisiones_clave: OpenAPI publicable en 07-api/contracts/openapi/document.yaml; storage_key nunca se expone al cliente (solo writeOnly en creación); versiones inmutables (solo GET/POST); reporte con paginación por offset (inventario acotado, no log continuo)
+halts_registrados: ninguno
+-->
+
 # Contrato — document-api
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟢 Aceptado | Última actualización: 2026-08-06
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
+
+> **Fuente de verdad (normativa):** el spec OpenAPI 3.1 en
+> [`07-api/contracts/openapi/document.yaml`](../../../../../07-api/contracts/openapi/document.yaml).
+> Este documento es la **narrativa** que lo explica; ante cualquier diferencia, **manda el
+> `document.yaml`**. Convenciones transversales en
+> [07-api/guidelines.md](../../../../../07-api/guidelines.md).
 
 > **Diseño previsto — no implementado.** Contrato a nivel de protocolo (REST/JSON). Sin
 > código de ningún lenguaje. Las entidades y campos son los reales de [data-model.md](../../data-model.md).
@@ -26,27 +44,56 @@ entidad propietaria.
 
 | Método | Path | Descripción | Roles |
 |--------|------|-------------|-------|
-| `GET` | `/documents` | Listar documentos (paginado), filtrable por `owner_service`, `owner_entity_id`, `domain`, `status` | `*` |
-| `GET` | `/documents/{id}` | Metadatos de un documento | `*` |
-| `GET` | `/documents/{id}/versions` | Historial de versiones (`document_version`) | `*` |
-| `GET` | `/documents/{id}/download-url` | Genera y retorna una URL firmada de la versión vigente | `*` |
+| `GET` | `/documents` | Listar documentos (paginado, offset), filtrable por `owner_service`, `owner_entity_id`, `domain`, `status` | `*` |
+| `POST` | `/documents` | Registra un documento cuyo binario ya fue subido al object storage (metadatos + `storage_key`) | `coordinador`, `admin` |
 | `POST` | `/documents/generate` | Solicita la generación asíncrona de un documento a partir de una plantilla | `coordinador`, `sistema` |
-| `POST` | `/documents` | Registra/carga un documento manualmente (metadatos + binario ya en storage) | `coordinador`, `admin` |
+| `GET` | `/documents/{id}` | Metadatos de un documento | `*` |
+| `PATCH` | `/documents/{id}` | Actualiza `title`/`domain`; requiere `row_version` (bloqueo optimista) | `coordinador`, `admin` |
 | `DELETE` | `/documents/{id}` | Archiva el documento (`status = ARCHIVED`, soft) | `admin` |
+| `GET` | `/documents/{id}/download-url` | Genera y retorna una URL firmada de la versión vigente | `*` |
+| `GET` | `/documents/{id}/versions` | Historial de versiones (`document_version`) | `*` |
+| `POST` | `/documents/{id}/versions` | Sube el binario de una nueva versión (`multipart/form-data`) | `coordinador`, `admin`, `sistema` |
+| `GET` | `/documents/{id}/versions/{version_id}` | Detalle de una versión puntual | `*` |
+| `GET` | `/reports/document-status` | Inventario de documentos por entidad/dominio/estado (paginado, offset) | `coordinador`, `admin` |
+
+Las versiones son **inmutables/append-only** (ver convenciones de modelado en data-model.md):
+no existe `PUT`/`PATCH`/`DELETE` sobre `document_version`.
 
 ## Entidades del contrato
 
 Campos reales de [data-model.md](../../data-model.md):
 
 - `document`: `id`, `template_id?`, `title`, `domain`, `owner_service`, `owner_entity_id`,
-  `storage_key`, `mime_type`, `size_bytes?`, `status`, `created_by`, `created_at`, `updated_at`.
+  `storage_key`, `mime_type`, `size_bytes?`, `status`, `row_version`, `created_by`, `created_at`,
+  `updated_at`.
 - `document_version`: `id`, `document_id`, `version_number`, `storage_key`, `created_by`,
   `created_at`, `notes?`.
+
+`storage_key` es de **solo escritura** en el contrato: se acepta al registrar un documento
+(`POST /documents`) pero **nunca se retorna** en ninguna respuesta; la descarga se resuelve
+siempre vía `GET /documents/{id}/download-url`.
+
+`owner_entity_id` y `created_by` son referencias lógicas cross-service (a `owner_service` y a
+`iam-service` respectivamente): `UUID` sin FK física ni endpoint de join.
 
 **Valores permitidos:**
 
 - `domain`: `SCHEDULE`, `FICHA`, `CERTIFICATE`, `ACTOR`, `REPORT`.
 - `status`: `GENERATING`, `AVAILABLE`, `ARCHIVED`, `EXPIRED`, `GENERATION_FAILED`.
+
+## Carga de nueva versión — `POST /documents/{id}/versions`
+
+`Content-Type: multipart/form-data` (guidelines §1, excepción explícita para document-service).
+Partes:
+
+| Parte | Tipo | Requerido | Descripción |
+|-------|------|-----------|-------------|
+| `file` | binario | Sí | Contenido de la nueva versión. |
+| `notes` | texto | No | Observaciones sobre esta versión. |
+
+El servicio escribe el binario en object storage, crea el `document_version`
+(`version_number` autoincremental) y actualiza `document.storage_key`/`status = AVAILABLE`
+para apuntar a la nueva versión (desnormalización intencional, ver data-model.md).
 
 ## Solicitud de generación — `POST /documents/generate`
 
@@ -97,20 +144,43 @@ La URL firmada se genera solo tras validar el scope del usuario. TTL por defecto
 Nunca se expone `storage_key` al cliente. Requiere `status = AVAILABLE`; en otro caso se
 responde `409 Conflict`.
 
+## Reportes (dominio propio)
+
+`GET /reports/document-status` — inventario de documentos por entidad propietaria, dominio y
+estado (guidelines §11: reportes descentralizados, sin hub central; cada servicio expone y
+responde por los suyos).
+
+| Campo | Valor |
+|-------|-------|
+| Usuarios | Servicios propietarios (SCHEDULE, FICHA, CERTIFICATE, ACTOR, REPORT) vía integración; coordinadores/administradores vía UI |
+| Frecuencia | On-demand |
+| Formato | JSON |
+| Paginación | Offset (`page`/`page_size`); es un inventario acotado, no un log continuo (a diferencia de `login-audit` en iam-service, que sí usa cursor) |
+| Filtros | `domain`, `status`, `owner_service`, `owner_entity_id`, `from`/`to` (rango de `created_at`) |
+| Fuente de datos | `document` (`document_db`) |
+| Mutación | Ninguna — solo lectura |
+
 ## Formato de error estándar
+
+Envelope uniforme de la plataforma (guidelines §7; ver `Error` en
+[`_shared.yaml`](../../../../../07-api/contracts/openapi/_shared.yaml)):
 
 ```json
 {
-  "error_code": "DOCUMENT_NOT_FOUND",
-  "message": "El documento solicitado no existe",
-  "trace_id": "uuid-v4"
+  "error": {
+    "code": "DOCUMENT_NOT_FOUND",
+    "message": "El documento solicitado no existe",
+    "details": [],
+    "trace_id": "b3f1c2a4-...-uuid"
+  }
 }
 ```
 
-| `error_code` | HTTP | Caso |
+| `error.code` | HTTP | Caso |
 |--------------|------|------|
-| `DOCUMENT_NOT_FOUND` | 404 | `id` inexistente |
+| `DOCUMENT_NOT_FOUND` | 404 | `id` (o `version_id`) inexistente |
 | `DOCUMENT_NOT_AVAILABLE` | 409 | Descarga solicitada con `status` ≠ `AVAILABLE` |
+| `ROW_VERSION_MISMATCH` | 409 | `row_version` de `PATCH /documents/{id}` no coincide con el actual |
 | `TEMPLATE_NOT_FOUND` | 422 | `template_code` inválido en la solicitud de generación |
 | `FORBIDDEN` | 403 | El token no tiene scope sobre la entidad propietaria |
 | `UNAUTHORIZED` | 401 | JWT ausente o inválido |
