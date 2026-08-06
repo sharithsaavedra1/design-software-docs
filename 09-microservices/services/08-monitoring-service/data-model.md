@@ -295,3 +295,14 @@ borrado de datos mayores a 1 año se hace por poda de particiones en lugar de DE
 | `CURRICULUM_PROGRESS` | Avance curricular | PERCENTAGE |
 | `DROPOUT_RISK` | Riesgo de deserción | COUNT |
 | `PRODUCTIVE_STAGE_PROGRESS` | Avance etapa productiva | PERCENTAGE |
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+- **`remediation-monitoring-960`:** 5 columnas estaban como **ENUM nativo** (viola ADR-004) →
+  convertidas a `VARCHAR + CHECK` conservando los valores: `alert_type.threshold_unit`,
+  `tracking_session.session_type`, `improvement_plan.status`, `sent_notification.channel`,
+  `sent_notification.send_status` (el índice parcial `idx_sent_notification_pending` se recreó
+  con predicado de texto).
+- **`remediation-monitoring-961`:** `kpi_tracking` se implementa como tabla **particionada por
+  RANGE mensual de `measured_at`** (antes se declaraba particionada en docs sin estarlo). La PK
+  pasa a incluir la clave de partición.

@@ -123,3 +123,11 @@ ALTER TABLE class_session ADD CONSTRAINT ex_session_environment
     tsrange((session_date + start_time),(session_date + end_time)) WITH &&)
   WHERE (status = 'ACTIVE');
 ```
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+El contrato promete **soft delete** (`DELETE` lógico) en `schedule`, `class_session` y
+`time_slot`, pero las tablas no tenían columnas que lo respalden. Se agregan vía changeset
+nuevo `remediation-scheduling-960` (no se modifica ningún changeset corrido):
+`is_active BOOLEAN NOT NULL DEFAULT true`, `deleted_at TIMESTAMPTZ`, `deleted_by UUID` en las
+tres tablas. `scheduling_conflict` no se toca (es de solo lectura, sin `DELETE` en el contrato).

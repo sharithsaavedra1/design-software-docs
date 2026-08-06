@@ -143,11 +143,13 @@ Aprendiz en proceso de formación. La ficha activa y la etapa actual del aprendi
 | `email` | VARCHAR(255) | No | ✓ | |
 | `phone` | VARCHAR(20) | Sí | ✓ | |
 | `birth_date` | DATE | Sí | ✓ | |
-| `enrollment_status` | VARCHAR(12) | No | — | |
-| `enrollment_date` | DATE | No | — | Fecha de vinculación a la ficha |
 | `created_at` | TIMESTAMPTZ | No | — | |
 
-**CHECK**: `document_type IN ('CC','CE','RC','TI')`; `enrollment_status IN ('ACTIVE','DROPOUT','TRANSFERRED','GRADUATED','CANCELLED')`.
+**CHECK**: `document_type IN ('CC','CE','RC','TI')`.
+
+**Nota**: el estado de vinculación (`enrollment_status_id`) y la fecha de vinculación
+(`enrollment_date`) NO viven en `learner` — pertenecen a la inscripción de ficha vigente;
+ver `learner_ficha_enrollment`.
 
 **Retención PII**: datos de `learner` → 5 años después de graduación o desvinculación.
 
@@ -162,6 +164,7 @@ Historial de inscripciones de un aprendiz en fichas de caracterización. Permite
 | `id` | UUID | No | PK |
 | `learner_id` | UUID | No | FK → learner |
 | `ficha_id` | UUID | No | Referencia externa → academic-management-service |
+| `enrollment_status_id` | UUID | No | FK → `actors_parameterization.status` (estado de negocio, parametrizable) |
 | `stage` | VARCHAR(12) | No | Etapa actual del aprendiz en esta ficha |
 | `enrollment_date` | DATE | No | Fecha de inscripción en esta ficha |
 | `completion_date` | DATE | Sí | null = inscripción vigente |
@@ -215,12 +218,12 @@ cuando cumple los requisitos académicos del programa.
 | `actual_end_date` | DATE | Sí | Fecha fin real (null si en curso) |
 | `total_hours_required` | INT | No | Horas requeridas según programa |
 | `total_hours_completed` | INT | No | DEFAULT 0 |
-| `status` | VARCHAR(12) | No | |
-| `interruption_reason` | TEXT | Sí | Solo si status = INTERRUPTED |
+| `status_id` | UUID | No | FK → `actors_parameterization.status` (estado de negocio, parametrizable) |
+| `interruption_reason` | TEXT | Sí | Solo si el status vigente corresponde a INTERRUPTED |
 | `created_at` | TIMESTAMPTZ | No | |
 | `updated_at` | TIMESTAMPTZ | No | |
 
-**CHECK**: `status IN ('ACTIVE','COMPLETED','INTERRUPTED','CANCELLED')`; `total_hours_required >= 0`; `total_hours_completed >= 0`.
+**CHECK**: `total_hours_required >= 0`; `total_hours_completed >= 0`.
 
 ---
 
@@ -265,12 +268,12 @@ de monitoring-service, que es a nivel de ficha.
 | `description` | TEXT | No | Descripción del plan de mejoramiento |
 | `specific_goals` | TEXT | No | Metas específicas y verificables |
 | `due_date` | DATE | No | |
-| `status` | VARCHAR(12) | No | |
+| `status_id` | UUID | No | FK → `actors_parameterization.status` (estado de negocio, parametrizable) |
 | `created_by` | UUID | No | Referencia externa → iam-service |
 | `created_at` | TIMESTAMPTZ | No | |
 | `completed_at` | TIMESTAMPTZ | Sí | |
 
-**CHECK**: `origin IN ('COMPANY_VISIT','PERFORMANCE_REVIEW','TRACKING_SESSION','DISCIPLINARY')`; `status IN ('PENDING','IN_PROGRESS','COMPLETED','CANCELLED')`.
+**CHECK**: `origin IN ('COMPANY_VISIT','PERFORMANCE_REVIEW','TRACKING_SESSION','DISCIPLINARY')`.
 
 **Arco exclusivo (FK polimórfica resuelta)**: el actor se referencia mediante dos FK nullable
 (`instructor_id`, `learner_id`) en vez de un par `actor_type` + `actor_id` sin integridad

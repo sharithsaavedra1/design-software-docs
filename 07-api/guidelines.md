@@ -1,6 +1,6 @@
 # Convenciones de Diseño de API REST
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-06
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 Convenciones REST que **regirán** las APIs de los servicios de **Horarios SENA**.
@@ -117,3 +117,14 @@ Cuerpo de error uniforme en toda la plataforma (alineado con los `error_code` de
 - **Correlación**: propagar `trace_id` entre servicios y hacia eventos/auditoría.
 - **Rate limiting**: respuesta `429` con `Retry-After`; límites por identidad, no por IP.
 - **Compatibilidad**: nunca romper un contrato publicado sin subir versión mayor.
+
+## 11. Reportes
+
+- **Descentralizados:** cada servicio **expone y responde por sus propios reportes**. **No hay hub central**; `monitoring-service` sólo publica los KPIs/indicadores de **su** dominio, no los de otros servicios.
+- Endpoint de lectura dentro del propio servicio: `GET /api/v1/reports/<nombre-kebab>` (p. ej. `GET /api/v1/reports/schedule-conflicts`). Nunca mutan estado.
+- Filtros por query params (rango de fechas `from`/`to`, ids de entidad, `status`), con las mismas reglas de la sección 6.
+- Cada reporte declara su **inventario** en el `contract.md` del servicio: quién lo usa, frecuencia, formato de salida (JSON por defecto; `202 Accepted` + `document-service` para PDF/exports pesados) y su **fuente de datos** (tablas del repo `*-db`).
+
+## 12. Resumen ejecutivo en contratos
+
+- Todo `contract.md` inicia con un bloque `<!-- RESUMEN-EJECUTIVO … -->` de **≤15 líneas**: `agente`, `capacidad`, `fase`, `estado` (`draft|review|accepted`), `dependencias_entrada`, `consumidores_siguientes`, `tldr`, `decisiones_clave`, `halts_registrados`. Permite que un consumidor (o agente) lea ~300 tokens en vez del archivo completo.

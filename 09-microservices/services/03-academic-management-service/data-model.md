@@ -173,3 +173,11 @@ Estado inicial: `INDUCTION`. Transiciones válidas:
 | `enrollment_ficha` | `status` | B-Tree | Filtro por estado activo (frecuente) |
 | `enrollment_ficha` | `training_center_id` | B-Tree | Fichas activas por centro |
 | `enrollment_ficha` | `(training_center_id, status)` | B-Tree | Consultas de dashboard por centro y estado |
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+El CHECK de `enrollment_ficha.status` ya estaba documentado pero **faltaba en el DDL real**
+(la columna aceptaba cualquier string). Se implementa vía changeset nuevo
+`remediation-academic-960` (no se modifica ningún changeset corrido):
+`CHECK (status IN ('INDUCTION','EXECUTION','PRODUCTIVE_STAGE','COMPLETED','CANCELLED'))`.
+Además, el contrato se ajustó en R1 a `max_capacity ≥ 1` (calzar con el `CHECK max_capacity > 0` real).
