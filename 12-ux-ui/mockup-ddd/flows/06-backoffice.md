@@ -83,6 +83,9 @@ exponer nunca la ruta interna de almacenamiento.
   icono+texto: `GENERATING` neutro/spinner, `AVAILABLE` éxito, `ARCHIVED` neutro, `EXPIRED`
   advertencia, `GENERATION_FAILED` crítico), Actualizado (`updated_at`). Fila con acciones: **Ver
   detalle**, **Descargar** (deshabilitado si `status ≠ AVAILABLE`), **Archivar**.
+- **Paginación** (al pie de la tabla, REAL y visible): barra ‹ anterior · 1 2 3 … › siguiente,
+  selector de tamaño de página (`page_size`: 10/20/50) y texto **"Mostrando X–Y de N"**, alineados
+  a los parámetros `page`/`page_size`/`sort` de `GET /documents`.
 - **Panel de detalle** (lateral, al seleccionar fila): metadatos del documento + sección
   **Versiones** (tabla `version_number`, `created_by`, `created_at`, `notes`) + botón **Descargar
   versión vigente**.
@@ -115,12 +118,24 @@ campo de texto "Entidad propietaria (UUID)") y un botón primario "Generar docum
 Debajo, una tabla densa con columnas Título, Dominio, Servicio propietario, Estado (con badges de
 color + icono + texto: verde "Disponible", gris "Generando" con spinner, gris "Archivado", ámbar
 "Expirado", rojo "Error de generación") y Actualizado, con acciones por fila (ver, descargar,
-archivar) y paginación al pie. Un panel lateral derecho de detalle muestra metadatos del documento
+archivar) y al pie una **barra de paginación real y visible** (‹ anterior · 1 2 3 … › siguiente),
+un **selector de tamaño de página** (10/20/50) y el texto **"Mostrando X–Y de N"**. Un panel
+lateral derecho de detalle muestra metadatos del documento
 seleccionado y una lista de versiones con fecha y autor, y un botón "Descargar versión vigente".
 Incluir un modal de "Generar documento" con select de plantilla, select de dominio, campos de
 texto y un textarea de datos JSON opcional. Mostrar también el estado vacío ("No hay documentos
 que coincidan con los filtros") y el estado de carga (skeleton de filas). Estilo institucional
 sobrio, verde SENA (placeholder), alto contraste WCAG AA, navegable por teclado, responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -151,6 +166,9 @@ documentos, y validar su renderizado antes de publicarla.
   plantilla**.
 - **Tabla:** columnas Código, Nombre, Tipo de salida, Versión, Activa (badge sí/no). Acciones:
   **Editar**, **Desactivar**.
+- **Paginación** (al pie de la tabla, REAL y visible): barra ‹ anterior · 1 2 3 … › siguiente,
+  selector de tamaño de página (`page_size`: 10/20/50) y texto **"Mostrando X–Y de N"**, alineados
+  a la paginación de `GET /document-templates`.
 - **Editor de plantilla** (pantalla/panel completo): campo **Código** (bloqueado si ya existe),
   campo **Nombre**, select **Tipo de salida**, editor de texto/código **Cuerpo de la plantilla**
   (HTML/Handlebars), toggle **Activa**, botón **Guardar** y botón secundario **Previsualizar**.
@@ -176,13 +194,25 @@ Pantalla "Plantillas de documento" del área de soporte back-office SENA — Ges
 español, dentro del app shell (nav lateral con ítem activo "Soporte > Plantillas"). Vista de lista:
 filtros (select "Tipo de salida" con PDF/Excel/Word, campo "Código", interruptor "Activa") y botón
 primario "Nueva plantilla". Tabla con columnas Código, Nombre, Tipo de salida, Versión, Activa
-(badge). Vista de editor (pantalla completa o panel ancho): campo "Código" bloqueado en modo
+(badge), con al pie una **barra de paginación real y visible** (‹ anterior · 1 2 3 … › siguiente),
+un **selector de tamaño de página** (10/20/50) y el texto **"Mostrando X–Y de N"**. Vista de editor
+(pantalla completa o panel ancho): campo "Código" bloqueado en modo
 edición, campo "Nombre", select "Tipo de salida", un editor de código grande para el cuerpo
 HTML/Handlebars de la plantilla, interruptor "Activa", botón primario "Guardar" y botón secundario
 "Previsualizar". Modal de previsualización con un editor JSON de datos de muestra a la izquierda y
 el HTML renderizado a la derecha, con una lista de "placeholders sin valor" en un aviso ámbar con
 icono de advertencia. Estilo institucional sobrio, alto contraste WCAG AA, tipografía monoespaciada
 para el código, responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -215,10 +245,13 @@ append-only por `audit-worker`.
   `scheduling.class_session.created`), select **Servicio origen** (`source_service`), rango de
   fechas **Desde/Hasta** (sobre `received_at`). Sin botón de creación/edición: pantalla 100 %
   solo-lectura. Botón **Exportar** (`AUDIT_EXPORT`).
-- **Tabla** (paginada, orden descendente por `received_at`): columnas Recibido (`received_at`),
-  Ocurrido en origen (`event_occurred_at`), Evento (`event_type`), Servicio origen
+- **Tabla** (paginada por **cursor**, orden descendente por `received_at`): columnas Recibido
+  (`received_at`), Ocurrido en origen (`event_occurred_at`), Evento (`event_type`), Servicio origen
   (`source_service`), Actor (`actor_id`; "Sistema" si null), Entidad (`entity_type` + `entity_id`).
   Acción por fila: **Ver payload**.
+- **Paginación por CURSOR** (al pie de la tabla — `audit_record` es una colección append-only
+  grande, no usa `page`/`page_size`): barra **"Cargar más / Siguiente"** que avanza con
+  `cursor`/`limit` (sin números de página absolutos) y texto **"Mostrando X de N aprox."**.
 - **Panel/modal "Ver payload":** JSON completo de `payload` en visor de solo lectura (JSON
   formateado/colapsable), más `event_id` para soporte de trazabilidad cruzada.
 - **Nota de retención/partición** (visible como texto de ayuda al pie de la tabla): "Registro
@@ -245,11 +278,23 @@ evento" (ej. scheduling.class_session.created), select "Servicio origen", dos se
 "Desde" / "Hasta", y un botón secundario "Exportar" a la derecha. Tabla densa de solo lectura con
 columnas Recibido, Ocurrido en origen, Evento, Servicio origen, Actor (o "Sistema" si no aplica),
 Entidad, y una acción "Ver payload" por fila que abre un panel con JSON formateado y colapsable.
-Al pie de la tabla, una nota de ayuda en texto pequeño: "Registro append-only · retención mínima
+Al pie de la tabla, una **barra de paginación por cursor** con un botón "Cargar más / Siguiente"
+(sin números de página absolutos, avanza con `cursor`/`limit`) y el texto **"Mostrando X de N
+aprox."**, seguida de una nota de ayuda en texto pequeño: "Registro append-only · retención mínima
 7 años · particionado mensual · datos de más de 2 años se archivan en frío". Mostrar el estado
 vacío ("No hay eventos que coincidan con los filtros") y el estado de carga (skeleton de filas).
 Estilo institucional sobrio, alto contraste WCAG AA, tabla con scroll horizontal en móvil,
 responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -293,13 +338,19 @@ parámetros globales del sistema, sin hardcodear listas en el frontend.
 
 **Layout:** dos pestañas.
 - **Pestaña "Catálogos":** panel maestro-detalle. Izquierda: tabla de catálogos (Código, Nombre,
-  Activo) con filtros `code`/`is_active` y botón **Nuevo catálogo**. Al seleccionar un catálogo,
-  a la derecha: cabecera con `name`/`description` editable + tabla de sus valores
-  (`catalog_detail`: Código, Etiqueta, Orden, Activo) con filtros `code`/`is_active`, botón
-  **Agregar valor**, y acciones por fila **Editar**/**Desactivar**.
+  Activo) con filtros `code`/`is_active` y botón **Nuevo catálogo**, con **paginación REAL visible**
+  al pie (‹ anterior · 1 2 3 … › siguiente, selector `page_size`: 10/20/50, "Mostrando X–Y de N"),
+  alineada a `GET /catalogs`. Al seleccionar un catálogo, a la derecha: cabecera con
+  `name`/`description` editable + tabla de sus valores (`catalog_detail`: Código, Etiqueta, Orden,
+  Activo) con filtros `code`/`is_active`, botón **Agregar valor**, acciones por fila
+  **Editar**/**Desactivar**, y su propia **paginación REAL visible** al pie (misma barra
+  ‹anterior·1 2 3…›siguiente + `page_size` + "Mostrando X–Y de N"), alineada a
+  `GET /catalogs/{catalog_id}/details`.
 - **Pestaña "Parámetros del sistema":** tabla (Clave, Valor, Tipo, Descripción) con filtros
   `key`/`value_type`, botón **Nuevo parámetro**, acción por fila **Editar** (abre modal con
-  `value` tipado según `value_type`; sin acción de eliminar, solo "Actualizar valor").
+  `value` tipado según `value_type`; sin acción de eliminar, solo "Actualizar valor"), y
+  **paginación REAL visible** al pie (‹ anterior · 1 2 3 … › siguiente, selector `page_size`:
+  10/20/50, "Mostrando X–Y de N"), alineada a `GET /parameters`.
 - **Aviso de permisos:** si el usuario no tiene `REF_CATALOG_MANAGE`/`REF_PARAMETER_MANAGE`, la
   pantalla se muestra en modo solo-lectura (sin botones de creación/edición), conforme a RN-REF-03.
 
@@ -326,15 +377,28 @@ Pantalla "Parametrización / catálogos" del área de soporte back-office SENA �
 en español, dentro del app shell (nav lateral con ítem activo "Soporte > Parametrización"). Dos
 pestañas superiores: "Catálogos" y "Parámetros del sistema". Pestaña Catálogos activa: layout
 maestro-detalle de dos columnas; columna izquierda angosta con una lista de catálogos (código y
-nombre) con un filtro y botón "Nuevo catálogo"; columna derecha ancha con el catálogo seleccionado
-mostrando nombre y descripción editables arriba, y debajo una tabla de sus valores con columnas
-Código, Etiqueta, Orden, Activo, botón "Agregar valor" y acciones editar/desactivar por fila.
+nombre) con un filtro, botón "Nuevo catálogo" y, al pie, una barra de paginación real y visible
+(‹ anterior · 1 2 3 … › siguiente, selector de tamaño de página, "Mostrando X–Y de N"); columna
+derecha ancha con el catálogo seleccionado mostrando nombre y descripción editables arriba, y
+debajo una tabla de sus valores con columnas Código, Etiqueta, Orden, Activo, botón "Agregar
+valor", acciones editar/desactivar por fila, y su propia barra de paginación real al pie.
 Pestaña Parámetros del sistema (mostrar como vista secundaria): tabla con columnas Clave, Valor,
-Tipo (integer/string/boolean/json), Descripción, botón "Nuevo parámetro" y acción "Editar" por
-fila. Incluir un banner superior opcional de "Modo solo lectura" para el estado sin permisos de
-edición. Mostrar estado vacío ("Este catálogo aún no tiene valores") y estado de carga (skeleton).
-Estilo institucional sobrio, verde SENA (placeholder), alto contraste WCAG AA, objetivos táctiles
-≥44px, responsive.
+Tipo (integer/string/boolean/json), Descripción, botón "Nuevo parámetro", acción "Editar" por
+fila, y al pie una barra de paginación real y visible (‹ anterior · 1 2 3 … › siguiente, selector
+de tamaño de página, "Mostrando X–Y de N"). Incluir un banner superior opcional de "Modo solo
+lectura" para el estado sin permisos de edición. Mostrar estado vacío ("Este catálogo aún no tiene
+valores") y estado de carga (skeleton). Estilo institucional sobrio, verde SENA (placeholder),
+alto contraste WCAG AA, objetivos táctiles ≥44px, responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
