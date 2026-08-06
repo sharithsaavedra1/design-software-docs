@@ -112,3 +112,27 @@ halts_registrados: ninguno
 > El guard exacto por endpoint usa `x-required-feature` (RBAC feature+scope de iam). La UI **oculta**
 > lo no permitido (no "controles deshabilitados escondidos", conforme al design-system §1). El acceso
 > directo por URL a un área no permitida → **403** ([Estados globales](flows/01-auth.md)).
+
+## Convención de build (ruta → archivo del prototipo)
+
+> Para que la generación del mockup cablee la navegación sin placeholders. El prototipo estático vive
+> en `mockups/app/<carpeta-por-rol-o-MFE>/<archivo>.html`. **Regla:** TODO enlace de navegación
+> apunta a un archivo real; **prohibido `href="#"`** para navegación (solo válido en toggles JS).
+> Los **modales** no son archivos: se abren en su página padre (`data-toggle="modal"`).
+
+| Ruta | Archivo del prototipo |
+|---|---|
+| `/login`, `/forgot-password`, `/reset-password` | `iam/login.html`, `iam/forgot-password.html`, `iam/reset-password.html` |
+| 403/404/500/sesión | `global/error-states.html` |
+| `/` (Coordinador) | `coordinator/dashboard.html` |
+| `/horarios` · `/horarios/nuevo`·`:id` · `:id/conflictos` | `coordinator/schedules-list.html` · `schedule-edit.html` / `schedule-detail.html` · `conflicts.html` |
+| `/disponibilidad` · `/ambientes/:id` | `coordinator/availability.html` · `environment-detail.html` |
+| `/fichas` · `/fichas/:id` | `coordinator/fichas-list.html` · `ficha-detail.html` |
+| `/instructor/mi-horario` · `/mi-disponibilidad` · `/seguimiento` | `instructor/my-schedule.html` · `my-availability.html` · `tracking.html` |
+| `/mi-horario` · `/sesiones/:id` · `/notificaciones` · `/:id` | `learner/my-schedule.html` · `session-detail.html` · `notifications.html` · `notification-detail.html` |
+| `/admin/indicadores` · `/:ft/:kpi` · `/usuarios` · `/:id` · `/datos-referencia` | `admin/kpi-dashboard.html` · `kpi-detail.html` · `users-list.html` · `user-detail.html` · `reference-data.html` |
+| `/backoffice/documentos` · `/:id` · `/plantillas` · `/:id/editar` · `/auditoria` · `/parametrizacion` | `backoffice/documents.html` · `document-detail.html` · `templates.html` · `template-editor.html` · `audit.html` · `parametrization.html` |
+
+**Modales (se abren en su página, sin ruta/archivo):** agregar/editar sesión, confirmar publicación,
+resolver conflicto (coordinator); crear excepción, registrar seguimiento (instructor); crear/editar
+usuario, asignar rol (admin); generar documento, detalle de auditoría, CRUD catálogos (back-office).

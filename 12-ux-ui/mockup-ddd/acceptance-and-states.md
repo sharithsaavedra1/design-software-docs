@@ -54,6 +54,10 @@ Una pantalla del mockup se marca **✅ aceptada** cuando cumple TODO:
 - [ ] **Responsive:** variante móvil (~390px) y escritorio (~1440px); tabla→tarjetas en móvil.
 - [ ] **Contrato de entrega:** el prompt produjo un **ZIP** con PNG desktop + móvil **+ HTML/CSS/JS
       iterativo y funcional** que abre en el navegador ([README §contrato de entrega](README.md)).
+- [ ] **Navegación cableada (sin enlaces muertos):** todo enlace de navegación apunta a un archivo
+      real (según [sitemap §convención de build](sitemap.md)); **prohibido `href="#"`** para navegar
+      (solo válido en toggles JS). Los modales se abren con `data-toggle`, no con enlaces muertos.
+      Cada pantalla es **alcanzable** desde el índice y desde la nav de su rol.
 - [ ] **Trazabilidad:** la pantalla declara `HU → endpoint → tabla → MFE` en su header.
 
 ## C. Estado de aceptación
