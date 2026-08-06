@@ -48,6 +48,16 @@ con icono para mostrar/ocultar, un enlace "¿Olvidó su contraseña?" y un botó
 Debajo, un banner de error de ejemplo con icono de alerta y texto "Correo o contraseña incorrectos"
 (color crítico + icono, no solo color). Estilo sobrio, alto contraste WCAG AA, esquinas suaves,
 tipografía sans-serif. Mostrar también el estado de carga (botón con spinner). Responsive (móvil y escritorio).
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -70,6 +80,16 @@ centrada con título "Recuperar contraseña", un párrafo breve explicativo, un 
 primario "Enviar enlace" y un enlace secundario "Volver a ingresar". Mostrar el estado de éxito como un
 mensaje neutro: "Si el correo existe, enviaremos instrucciones para restablecer la contraseña". Estilo
 institucional, alto contraste WCAG AA, sobrio. Responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -91,6 +111,16 @@ con título "Definir nueva contraseña", campo "Nueva contraseña" (con medidor 
 "Confirmar contraseña", texto de requisitos (mínimo 8 caracteres) y botón "Guardar". Incluir el estado
 de error "El enlace expiró o ya fue usado" con un botón "Solicitar uno nuevo". Estilo institucional,
 alto contraste WCAG AA. Responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -126,6 +156,16 @@ principal a la derecha con un encabezado de página y espacio para tablas/tarjet
 sutil de "Sin conexión — mostrando datos guardados" para el estado offline. Estilo sobrio, verde
 institucional (placeholder), alto contraste WCAG AA, navegable por teclado. Mostrar variante móvil con
 nav lateral como menú hamburguesa.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
