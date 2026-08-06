@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios - Coordinador - SENA</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        :root {
+            --color-brand: #007832;
+            --color-bg: #FFFFFF;
+            --color-surface: #FFFFFF;
+            --color-surface-muted: #F2F4F7;
+            --color-text: #101828;
+            --color-text-muted: #475467;
+            --color-border: #EAECF0;
+            --color-danger: #B42318;
+            --color-danger-surface: #FEF3F2;
+            --color-warning: #93370D;
+            --color-warning-surface: #FFFAEB;
+            --color-success: #067647;
+            --color-success-surface: #ECFDF3;
+            --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(16,24,40,.06);
+            --shadow-md: 0 4px 8px rgba(16,24,40,.08);
+        }
+        
+        body { margin: 0; font-family: var(--font-family); background-color: var(--color-surface-muted); color: var(--color-text); display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 250px; background-color: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 16px; border-bottom: 1px solid var(--color-border); font-weight: 600; color: var(--color-brand); display: flex; align-items: center; gap: 8px; font-size: 18px; }
+        .sidebar-nav { padding: 16px 0; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: var(--color-text-muted); text-decoration: none; font-weight: 500; transition: background-color 0.2s; }
+        .nav-item:hover { background-color: var(--color-surface-muted); }
+        .nav-item.active { background-color: var(--color-success-surface); color: var(--color-success); border-right: 3px solid var(--color-brand); }
+        
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { height: 64px; background-color: var(--color-surface); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+        .topbar-left { display: flex; align-items: center; gap: 16px; font-weight: 600; color: var(--color-text); }
+        .topbar-right { display: flex; align-items: center; gap: 24px; }
+        .user-menu { display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 14px; cursor: pointer; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--color-brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .notification-btn { position: relative; background: none; border: none; cursor: pointer; color: var(--color-text-muted); padding: 4px; display: flex; align-items: center; }
+        .badge { position: absolute; top: 0; right: 0; background-color: var(--color-danger); color: white; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 10px; transform: translate(30%, -25%); border: 2px solid var(--color-surface); }
+        
+        .content-area { flex: 1; overflow-y: auto; padding: 32px; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { margin: 0; font-size: 24px; font-weight: 600; color: var(--color-text); }
+        
+        .btn-primary { background-color: var(--color-brand); color: white; border: none; padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 14px; }
+        .btn-primary:hover { background-color: var(--color-success); }
+        
+        .filters-bar { background-color: var(--color-surface); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--color-border); margin-bottom: 24px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; box-shadow: var(--shadow-sm); }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+        .filter-label { font-size: 13px; font-weight: 500; color: var(--color-text-muted); }
+        .filter-input { padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: var(--font-family); font-size: 14px; color: var(--color-text); background-color: var(--color-surface); outline: none; }
+        .filter-input:focus { border-color: var(--color-brand); box-shadow: 0 0 0 2px rgba(0, 120, 50, 0.2); }
+        select.filter-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23475467%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 10px auto; padding-right: 30px; }
+        
+        .table-container { background-color: var(--color-surface); border: 1px solid var(--color-border); border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); overflow-x: auto; box-shadow: var(--shadow-sm); }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th, td { padding: 12px 24px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 14px; }
+        th { background-color: var(--color-surface-muted); color: var(--color-text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .status-draft { background-color: var(--color-surface-muted); color: var(--color-text-muted); }
+        .status-review { background-color: var(--color-warning-surface); color: var(--color-warning); }
+        .status-published { background-color: var(--color-success-surface); color: var(--color-success); }
+        .status-archived { background-color: var(--color-surface-muted); color: var(--color-text-muted); }
+        
+        .conflict-alert-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 4px; background-color: var(--color-danger-surface); color: var(--color-danger); font-size: 11px; font-weight: 600; margin-left: 8px; border: 1px solid rgba(180,35,24,0.1); }
+        
+        .action-link { color: var(--color-brand); text-decoration: none; font-weight: 500; }
+        .action-link:hover { text-decoration: underline; }
+        
+        .pagination-bar { background-color: var(--color-surface); padding: 16px 24px; border: 1px solid var(--color-border); border-top: none; border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--color-text-muted); box-shadow: var(--shadow-sm); }
+        .pagination-controls { display: flex; align-items: center; gap: 4px; }
+        .page-btn { background: none; border: none; padding: 6px 10px; cursor: pointer; color: var(--color-text-muted); border-radius: 4px; font-family: var(--font-family); font-size: 14px; display: flex; align-items: center; gap: 4px; }
+        .page-btn:hover:not(:disabled) { background-color: var(--color-surface-muted); }
+        .page-btn.active { background-color: var(--color-surface-muted); font-weight: 600; color: var(--color-text); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-size-selector { display: flex; align-items: center; gap: 8px; }
+        .page-size-selector select { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: inherit; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            SENA
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Inicio
+            </a>
+            <a href="schedules-list.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Horarios
+            </a>
+            <a href="availability.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Disponibilidad
+            </a>
+            <a href="fichas-list.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                Fichas
+            </a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="topbar-left">
+                SENA — Gestión de Horarios
+            </div>
+            <div class="topbar-right">
+                <button class="notification-btn" aria-label="Notificaciones">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span class="badge">3</span>
+                </button>
+                <div class="user-menu">
+                    <div class="user-avatar">MG</div>
+                    <span>María García — Coordinador</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div class="page-header">
+                <h1 class="page-title">Horarios</h1>
+                <a href="schedule-edit.html" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Nuevo horario
+                </a>
+            </div>
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label class="filter-label">Ficha</label>
+                    <select class="filter-input">
+                        <option value="">Buscar ficha...</option>
+                        <option value="2589341">2589341</option>
+                        <option value="2601873">2601873</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Período</label>
+                    <input type="text" class="filter-input" placeholder="2026-1">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Estado</label>
+                    <select class="filter-input">
+                        <option value="">Todos</option>
+                        <option value="draft">Borrador</option>
+                        <option value="review">En revisión</option>
+                        <option value="published">Publicado</option>
+                        <option value="archived">Archivado</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Desde</label>
+                    <input type="date" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Hasta</label>
+                    <input type="date" class="filter-input">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ficha</th>
+                            <th>Período</th>
+                            <th>Nombre</th>
+                            <th>Estado</th>
+                            <th>Publicado el</th>
+                            <th>Última actualización</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2589341</td>
+                            <td>2026-1</td>
+                            <td>Horario ADSO mañana</td>
+                            <td>
+                                <span class="status-badge status-draft">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+                                    BORRADOR
+                                </span>
+                            </td>
+                            <td>—</td>
+                            <td>06 ago 2026</td>
+                            <td><a href="schedule-edit.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2601873</td>
+                            <td>2026-1</td>
+                            <td>Horario Contabilidad tarde</td>
+                            <td>
+                                <span class="status-badge status-review">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    EN REVISIÓN
+                                </span>
+                                <span class="conflict-alert-badge">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                    2 conflictos
+                                </span>
+                            </td>
+                            <td>—</td>
+                            <td>05 ago 2026</td>
+                            <td><a href="schedule-edit.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2614027</td>
+                            <td>2026-1</td>
+                            <td>Horario Mecatrónica completa</td>
+                            <td>
+                                <span class="status-badge status-draft">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+                                    BORRADOR
+                                </span>
+                            </td>
+                            <td>—</td>
+                            <td>05 ago 2026</td>
+                            <td><a href="schedule-edit.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2498712</td>
+                            <td>2025-2</td>
+                            <td>Horario Salud Ocupacional</td>
+                            <td>
+                                <span class="status-badge status-published">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    PUBLICADO
+                                </span>
+                            </td>
+                            <td>15 jul 2026</td>
+                            <td>15 jul 2026</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2487234</td>
+                            <td>2025-2</td>
+                            <td>Horario Electrónica mañana</td>
+                            <td>
+                                <span class="status-badge status-published">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    PUBLICADO
+                                </span>
+                            </td>
+                            <td>10 jul 2026</td>
+                            <td>10 jul 2026</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2476891</td>
+                            <td>2025-2</td>
+                            <td>Horario Gastronomía tarde</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>01 mar 2026</td>
+                            <td>01 mar 2026</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2465102</td>
+                            <td>2025-2</td>
+                            <td>Horario Sistemas tarde</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>15 feb 2026</td>
+                            <td>15 feb 2026</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2458921</td>
+                            <td>2025-1</td>
+                            <td>Horario Logística mañana</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>10 nov 2025</td>
+                            <td>10 nov 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2443098</td>
+                            <td>2025-1</td>
+                            <td>Horario Diseño Gráfico tarde</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>05 nov 2025</td>
+                            <td>05 nov 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2431287</td>
+                            <td>2025-1</td>
+                            <td>Horario Gestión Empresarial noche</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>01 nov 2025</td>
+                            <td>01 nov 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2428765</td>
+                            <td>2024-2</td>
+                            <td>Horario Animación 3D completa</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>20 jul 2025</td>
+                            <td>20 jul 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2419876</td>
+                            <td>2024-2</td>
+                            <td>Horario Producción Multimedia</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>15 jul 2025</td>
+                            <td>15 jul 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2408765</td>
+                            <td>2024-2</td>
+                            <td>Horario Enfermería mañana</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>10 jul 2025</td>
+                            <td>10 jul 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2397654</td>
+                            <td>2024-1</td>
+                            <td>Horario Construcción tarde</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>05 feb 2025</td>
+                            <td>05 feb 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2386543</td>
+                            <td>2024-1</td>
+                            <td>Horario Soldadura noche</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>01 feb 2025</td>
+                            <td>01 feb 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2375432</td>
+                            <td>2024-1</td>
+                            <td>Horario Topografía completa</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>25 ene 2025</td>
+                            <td>25 ene 2025</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2364321</td>
+                            <td>2023-2</td>
+                            <td>Horario Recursos Humanos mañana</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>15 jul 2024</td>
+                            <td>15 jul 2024</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2353210</td>
+                            <td>2023-2</td>
+                            <td>Horario Finanzas tarde</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>10 jul 2024</td>
+                            <td>10 jul 2024</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2342109</td>
+                            <td>2023-2</td>
+                            <td>Horario Deportes completa</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>05 jul 2024</td>
+                            <td>05 jul 2024</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                        <tr>
+                            <td>2331098</td>
+                            <td>2023-1</td>
+                            <td>Horario Turismo mañana</td>
+                            <td>
+                                <span class="status-badge status-archived">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    ARCHIVADO
+                                </span>
+                            </td>
+                            <td>15 feb 2024</td>
+                            <td>15 feb 2024</td>
+                            <td><a href="schedule-detail.html" class="action-link">Ver</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination-bar">
+                <div>Mostrando 1–20 de 87</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        anterior
+                    </button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">
+                        siguiente
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+                <div class="page-size-selector">
+                    <span>Filas por página:</span>
+                    <select>
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>

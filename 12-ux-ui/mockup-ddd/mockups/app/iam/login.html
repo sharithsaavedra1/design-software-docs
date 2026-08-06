@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar - SENA Gestión de Horarios</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        body {
+            background-color: var(--color-surface-muted, #F2F4F7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            font-family: var(--font-family, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-brand, #007832);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        .brand svg {
+            width: 32px;
+            height: 32px;
+        }
+        .card {
+            background: var(--color-surface, #FFFFFF);
+            padding: 2rem;
+            border-radius: var(--radius-lg, 16px);
+            box-shadow: var(--shadow-md, 0 4px 8px rgba(16,24,40,.08));
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--color-text, #101828);
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text, #101828);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        .input-group {
+            position: relative;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border, #EAECF0);
+            border-radius: var(--radius-sm, 6px);
+            font-size: 1rem;
+            box-sizing: border-box;
+            color: var(--color-text, #101828);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--color-brand, #007832);
+            box-shadow: 0 0 0 3px rgba(0, 120, 50, 0.1);
+        }
+        input:disabled {
+            background-color: var(--color-surface-muted, #F2F4F7);
+            color: var(--color-text-muted, #475467);
+            cursor: not-allowed;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-text-muted, #475467);
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toggle-password:hover {
+            color: var(--color-text, #101828);
+        }
+        .links {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+            margin-top: -0.5rem;
+        }
+        a {
+            color: var(--color-brand, #007832);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--color-brand, #007832);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm, 6px);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+        .btn-primary:hover {
+            background-color: #00632a;
+        }
+        .btn-primary:disabled {
+            background-color: #a3cbb5;
+            cursor: not-allowed;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .alert {
+            background-color: var(--color-danger-surface, #FEF3F2);
+            border-left: 4px solid var(--color-danger, #B42318);
+            padding: 1rem;
+            border-radius: var(--radius-sm, 6px);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .alert-icon {
+            color: var(--color-danger, #B42318);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .alert-text {
+            color: var(--color-danger, #B42318);
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        .footer-note {
+            margin-top: 2rem;
+            color: var(--color-text-muted, #475467);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        SENA — Gestión de Horarios
+    </div>
+
+    <div class="card">
+        <h1>Ingresar</h1>
+        
+        <div id="error-banner" class="alert" style="display: none;" role="alert">
+            <div class="alert-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <div class="alert-text">Correo o contraseña incorrectos</div>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" placeholder="nombre@correo.com" required aria-required="true">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="••••••••" required aria-required="true">
+                    <button type="button" class="toggle-password" id="toggle-pwd" aria-label="Mostrar contraseña">
+                        <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="links">
+                <a href="forgot-password.html">¿Olvidó su contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submit-btn">
+                <span class="btn-text">Ingresar</span>
+                <svg class="spinner" id="btn-spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <div class="footer-note">
+        Servicio Nacional de Aprendizaje — Colombia
+    </div>
+
+    <script>
+        const pwdInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('toggle-pwd');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        toggleBtn.addEventListener('click', () => {
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+                toggleBtn.setAttribute('aria-label', 'Ocultar contraseña');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+                toggleBtn.setAttribute('aria-label', 'Mostrar contraseña');
+            }
+        });
+
+        const form = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const errorBanner = document.getElementById('error-banner');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            errorBanner.style.display = 'none';
+            
+            emailInput.disabled = true;
+            pwdInput.disabled = true;
+            submitBtn.disabled = true;
+            btnText.textContent = 'Ingresando...';
+            btnSpinner.style.display = 'block';
+
+            setTimeout(() => {
+                // Demo: no hay backend real, todo login válido aterriza en el dashboard
+                // del Coordinador (aterrizaje demo por rol, ver flows/01-auth.md P1).
+                window.location.href = '../coordinator/dashboard.html';
+            }, 800);
+        });
+    </script>
+</body>
+</html>

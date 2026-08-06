@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Coordinador - SENA</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        :root {
+            --color-brand: #007832;
+            --color-bg: #FFFFFF;
+            --color-surface: #FFFFFF;
+            --color-surface-muted: #F2F4F7;
+            --color-text: #101828;
+            --color-text-muted: #475467;
+            --color-border: #EAECF0;
+            --color-danger: #B42318;
+            --color-danger-surface: #FEF3F2;
+            --color-warning: #93370D;
+            --color-warning-surface: #FFFAEB;
+            --color-success: #067647;
+            --color-success-surface: #ECFDF3;
+            --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(16,24,40,.06);
+            --shadow-md: 0 4px 8px rgba(16,24,40,.08);
+        }
+        
+        body { margin: 0; font-family: var(--font-family); background-color: var(--color-surface-muted); color: var(--color-text); display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 250px; background-color: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 16px; border-bottom: 1px solid var(--color-border); font-weight: 600; color: var(--color-brand); display: flex; align-items: center; gap: 8px; font-size: 18px; }
+        .sidebar-nav { padding: 16px 0; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px; color: var(--color-text-muted); text-decoration: none; font-weight: 500; transition: background-color 0.2s; }
+        .nav-item:hover { background-color: var(--color-surface-muted); }
+        .nav-item.active { background-color: var(--color-success-surface); color: var(--color-success); border-right: 3px solid var(--color-brand); }
+        
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { height: 64px; background-color: var(--color-surface); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+        .topbar-left { display: flex; align-items: center; gap: 16px; font-weight: 600; color: var(--color-text); }
+        .topbar-right { display: flex; align-items: center; gap: 24px; }
+        .user-menu { display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 14px; cursor: pointer; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--color-brand); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .notification-btn { position: relative; background: none; border: none; cursor: pointer; color: var(--color-text-muted); padding: 4px; display: flex; align-items: center; }
+        .badge { position: absolute; top: 0; right: 0; background-color: var(--color-danger); color: white; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 10px; transform: translate(30%, -25%); border: 2px solid var(--color-surface); }
+        
+        .content-area { flex: 1; overflow-y: auto; padding: 32px; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { margin: 0 0 4px 0; font-size: 24px; font-weight: 600; color: var(--color-text); }
+        .page-subtitle { margin: 0; color: var(--color-text-muted); font-size: 14px; }
+        
+        .btn-primary { background-color: var(--color-brand); color: white; border: none; padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 14px; }
+        .btn-primary:hover { background-color: var(--color-success); }
+        
+        .conflicts-section { background-color: var(--color-surface); border: 1px solid var(--color-danger); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+        .conflicts-banner { background-color: var(--color-danger-surface); color: var(--color-danger); padding: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--color-border); }
+        .conflicts-list { list-style: none; margin: 0; padding: 0; }
+        .conflict-item { padding: 16px; border-bottom: 1px solid var(--color-border); display: flex; gap: 16px; align-items: flex-start; }
+        .conflict-item:last-child { border-bottom: none; }
+        .conflict-icon { color: var(--color-danger); margin-top: 2px; display: flex; }
+        .conflict-details { flex: 1; }
+        .conflict-title { font-weight: 500; margin: 0 0 4px 0; color: var(--color-text); font-size: 14px; line-height: 1.4; }
+        .conflict-meta { font-size: 13px; color: var(--color-text-muted); display: flex; gap: 12px; align-items: center; }
+        .conflict-link { color: var(--color-brand); text-decoration: none; font-weight: 500; font-size: 13px; margin-top: 8px; display: inline-block; }
+        .conflict-link:hover { text-decoration: underline; }
+        .conflicts-footer { padding: 12px 16px; background-color: var(--color-surface-muted); border-top: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-muted); display: flex; justify-content: space-between; align-items: center; }
+        .conflicts-footer a { color: var(--color-brand); font-weight: 500; text-decoration: none; }
+        
+        .kpi-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px; }
+        .kpi-card { background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+        .kpi-title { font-size: 14px; color: var(--color-text-muted); font-weight: 500; margin-bottom: 8px; }
+        .kpi-value { font-size: 32px; font-weight: 600; color: var(--color-text); margin-bottom: 16px; }
+        .kpi-link { color: var(--color-brand); text-decoration: none; font-weight: 500; font-size: 14px; align-self: flex-start; }
+        .kpi-link:hover { text-decoration: underline; }
+        
+        .widget { background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .widget-header { padding: 16px 24px; border-bottom: 1px solid var(--color-border); font-weight: 600; color: var(--color-text); }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 24px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 14px; }
+        th { background-color: var(--color-surface-muted); color: var(--color-text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        .action-link { color: var(--color-brand); text-decoration: none; font-weight: 500; }
+        .action-link:hover { text-decoration: underline; }
+        .widget-footer { padding: 12px 24px; background-color: var(--color-surface); border-top: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-muted); display: flex; justify-content: space-between; align-items: center; }
+        .widget-footer a { color: var(--color-brand); font-weight: 500; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            SENA
+        </div>
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Inicio
+            </a>
+            <a href="schedules-list.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Horarios
+            </a>
+            <a href="availability.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Disponibilidad
+            </a>
+            <a href="fichas-list.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                Fichas
+            </a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="topbar-left">
+                SENA — Gestión de Horarios
+            </div>
+            <div class="topbar-right">
+                <button class="notification-btn" aria-label="Notificaciones">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span class="badge">3</span>
+                </button>
+                <div class="user-menu">
+                    <div class="user-avatar">MG</div>
+                    <span>María García — Coordinador</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Inicio</h1>
+                    <p class="page-subtitle">Hola, María García</p>
+                </div>
+                <a href="schedule-edit.html" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Crear horario
+                </a>
+            </div>
+
+            <section class="conflicts-section">
+                <div class="conflicts-banner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Conflictos pendientes (4)
+                </div>
+                <ul class="conflicts-list">
+                    <li class="conflict-item">
+                        <div class="conflict-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5c-1.1 0-2 .9-2 2v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="13"></line><line x1="23" y1="8" x2="18" y2="13"></line></svg>
+                        </div>
+                        <div class="conflict-details">
+                            <h3 class="conflict-title">Instructor doble-asignado: Juan Pérez tiene dos sesiones el lun 10 feb 07:00–10:00</h3>
+                            <div class="conflict-meta">
+                                <span>Horario Ficha 2589341</span>
+                                <span>•</span>
+                                <span>Detectado hace 2 h</span>
+                            </div>
+                            <a href="conflicts.html" class="conflict-link">Ver panel</a>
+                        </div>
+                    </li>
+                    <li class="conflict-item">
+                        <div class="conflict-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M19 21v-14a2 2 0 0 0-2-2h-10a2 2 0 0 0-2 2v14"></path><path d="M9.5 13l3.5 0"></path><line x1="4" y1="5" x2="20" y2="21"></line></svg>
+                        </div>
+                        <div class="conflict-details">
+                            <h3 class="conflict-title">Ambiente doble-asignado: Aula 201 asignada a dos sesiones el mar 11 feb 10:00–13:00</h3>
+                            <div class="conflict-meta">
+                                <span>Horario Ficha 2589341</span>
+                                <span>•</span>
+                                <span>Detectado hace 5 h</span>
+                            </div>
+                            <a href="conflicts.html" class="conflict-link">Ver panel</a>
+                        </div>
+                    </li>
+                    <li class="conflict-item">
+                        <div class="conflict-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                        </div>
+                        <div class="conflict-details">
+                            <h3 class="conflict-title">Sesiones solapadas: Ficha 2601873, sesiones del mié 12 feb se solapan en franja 07:00–10:00</h3>
+                            <div class="conflict-meta">
+                                <span>Detectado ayer</span>
+                            </div>
+                            <a href="conflicts.html" class="conflict-link">Ver panel</a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="conflicts-footer">
+                    <span>Mostrando 3 de 4</span>
+                    <a href="conflicts.html">Ver todos</a>
+                </div>
+            </section>
+
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <span class="kpi-title">Fichas activas</span>
+                    <span class="kpi-value">12</span>
+                    <a href="fichas-list.html" class="kpi-link">Ver todas</a>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-title">Horarios en borrador</span>
+                    <span class="kpi-value">3</span>
+                    <a href="schedules-list.html?status=draft" class="kpi-link">Ver todos</a>
+                </div>
+            </div>
+
+            <section class="widget">
+                <div class="widget-header">
+                    Horarios recientes en borrador
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ficha</th>
+                                <th>Período</th>
+                                <th>Nombre</th>
+                                <th>Última edición</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2589341</td>
+                                <td>2026-1</td>
+                                <td>Horario ADSO mañana</td>
+                                <td>Hace 2 h</td>
+                                <td><a href="schedule-edit.html" class="action-link">Continuar edición →</a></td>
+                            </tr>
+                            <tr>
+                                <td>2601873</td>
+                                <td>2026-1</td>
+                                <td>Horario Contabilidad tarde</td>
+                                <td>Ayer</td>
+                                <td><a href="schedule-edit.html" class="action-link">Continuar edición →</a></td>
+                            </tr>
+                            <tr>
+                                <td>2614027</td>
+                                <td>2026-1</td>
+                                <td>Horario Mecatrónica jornada completa</td>
+                                <td>05 feb 2026</td>
+                                <td><a href="schedule-edit.html" class="action-link">Continuar edición →</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="widget-footer">
+                    <span>Mostrando 3 de 3</span>
+                    <a href="schedules-list.html?status=draft">Ver todos</a>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>

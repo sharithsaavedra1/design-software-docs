@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de indicadores - SENA Admin</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        .filters { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); }
+        .filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+        .btn-primary { padding: 8px 16px; background: var(--color-brand); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; }
+        
+        .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .kpi-card { padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); }
+        .kpi-card.success { border-top: 4px solid var(--color-success); }
+        .kpi-card.warning { border-top: 4px solid var(--color-warning); }
+        .kpi-card.danger { border-top: 4px solid var(--color-danger); }
+        .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; }
+        .kpi-value { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+        .kpi-subtext { color: var(--color-text-muted); font-size: 0.9rem; }
+        
+        .chart-container { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; }
+        .bar-chart { display: flex; height: 32px; border-radius: 16px; overflow: hidden; margin-top: 16px; }
+        .bar-segment { display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: 600; }
+        .bar-segment.success { background: var(--color-success); width: 68%; }
+        .bar-segment.warning { background: var(--color-warning); width: 23%; }
+        .bar-segment.danger { background: var(--color-danger); width: 9%; }
+        
+        .table-widget { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+        .table-widget table { width: 100%; border-collapse: collapse; }
+        .table-widget th, .table-widget td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--color-border); }
+        .table-widget th { background: var(--color-surface-muted); font-weight: 600; font-size: 0.9rem; color: var(--color-text-muted); }
+        .table-widget tbody tr:hover { background: var(--color-surface-muted); cursor: pointer; }
+        .table-widget tbody tr:last-child td { border-bottom: none; }
+        
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .badge.success { background: var(--color-success-surface); color: var(--color-success); }
+        .badge.warning { background: var(--color-warning-surface); color: var(--color-warning); }
+        .badge.danger { background: var(--color-danger-surface); color: var(--color-danger); }
+        
+        .widget-footer { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--color-border); font-size: 0.9rem; color: var(--color-text-muted); }
+        .widget-footer a { color: var(--color-brand); text-decoration: none; font-weight: 500; }
+        .widget-footer-disabled { color: var(--color-text-muted); font-weight: 500; cursor: not-allowed; }
+        .table-widget tbody tr:focus-visible { outline: 2px solid var(--color-brand); outline-offset: -2px; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">SENA - Diseño de Software</div>
+        <div class="user-menu">
+            <div class="bell" title="Notificaciones">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span class="badge" style="display:none">0</span>
+            </div>
+            <div class="user-info">Roberto Díaz — Director</div>
+        </div>
+    </header>
+    
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav>
+                <a href="kpi-dashboard.html" class="active">Indicadores</a>
+                <div class="nav-group">
+                    <span>Administración</span>
+                    <a href="users-list.html">Usuarios</a>
+                    <a href="reference-data.html">Datos de referencia</a>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="app-content">
+            <header class="content-header">
+                <h1>Panel de indicadores</h1>
+            </header>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Tipo de KPI</label>
+                    <select>
+                        <option>Asistencia</option>
+                        <option>Avance curricular</option>
+                        <option>Riesgo de deserción</option>
+                        <option>Avance etapa productiva</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select>
+                        <option>Todos</option>
+                        <option>En seguimiento</option>
+                        <option>En riesgo</option>
+                        <option>Crítico</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Rango de fechas</label>
+                    <input type="date" value="2026-01-01">
+                </div>
+                <button class="btn-primary">Actualizar</button>
+            </div>
+            
+            <div class="kpi-cards">
+                <div class="kpi-card success">
+                    <div class="kpi-header">
+                        <span style="color: var(--color-success)">En seguimiento</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div class="kpi-value">32 fichas</div>
+                    <div class="kpi-subtext">Alertas activas promedio: 0.4</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-header">
+                        <span style="color: var(--color-warning)">En riesgo</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    </div>
+                    <div class="kpi-value">11 fichas</div>
+                    <div class="kpi-subtext">Alertas activas promedio: 2.1</div>
+                </div>
+                <div class="kpi-card danger">
+                    <div class="kpi-header">
+                        <span style="color: var(--color-danger)">Crítico</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <div class="kpi-value">4 fichas</div>
+                    <div class="kpi-subtext">Alertas activas promedio: 4.7</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3>Distribución de 47 fichas por nivel de riesgo</h3>
+                <div class="bar-chart">
+                    <div class="bar-segment success">32</div>
+                    <div class="bar-segment warning">11</div>
+                    <div class="bar-segment danger">4</div>
+                </div>
+            </div>
+            
+            <div class="table-widget">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ficha</th>
+                            <th>KPI</th>
+                            <th>Valor actual</th>
+                            <th>Umbral</th>
+                            <th>Estado</th>
+                            <th>Período</th>
+                            <th>Medido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2601873&amp;kpiName=Asistencia&amp;valor=68%25&amp;umbral=80%25&amp;estado=danger&amp;estadoText=Cr%C3%ADtico'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2601873</td>
+                            <td>Asistencia</td>
+                            <td>68%</td>
+                            <td>80%</td>
+                            <td>
+                                <span class="badge danger">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                    Crítico
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2614027&amp;kpiName=Avance%20curricular&amp;valor=42%25&amp;umbral=50%25&amp;estado=warning&amp;estadoText=En%20riesgo'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2614027</td>
+                            <td>Avance curricular</td>
+                            <td>42%</td>
+                            <td>50%</td>
+                            <td>
+                                <span class="badge warning">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                                    En riesgo
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2625011&amp;kpiName=Asistencia&amp;valor=72%25&amp;umbral=80%25&amp;estado=warning&amp;estadoText=En%20riesgo'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2625011</td>
+                            <td>Asistencia</td>
+                            <td>72%</td>
+                            <td>80%</td>
+                            <td>
+                                <span class="badge warning">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                                    En riesgo
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2639012&amp;kpiName=Riesgo%20de%20deserci%C3%B3n&amp;valor=Alta&amp;umbral=Baja&amp;estado=danger&amp;estadoText=Cr%C3%ADtico'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2639012</td>
+                            <td>Riesgo de deserción</td>
+                            <td>Alta</td>
+                            <td>Baja</td>
+                            <td>
+                                <span class="badge danger">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                                    Crítico
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2645019&amp;kpiName=Avance%20curricular&amp;valor=85%25&amp;umbral=50%25&amp;estado=success&amp;estadoText=En%20seguimiento'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2645019</td>
+                            <td>Avance curricular</td>
+                            <td>85%</td>
+                            <td>50%</td>
+                            <td>
+                                <span class="badge success">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    En seguimiento
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2651034&amp;kpiName=Asistencia&amp;valor=90%25&amp;umbral=80%25&amp;estado=success&amp;estadoText=En%20seguimiento'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2651034</td>
+                            <td>Asistencia</td>
+                            <td>90%</td>
+                            <td>80%</td>
+                            <td>
+                                <span class="badge success">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    En seguimiento
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2668045&amp;kpiName=Asistencia&amp;valor=82%25&amp;umbral=80%25&amp;estado=success&amp;estadoText=En%20seguimiento'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2668045</td>
+                            <td>Asistencia</td>
+                            <td>82%</td>
+                            <td>80%</td>
+                            <td>
+                                <span class="badge success">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    En seguimiento
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2679056&amp;kpiName=Avance%20curricular&amp;valor=30%25&amp;umbral=50%25&amp;estado=danger&amp;estadoText=Cr%C3%ADtico'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2679056</td>
+                            <td>Avance curricular</td>
+                            <td>30%</td>
+                            <td>50%</td>
+                            <td>
+                                <span class="badge danger">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                                    Crítico
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2682067&amp;kpiName=Asistencia&amp;valor=78%25&amp;umbral=80%25&amp;estado=warning&amp;estadoText=En%20riesgo'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2682067</td>
+                            <td>Asistencia</td>
+                            <td>78%</td>
+                            <td>80%</td>
+                            <td>
+                                <span class="badge warning">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                                    En riesgo
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                        <tr tabindex="0" role="link" onclick="location.href='kpi-detail.html?ficha=2693078&amp;kpiName=Asistencia&amp;valor=81%25&amp;umbral=80%25&amp;estado=success&amp;estadoText=En%20seguimiento'" onkeydown="if(event.key==='Enter')this.click()">
+                            <td>2693078</td>
+                            <td>Asistencia</td>
+                            <td>81%</td>
+                            <td>80%</td>
+                            <td>
+                                <span class="badge success">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    En seguimiento
+                                </span>
+                            </td>
+                            <td>2026-1</td>
+                            <td>01 ago 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="widget-footer">
+                    <span>Mostrando 10 de 47</span>
+                    <span class="widget-footer-disabled" title="Pantalla de lista completa de KPIs — pendiente (fuera de alcance de este mockup)" aria-disabled="true">Ver todos</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>
