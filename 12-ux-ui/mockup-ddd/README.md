@@ -59,6 +59,44 @@ El DDD **no inventa** dominio ni datos; deriva del SSOT:
 6. **Accesibilidad WCAG 2.1 AA** — contraste ≥4.5:1, teclado, objetivos táctiles 44×44, ARIA.
 7. **Estados de negocio parametrizables** — la UI consume el catálogo `status`, no lo hardcodea.
 
+## Reglas de calidad para Stitch (anti-patrones) — obligatorias en TODO prompt
+
+> Derivadas de la revisión del mockup **v1** (elementos desproporcionados, sin paginación,
+> redundancia/sobrecarga de elementos similares). Todo `PROMPT STITCH` debe respetarlas y, cuando
+> aplique, enunciarlas explícitamente al final del prompt.
+
+1. **Una sola representación por dato o acción.** El mismo dato o la misma acción **no** se muestra
+   en dos lugares. Ej.: los **conflictos** son **UNA** sección destacada, **no** una tarjeta KPI
+   *y además* un panel. Cada CTA aparece **una vez** (prohibido: botón superior + fila inferior de
+   "accesos directos" que lo repita).
+2. **Coherencia numérica.** Si un contador dice "N", los ítems listados **deben ser N**; si se
+   muestran menos, usar explícito **"mostrando X de N · Ver todos"**. Nunca un número que no calce
+   con lo listado (v1 decía "4 conflictos" y listaba 3 — prohibido).
+3. **Paginación / conteo en toda lista.** Pantallas de **lista** → **paginación real**
+   (`page`/`page_size` del contrato) con **"mostrando X–Y de N"**. **Widgets** de resumen
+   (dashboard) → **"top X de N"** + un solo enlace "Ver todos" (no una tabla completa sin fin).
+4. **Densidad controlada / jerarquía.** Máx **3–4** tarjetas KPI; **una** sección principal por
+   pantalla; **sin** filas de accesos directos que dupliquen la nav lateral o los enlaces de las
+   tarjetas. Evitar repetir muchos elementos del mismo tipo (no sobrecargar).
+5. **Identidad/rol una sola vez.** Nombre y rol del usuario van en el **menú de usuario** (barra
+   superior). No repetirlos en el sidebar ni en saludos redundantes.
+6. **Datos de ejemplo realistas y proporcionados.** Cantidades verosímiles, textos de longitud
+   real (no bloques enormes), números coherentes entre sí y con los contadores.
+7. **Sin tercera capa de navegación.** Las acciones viven en la nav lateral + los botones primarios
+   de la página; no agregar una capa extra que repita esos destinos.
+
+### Coletilla de calidad (pegar al FINAL de cada `PROMPT STITCH`)
+
+```text
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues una fila extra de accesos directos). Nombre
+y rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, no sobrecargar con muchos elementos iguales. Toda lista larga con paginación y "Mostrando
+X–Y de N"; los widgets de resumen muestran "top X de N · Ver todos". Los números deben calzar con lo
+listado (si el contador dice N, muestra N o di "Mostrando X de N"). Datos de ejemplo realistas y
+proporcionados.
+```
+
 ## Cómo se usa este DDD con Stitch (workflow)
 
 1. **Brief global de estilo** (una vez): se pega al iniciar el proyecto en Stitch —
