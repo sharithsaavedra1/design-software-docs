@@ -89,6 +89,16 @@ con el detalle completo de la sesión y sus notas. Incluir el estado vacío: men
 sobrio, verde SENA (placeholder), alto contraste WCAG AA, objetivos táctiles ≥44px. Mostrar
 también skeleton de carga de la rejilla. Variante móvil: la rejilla colapsa a una lista de
 tarjetas agrupadas por día.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -122,6 +132,12 @@ tarjetas agrupadas por día.
   recurrentes disponibles de forma positiva**. El instructor se asume disponible por
   defecto en toda franja salvo que registre una excepción — distinto de lo que sugiere el
   texto de HU-14 ("declarar mis franjas disponibles"), que queda parcialmente cubierto.
+- **Hallazgo de contrato — paginación (gap a confirmar con backend):**
+  `listInstructorAvailabilityExceptions` hoy solo expone `from`/`to` y responde un arreglo
+  plano (sin `page`/`page_size` ni sobre `pagination`). Esta pantalla es una **lista** (regla
+  README anti-patrón #3), así que el mockup **sí** incluye paginación real; se modela con los
+  parámetros estándar `page`/`page_size` del resto del contrato (mismo patrón que
+  `listFichaTrackings`/`listTrackingSessions`) a la espera de que el endpoint los adopte.
 
 **Propósito:** que el instructor declare bloqueos de disponibilidad para que el motor de
 conflictos detecte `INSTRUCTOR_UNAVAILABLE` (RN-SCH-03) y el coordinador no lo asigne en
@@ -131,7 +147,9 @@ esas franjas al construir un horario.
 tipo (icono + texto), rango de fechas/horas, descripción y quién la aprobó (si aplica);
 botón primario **+ Nueva excepción** abre formulario (modal o panel): selector de **tipo**
 (las 6 opciones), **fecha/hora inicio**, **fecha/hora fin**, **descripción** (opcional);
-cada fila tiene acción **Eliminar**.
+cada fila tiene acción **Eliminar**. Pie de lista con **paginación REAL visible**: barra
+‹ anterior · 1 2 3 … › siguiente, selector de tamaño de página (`page_size`: 10/20/50) y
+texto "Mostrando X–Y de N", alineados a `page`/`page_size` (ver hallazgo de contrato arriba).
 
 **Acciones:**
 | Control | Endpoint | Resultado |
@@ -158,7 +176,19 @@ texto "Descripción (opcional)" y un botón primario "Guardar". Mostrar el estad
 mensaje centrado "Sin excepciones registradas — estás disponible en tu franja estándar" con
 icono de calendario con check. Estilo institucional sobrio, alto contraste WCAG AA,
 objetivos táctiles ≥44px, navegable por teclado. Incluir un toast de confirmación
-"Excepción registrada".
+"Excepción registrada". Al final de la lista, incluir una barra de paginación real: flechas
+"‹ anterior" y "siguiente ›" alrededor de números de página "1 2 3", un selector desplegable
+de tamaño de página ("10 / 20 / 50 por página") y el texto "Mostrando 1–10 de 34".
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
@@ -182,7 +212,8 @@ objetivos táctiles ≥44px, navegable por teclado. Incluir un toast de confirma
   - Resumen de la ficha: `GET /ficha-trackings/{id}` (`operationId: getFichaTracking`) —
     requiere `MON_DASHBOARD_OWN` (coherente con acceso de Instructor a su propia ficha).
   - Histórico: `GET /ficha-trackings/{id}/tracking-sessions` (`operationId:
-    listTrackingSessions`), filtros `session_type`, `from`/`to`.
+    listTrackingSessions`), filtros `session_type`, `from`/`to`, paginado con `page`/
+    `page_size`/`sort` (respuesta `{ data, pagination }`).
   - Registrar: `POST /ficha-trackings/{id}/tracking-sessions` (`operationId:
     createTrackingSession`) — *"Normativa SENA: seguimiento mínimo mensual para fichas en
     Ejecución (Acuerdo 00003/2012). `attendance_percentage` es calculada por el servidor."*
@@ -206,15 +237,19 @@ avance curricular) de su ficha, insumo append-only del cálculo de KPIs y alerta
 con `overall_status` (badge de riesgo), `last_tracking_date` / `next_tracking_date` y
 `active_alert_count`; tabla histórica de `tracking_session` (más reciente primero) con
 columnas: fecha, tipo, asistencia (`attendance_count`/`total_learners` → `%`), avance
-curricular (%), "requiere seguimiento" (badge); botón primario **+ Registrar seguimiento**
-abre formulario: tipo de sesión (select), fecha, asistentes / total de aprendices, avance
-curricular (%), observaciones (textarea), checkbox "Requiere seguimiento adicional".
+curricular (%), "requiere seguimiento" (badge); pie de tabla con **paginación REAL visible**:
+barra ‹ anterior · 1 2 3 … › siguiente, selector de tamaño de página (`page_size`: 10/20/50)
+y texto "Mostrando X–Y de N", alineados a `page`/`page_size` de `listTrackingSessions`; botón
+primario **+ Registrar seguimiento** abre formulario: tipo de sesión (select), fecha,
+asistentes / total de aprendices, avance curricular (%), observaciones (textarea), checkbox
+"Requiere seguimiento adicional".
 
 **Acciones:**
 | Control | Endpoint | Resultado |
 |---|---|---|
 | Seleccionar ficha | `GET /ficha-trackings?assigned_instructor_id=` → `GET /ficha-trackings/{id}` | carga resumen |
-| Cargar histórico | `GET /ficha-trackings/{id}/tracking-sessions` | llena la tabla |
+| Cargar histórico | `GET /ficha-trackings/{id}/tracking-sessions?page=&page_size=` | llena la tabla (página actual) |
+| Cambiar página / tamaño de página | `GET /ficha-trackings/{id}/tracking-sessions?page=&page_size=` | recarga la tabla con la página/tamaño elegidos |
 | + Registrar seguimiento → Guardar | `POST /ficha-trackings/{id}/tracking-sessions` | crea registro append-only (no editable/eliminable); si `requires_follow_up = true`, el `alert-worker` puede generar una alerta |
 | Clic en fila | `GET /ficha-trackings/{id}/tracking-sessions/{session_id}` | abre panel de detalle |
 
@@ -239,7 +274,19 @@ curricular (%)", un textarea "Observaciones" y un checkbox "Requiere seguimiento
 con botón primario "Guardar". Mostrar el estado vacío: "Esta ficha aún no tiene registros de
 seguimiento" con un aviso de alerta si el seguimiento está vencido (más de 35 días sin
 registrar). Estilo institucional sobrio, alto contraste WCAG AA, objetivos táctiles ≥44px,
-navegable por teclado.
+navegable por teclado. Al final de la tabla histórica, incluir una barra de paginación real:
+flechas "‹ anterior" y "siguiente ›" alrededor de números de página "1 2 3", un selector
+desplegable de tamaño de página ("10 / 20 / 50 por página") y el texto "Mostrando 1–10 de 27".
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
