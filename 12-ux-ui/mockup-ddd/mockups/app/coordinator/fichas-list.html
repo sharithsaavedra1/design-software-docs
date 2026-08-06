@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fichas - Coordinador SENA</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    :root {
+      --color-brand: #007832;
+      --color-bg: #FFFFFF;
+      --color-surface: #FFFFFF;
+      --color-surface-muted: #F2F4F7;
+      --color-text: #101828;
+      --color-text-muted: #475467;
+      --color-border: #EAECF0;
+      --color-danger: #B42318;
+      --color-danger-surface: #FEF3F2;
+      --color-warning: #93370D;
+      --color-warning-surface: #FFFAEB;
+      --color-success: #067647;
+      --color-success-surface: #ECFDF3;
+      --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(16,24,40,.06);
+    }
+    body { margin: 0; font-family: var(--font-family); color: var(--color-text); background: var(--color-surface-muted); display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 250px; background: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--color-brand); font-size: 1.25rem; }
+    .sidebar-nav { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { padding: 12px 16px; border-radius: var(--radius-sm); color: var(--color-text-muted); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 12px; }
+    .nav-item:hover { background: var(--color-surface-muted); color: var(--color-text); }
+    .nav-item.active { background: #ECFDF3; color: var(--color-brand); }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+    .bell-icon { position: relative; padding: 8px; cursor: pointer; }
+    .bell-badge { position: absolute; top: 0; right: 0; background: var(--color-danger); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; }
+    .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.875rem; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--color-brand); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .page-content { flex: 1; padding: 32px; overflow-y: auto; }
+    
+    h1 { margin: 0 0 24px 0; font-size: 1.5rem; }
+    
+    .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 24px; }
+    
+    .filters { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+    .filter-group label { font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted); }
+    .filter-group input, .filter-group select { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; width: 100%; box-sizing: border-box; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 16px; border-bottom: 1px solid var(--color-border); font-size: 0.875rem; }
+    th { font-weight: 600; color: var(--color-text-muted); background: #F9FAFB; }
+    tr:last-child td { border-bottom: none; }
+    
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge-success { background: var(--color-success-surface); color: var(--color-success); }
+    
+    .btn-text { color: var(--color-brand); text-decoration: none; font-weight: 500; font-size: 0.875rem; }
+    .btn-text:hover { text-decoration: underline; }
+    
+    .pagination { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--color-border); font-size: 0.875rem; color: var(--color-text-muted); }
+    .pagination-controls { display: flex; align-items: center; gap: 8px; }
+    .page-btn { padding: 6px 10px; border: 1px solid var(--color-border); background: var(--color-surface); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text); }
+    .page-btn:hover { background: var(--color-surface-muted); }
+    .page-btn.active { background: var(--color-brand); color: white; border-color: var(--color-brand); }
+    .page-size { padding: 6px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      SENA
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        Inicio
+      </a>
+      <a href="schedules-list.html" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Horarios
+      </a>
+      <a href="availability.html" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Disponibilidad
+      </a>
+      <a href="fichas-list.html" class="nav-item active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Fichas
+      </a>
+    </nav>
+  </aside>
+  
+  <main class="main-content">
+    <header class="topbar">
+      <div class="bell-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span class="bell-badge">3</span>
+      </div>
+      <div class="user-profile">
+        <div class="user-avatar">MG</div>
+        María García — Coordinador
+      </div>
+    </header>
+    
+    <div class="page-content">
+      <h1>Fichas</h1>
+      
+      <div class="card">
+        <div class="filters" style="margin-bottom: 24px;">
+          <div class="filter-group">
+            <label for="programa">Programa</label>
+            <input type="text" id="programa" placeholder="Buscar programa o ficha...">
+          </div>
+          <div class="filter-group">
+            <label for="estado">Estado</label>
+            <select id="estado">
+              <option value="todos">Todos los estados</option>
+              <option value="ejecucion" selected>En ejecución</option>
+              <option value="lectiva">Etapa lectiva</option>
+              <option value="terminada">Terminada</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="fecha">Fecha inicio</label>
+            <input type="month" id="fecha">
+          </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Número de ficha</th>
+                <th>Programa</th>
+                <th>Jornada</th>
+                <th>Modalidad</th>
+                <th>Estado</th>
+                <th>Horarios</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2589341</td>
+                <td>Análisis y Desarrollo de Software</td>
+                <td>Mañana</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>2</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2601873</td>
+                <td>Contabilidad y Finanzas</td>
+                <td>Tarde</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614027</td>
+                <td>Mecatrónica Industrial</td>
+                <td>Completa</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <!-- Added realistic rows to fill out to 12 as per instructions -->
+              <tr>
+                <td>2614028</td>
+                <td>Gestión Administrativa</td>
+                <td>Noche</td>
+                <td>Virtual</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614029</td>
+                <td>Mantenimiento de Equipos de Cómputo</td>
+                <td>Mañana</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>3</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614030</td>
+                <td>Programación de Software</td>
+                <td>Tarde</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614031</td>
+                <td>Gestión Logística</td>
+                <td>Fines de semana</td>
+                <td>Mixta</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614032</td>
+                <td>Producción Multimedia</td>
+                <td>Mañana</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>2</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614033</td>
+                <td>Redes de Computadores</td>
+                <td>Noche</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614034</td>
+                <td>Electricidad Industrial</td>
+                <td>Completa</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614035</td>
+                <td>Asistencia Administrativa</td>
+                <td>Mañana</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>1</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+              <tr>
+                <td>2614036</td>
+                <td>Diseño Gráfico</td>
+                <td>Tarde</td>
+                <td>Presencial</td>
+                <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> En ejecución</span></td>
+                <td>2</td>
+                <td><a href="ficha-detail.html" class="btn-text">Ver</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="pagination">
+          <div>
+            Mostrando 1–12 de 48
+            <select class="page-size" style="margin-left: 8px;">
+              <option>10</option>
+              <option selected>12</option>
+              <option>20</option>
+              <option>50</option>
+            </select>
+          </div>
+          <div class="pagination-controls">
+            <button class="page-btn">‹ anterior</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">5</button>
+            <button class="page-btn">siguiente ›</button>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+  <script src="../js/app-shell.js"></script>
+</body>
+</html>

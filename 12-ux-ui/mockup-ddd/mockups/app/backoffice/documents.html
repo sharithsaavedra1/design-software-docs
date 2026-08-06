@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos - SENA Backoffice</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        .top-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .filters { display: flex; gap: 12px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { font-size: 0.85rem; font-weight: 500; color: var(--color-text-muted); }
+        .filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+        .btn-primary { padding: 8px 16px; background: var(--color-brand); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; }
+        
+        table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--color-border); font-size: 0.95rem; }
+        th { background: var(--color-surface-muted); font-weight: 600; font-size: 0.9rem; color: var(--color-text-muted); }
+        
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .badge.success { background: var(--color-success-surface); color: var(--color-success); }
+        .badge.warning { background: var(--color-warning-surface); color: var(--color-warning); }
+        .badge.danger { background: var(--color-danger-surface); color: var(--color-danger); }
+        .badge.neutral { background: var(--color-surface-muted); color: var(--color-text-muted); }
+        
+        .action-link { color: var(--color-brand); text-decoration: none; font-weight: 500; cursor: pointer; margin-right: 8px; }
+        
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; }
+        .page-numbers { display: flex; gap: 4px; }
+        .page-numbers button { border: 1px solid var(--color-border); background: var(--color-surface); padding: 4px 10px; border-radius: var(--radius-sm); cursor: pointer; }
+        .page-numbers button.active { background: var(--color-brand); color: white; border-color: var(--color-brand); }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">SENA - Diseño de Software</div>
+        <div class="user-menu">
+            <div class="user-info">Carlos Mendoza — Soporte</div>
+        </div>
+    </header>
+    
+    <div class="app-body">
+        <aside class="app-sidebar">
+            <nav>
+                <a href="documents.html" class="active">Documentos</a>
+                <a href="templates.html">Plantillas</a>
+                <a href="audit.html">Auditoría</a>
+                <a href="parametrization.html">Parametrización</a>
+            </nav>
+        </aside>
+        
+        <main class="app-content">
+            <header class="content-header">
+                <h1>Documentos</h1>
+            </header>
+            
+            <div class="top-actions">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Dominio</label>
+                        <select><option>Todos</option><option>Horario</option><option>Ficha</option><option>Constancia</option><option>Actor</option><option>Reporte</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Estado</label>
+                        <select><option>Todos</option><option>Disponible</option><option>Generando</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Servicio propietario</label>
+                        <select><option>scheduling</option><option>curriculum</option><option>iam</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Entidad propietaria (UUID)</label>
+                        <input type="text" placeholder="Ej. 123e4567-e89b...">
+                    </div>
+                </div>
+                <button class="btn-primary" data-toggle="modal" data-target="modal-generar-documento">Generar documento</button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Dominio</th>
+                        <th>Servicio</th>
+                        <th>Estado</th>
+                        <th>Actualizado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Horario Semanal - Instructor</td>
+                        <td>Horario</td>
+                        <td>scheduling</td>
+                        <td><span class="badge success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Disponible</span></td>
+                        <td>06 ago 2026 14:30</td>
+                        <td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Descargar</span></td>
+                    </tr>
+                    <tr>
+                        <td>Reporte Consolidado Asistencia</td>
+                        <td>Reporte</td>
+                        <td>curriculum</td>
+                        <td><span class="badge neutral"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg> Generando</span></td>
+                        <td>06 ago 2026 16:40</td>
+                        <td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link" style="opacity: 0.5;">Descargar</span></td>
+                    </tr>
+                    <tr>
+                        <td>Constancia de Matrícula</td>
+                        <td>Constancia</td>
+                        <td>curriculum</td>
+                        <td><span class="badge neutral"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><path d="M10 4v4"></path><path d="M14 4v4"></path></svg> Archivado</span></td>
+                        <td>01 jul 2026 09:15</td>
+                        <td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Restaurar</span></td>
+                    </tr>
+                    <tr>
+                        <td>Enlace Temporal Horario</td>
+                        <td>Horario</td>
+                        <td>scheduling</td>
+                        <td><span class="badge warning"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Expirado</span></td>
+                        <td>15 jul 2026 10:00</td>
+                        <td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Renovar</span></td>
+                    </tr>
+                    <tr>
+                        <td>Certificado de Notas</td>
+                        <td>Constancia</td>
+                        <td>curriculum</td>
+                        <td><span class="badge danger"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Error</span></td>
+                        <td>06 ago 2026 16:35</td>
+                        <td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Reintentar</span></td>
+                    </tr>
+                    <!-- More mock rows -->
+                    <tr><td>Ficha Técnica 2601873</td><td>Ficha</td><td>curriculum</td><td><span class="badge success">Disponible</span></td><td>05 ago 2026</td><td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Descargar</span></td></tr>
+                    <tr><td>Lista de Usuarios Activos</td><td>Actor</td><td>iam</td><td><span class="badge success">Disponible</span></td><td>04 ago 2026</td><td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Descargar</span></td></tr>
+                    <tr><td>Horario Semanal - Aprendiz</td><td>Horario</td><td>scheduling</td><td><span class="badge success">Disponible</span></td><td>03 ago 2026</td><td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Descargar</span></td></tr>
+                    <tr><td>Reporte Deserción</td><td>Reporte</td><td>curriculum</td><td><span class="badge neutral">Archivado</span></td><td>01 ene 2026</td><td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Restaurar</span></td></tr>
+                    <tr><td>Constancia Laboral - Instructor</td><td>Constancia</td><td>iam</td><td><span class="badge success">Disponible</span></td><td>02 ago 2026</td><td><a href="document-detail.html" class="action-link">Ver</a><span class="action-link">Descargar</span></td></tr>
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <span style="font-size: 0.9rem; color: var(--color-text-muted);">Mostrando 1–10 de 34</span>
+                <div class="page-numbers">
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>4</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Generar documento (flows/06 Pantalla 6) -->
+    <div id="modal-generar-documento" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Generar documento</h2>
+                <button class="modal-close" data-dismiss="modal" aria-label="Cerrar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Plantilla</label>
+                    <select class="form-select">
+                        <option>SCHEDULE_CERTIFICATE — Constancia de horario</option>
+                        <option>ATTENDANCE_REPORT — Reporte de asistencia</option>
+                        <option>ENROLLMENT_CERTIFICATE — Constancia de matrícula</option>
+                        <option>GRADE_CERTIFICATE — Certificado de notas</option>
+                    </select>
+                    <span class="form-hint">Solo se listan plantillas activas (GET /document-templates?is_active=true).</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Dominio</label>
+                    <select class="form-select">
+                        <option>Horario</option>
+                        <option>Ficha</option>
+                        <option>Constancia</option>
+                        <option>Actor</option>
+                        <option>Reporte</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Servicio propietario</label>
+                    <input type="text" class="form-input" placeholder="Ej. scheduling">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Entidad propietaria (UUID)</label>
+                    <input type="text" class="form-input" placeholder="Ej. 123e4567-e89b-12d3-a456-426614174000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Título</label>
+                    <input type="text" class="form-input" placeholder="Ej. Constancia de horario - Ficha 2589341">
+                </div>
+                <details class="form-group">
+                    <summary style="cursor:pointer; font-size:0.875rem; font-weight:500; margin-bottom:6px;">Datos (JSON opcional)</summary>
+                    <textarea class="form-textarea" style="font-family: monospace; font-size: 0.85rem;" rows="5" placeholder='{"ficha_id": "2589341", "periodo": "2026-1"}'></textarea>
+                </details>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn--primary" data-dismiss="modal">Generar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app-shell.js"></script>
+</body>
+</html>

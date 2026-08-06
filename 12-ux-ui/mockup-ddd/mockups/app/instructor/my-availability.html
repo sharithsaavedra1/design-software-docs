@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi disponibilidad - Instructor SENA</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    :root {
+      --color-brand: #007832;
+      --color-bg: #FFFFFF;
+      --color-surface: #FFFFFF;
+      --color-surface-muted: #F2F4F7;
+      --color-text: #101828;
+      --color-text-muted: #475467;
+      --color-border: #EAECF0;
+      --color-danger: #B42318;
+      --color-danger-surface: #FEF3F2;
+      --color-warning: #93370D;
+      --color-warning-surface: #FFFAEB;
+      --color-success: #067647;
+      --color-success-surface: #ECFDF3;
+      --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(16,24,40,.06);
+    }
+    body { margin: 0; font-family: var(--font-family); color: var(--color-text); background: var(--color-surface-muted); display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 250px; background: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--color-brand); font-size: 1.25rem; }
+    .sidebar-nav { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { padding: 12px 16px; border-radius: var(--radius-sm); color: var(--color-text-muted); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 12px; }
+    .nav-item:hover { background: var(--color-surface-muted); color: var(--color-text); }
+    .nav-item.active { background: #ECFDF3; color: var(--color-brand); }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .topbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+    .bell-icon { position: relative; padding: 8px; cursor: pointer; }
+    .bell-badge { position: absolute; top: 0; right: 0; background: var(--color-danger); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; }
+    .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.875rem; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--color-brand); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .page-content { flex: 1; padding: 32px; overflow-y: auto; }
+    
+    .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: 1.5rem; }
+    
+    .btn { padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); font-weight: 500; cursor: pointer; text-decoration: none; color: var(--color-text); text-align: center; }
+    .btn:hover { background: var(--color-surface-muted); }
+    .btn-primary { background: var(--color-brand); color: white; border-color: var(--color-brand); }
+    .btn-primary:hover { background: #006028; }
+    
+    .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 0; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 16px 24px; border-bottom: 1px solid var(--color-border); font-size: 0.875rem; }
+    th { font-weight: 600; color: var(--color-text-muted); background: #F9FAFB; }
+    tr:last-child td { border-bottom: none; }
+    
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge-success { background: var(--color-success-surface); color: var(--color-success); }
+    .badge-gray { background: var(--color-surface-muted); color: var(--color-text-muted); }
+    
+    .btn-text-danger { color: var(--color-danger); background: none; border: none; font-weight: 500; cursor: pointer; padding: 0; font-size: 0.875rem; }
+    .btn-text-danger:hover { text-decoration: underline; }
+    
+    .pagination { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-top: 1px solid var(--color-border); font-size: 0.875rem; color: var(--color-text-muted); }
+    
+    /* Modal styles */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(16,24,40,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal { background: var(--color-surface); border-radius: var(--radius-md); width: 100%; max-width: 500px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; }
+    .modal-header { padding: 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.125rem; font-weight: bold; margin: 0; }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--color-border); display: flex; justify-content: flex-end; gap: 12px; }
+    
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 0.875rem; font-weight: 500; color: var(--color-text-muted); }
+    .form-control { padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.875rem; }
+    .form-control:focus { outline: none; border-color: var(--color-brand); box-shadow: 0 0 0 2px rgba(0,120,50,0.1); }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      SENA
+    </div>
+    <nav class="sidebar-nav">
+      <a href="my-schedule.html" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Mi horario
+      </a>
+      <a href="my-availability.html" class="nav-item active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Mi disponibilidad
+      </a>
+      <a href="tracking.html" class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        Seguimiento
+      </a>
+    </nav>
+  </aside>
+  
+  <main class="main-content">
+    <header class="topbar">
+      <div class="bell-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span class="bell-badge">1</span>
+      </div>
+      <div class="user-profile">
+        <div class="user-avatar">JP</div>
+        Juan Pérez — Instructor
+      </div>
+    </header>
+    
+    <div class="page-content">
+      <div class="header-section">
+        <h1>Mi disponibilidad</h1>
+        <button class="btn btn-primary" data-toggle="modal" data-target="modalException">+ Nueva excepción</button>
+      </div>
+      
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Desde</th>
+              <th>Hasta</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Vacaciones</td>
+              <td>15 mar 2026 08:00</td>
+              <td>22 mar 2026 17:00</td>
+              <td>Vacaciones autorizadas</td>
+              <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Vigente</span></td>
+              <td><button class="btn-text-danger">Eliminar</button></td>
+            </tr>
+            <tr>
+              <td>Capacitación</td>
+              <td>28 feb 2026 07:00</td>
+              <td>28 feb 2026 13:00</td>
+              <td>Curso pedagógico regional</td>
+              <td><span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Vigente</span></td>
+              <td><button class="btn-text-danger">Eliminar</button></td>
+            </tr>
+            <tr>
+              <td>Incapacidad</td>
+              <td>10 ene 2026 07:00</td>
+              <td>12 ene 2026 17:00</td>
+              <td>Incapacidad médica</td>
+              <td><span class="badge badge-gray"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Pasada</span></td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Comisión</td>
+              <td>05 dic 2025 07:00</td>
+              <td>05 dic 2025 17:00</td>
+              <td>Visita empresarial</td>
+              <td><span class="badge badge-gray"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Pasada</span></td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          Mostrando 1–4 de 4
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modalException" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Crear excepción de disponibilidad</h3>
+        <button class="btn" style="border:none; padding:4px;" data-dismiss="modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" class="form-control">
+            <option>Vacaciones</option>
+            <option>Incapacidad</option>
+            <option>Comisión</option>
+            <option>Permiso</option>
+            <option>Capacitación</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="desde">Desde</label>
+            <input type="datetime-local" id="desde" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="hasta">Hasta</label>
+            <input type="datetime-local" id="hasta" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="desc">Descripción (opcional)</label>
+          <textarea id="desc" class="form-control" placeholder="Ej. Curso de actualización docente"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" data-dismiss="modal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/app-shell.js"></script>
+</body>
+</html>
