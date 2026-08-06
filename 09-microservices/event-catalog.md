@@ -1,6 +1,6 @@
 # Catálogo de eventos
 
-> Estado: 🟡 Revisión | Última actualización: 2026-06-17
+> Estado: 🟡 Revisión | Última actualización: 2026-08-06
 > Naming: nombres de eventos en inglés (HALT-DB-NAMING — los eventos son contratos de integración)
 
 Inventario centralizado de todos los eventos que circulan entre microservicios.
@@ -35,9 +35,15 @@ Ejemplo: `scheduling.class_session.created`
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
 | `academic.program.created` | Programa de formación creado | `audit-service` |
+| `academic.enrollment_ficha.created` | Ficha de caracterización creada | `audit-service`, `scheduling-service`, `monitoring-service` |
 | `academic.ficha.opened` | Ficha de caracterización en ejecución | `audit-service`, `monitoring-service` |
+| `academic.enrollment_ficha.status_changed` | Cambio de estado de la ficha (máquina de estados) | `audit-service`, `monitoring-service`, `actors-service` |
 | `academic.ficha.closed` | Ficha cerrada | `audit-service`, `monitoring-service` |
 | `academic.competency.updated` | Competencia modificada | `audit-service`, `actors-service` |
+
+> **Nota de naming:** la entidad real es `enrollment_ficha`. Los eventos históricos
+> `academic.ficha.opened`/`closed` se conservan por compatibilidad; los nuevos usan
+> `enrollment_ficha`. Pendiente decidir si se unifican todos a `enrollment_ficha`.
 
 ### training-environment-service
 
@@ -52,9 +58,11 @@ Ejemplo: `scheduling.class_session.created`
 
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
-| `scheduling.class_session.created` | Sesión de clase programada | `audit-service`, `monitoring-service` |
+| `scheduling.class_session.created` | Sesión de clase programada | `audit-service`, `monitoring-service`, `conflict-validator-worker` |
+| `scheduling.class_session.updated` | Sesión de clase modificada | `audit-service`, `conflict-validator-worker` |
 | `scheduling.class_session.cancelled` | Sesión cancelada | `audit-service`, `monitoring-service` |
 | `scheduling.conflict.detected` | Conflicto de horario detectado | `audit-service`, `monitoring-service` |
+| `scheduling.conflict.resolved` | Conflicto previamente detectado resuelto | `audit-service`, `monitoring-service` |
 | `scheduling.schedule.published` | Horario publicado a los actores | `audit-service`, `monitoring-service`, `actors-service`, `document-service` |
 
 ### actors-service
@@ -62,6 +70,7 @@ Ejemplo: `scheduling.class_session.created`
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
 | `actors.instructor.assigned` | Instructor habilitado para ficha/competencia | `audit-service`, `monitoring-service`, `scheduling-service` |
+| `actors.instructor.availability_changed` | Disponibilidad del instructor modificada | `audit-service`, `scheduling-service` |
 | `actors.learner.enrolled` | Aprendiz matriculado en ficha | `audit-service`, `monitoring-service` |
 | `actors.productive_stage.started` | Etapa productiva iniciada | `audit-service`, `monitoring-service` |
 | `actors.company_visit.completed` | Visita a empresa completada | `audit-service`, `monitoring-service` |
@@ -72,6 +81,8 @@ Ejemplo: `scheduling.class_session.created`
 |--------|-------------|-------------|
 | `document.document.generated` | Documento generado | `audit-service` |
 | `document.version.created` | Nueva versión de documento | `audit-service` |
+| `document.status.changed` | Cambio de estado del documento (ciclo de vida) | `audit-service` |
+| `document.archived` | Documento archivado | `audit-service` |
 
 ### monitoring-service
 
@@ -84,6 +95,26 @@ Ejemplo: `scheduling.class_session.created`
 ### audit-service
 
 > El audit-service no publica eventos. Solo consume y persiste.
+
+## Eventos internos de servicio (no cruzan frontera)
+
+Estos eventos son de **orquestación interna** de un servicio (worker↔worker, scheduler/cron)
+y **no son contratos de integración**: no los consume otro microservicio, por lo que no forman
+parte del inventario cross-servicio de arriba. Se documentan aquí para trazabilidad.
+
+| Evento interno | Servicio | Propósito |
+|----------------|----------|-----------|
+| `document.render.requested` | document-service | pdf-renderer: solicitud de render encolada |
+| `document.render.completed` | document-service | pdf-renderer: render finalizado |
+| `document.render.failed` | document-service | pdf-renderer: render fallido → reintento/DLQ |
+| `document.lifecycle.tick` | document-service | document-lifecycle-worker: pulso de cron |
+| `monitoring.kpi.tick` | monitoring-service | cron de recálculo de KPIs |
+
+## Normalización pendiente
+
+- **`monitoring.alert.generated` (usado en alert-worker/notification-worker) ≡ `monitoring.alert.triggered`**
+  (nombre canónico de este catálogo). Unificar los contratos de worker al nombre canónico.
+- Decidir si `academic.ficha.opened/closed` se renombran a `enrollment_ficha.*` (ver nota arriba).
 
 ## Nota de migración
 
