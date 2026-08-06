@@ -144,3 +144,12 @@ Patrón EAV de configuración (entidad-atributo-valor): cada fila es un parámet
 | `catalog` | `code` | UNIQUE | Consulta por código de catálogo |
 | `catalog_detail` | `(catalog_id, code)` | UNIQUE | Valor único por catálogo |
 | `parameter` | `key` | UNIQUE | Consulta por clave de parámetro |
+
+## Remediación de congruencia — R3 (2026-08-06)
+
+`institutional_unit.unit_type` y `parameter.value_type` estaban implementados como **ENUM
+nativo de Postgres**, lo que **viola ADR-004** (el `ALTER TYPE` bloquea migraciones
+independientes por servicio). Se convierten a **`VARCHAR + CHECK`** vía changeset nuevo
+`remediation-reference-960` (no se modifica ningún changeset corrido), conservando el mismo
+conjunto de valores: `unit_type IN ('ACADEMIC','ADMINISTRATIVE','MIXED')`,
+`value_type IN ('integer','string','boolean','json')`.
