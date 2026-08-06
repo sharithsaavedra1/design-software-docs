@@ -91,6 +91,16 @@ listas (si el contador dice 4, o se muestran 4 o el pie dice "Mostrando 3 de 4")
 conflictos: mensaje positivo con check verde "Sin conflictos pendientes". Estilo institucional sobrio,
 alto contraste WCAG AA, sombras sutiles, densidad moderada sin sobrecargar. Responsive: en móvil todo
 se apila y la sección de conflictos queda primero.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 **Mockup:** _(pendiente — se guardará en `../mockups/02-coordinador/dashboard.png` y se enlazará aquí)_
@@ -119,8 +129,10 @@ ficha con búsqueda, campo período, selector de estado, rango de fechas); tabla
 **Ficha** (referencia `ficha_id`, muestra número si el cliente lo resuelve contra
 academic-management-service), **Período**, **Nombre**, **Estado** (badge icono+texto: BORRADOR
 neutro / EN_REVISIÓN advertencia / PUBLICADO éxito / ARCHIVADO neutro atenuado), **Publicado el**
-(`published_at`, si aplica), **Última actualización** (`updated_at`); paginación estándar
-(`page`/`page_size`) y orden (`sort`).
+(`published_at`, si aplica), **Última actualización** (`updated_at`); pie de tabla con
+**paginación REAL y visible** — barra ‹ anterior · 1 2 3 … › siguiente, **selector de tamaño de
+página** (`page_size`: 10/20/50) y texto **"Mostrando X–Y de N"** — alineada a los parámetros
+`page`/`page_size` de `GET /schedules`; orden (`sort`). Nunca una tabla infinita sin control.
 
 **Acciones:**
 | Control | Endpoint | Resultado |
@@ -143,10 +155,22 @@ de filtros con: selector "Ficha" (buscable), campo "Período" (ej. 2026-1), sele
 (Borrador / En revisión / Publicado / Archivado), y un rango de fechas. Tabla densa con columnas:
 Ficha, Período, Nombre, Estado (badge con icono + texto — círculo gris "Borrador", triángulo
 ámbar "En revisión", check verde "Publicado", candado gris "Archivado"), Publicado el, Última
-actualización. Paginación en el pie de la tabla. Mostrar el estado vacío con un icono de calendario
-y el texto "No hay horarios que coincidan con los filtros". Estilo institucional, alto contraste
-WCAG AA, filas con hover sutil, objetivos táctiles ≥44px. Responsive: en móvil la tabla colapsa a
-tarjetas apiladas por horario.
+actualización. Al pie de la tabla, una barra de paginación REAL y visible: "‹ anterior · 1 2 3 …
+siguiente ›", un selector de tamaño de página ("10 / 20 / 50 por página") y el texto "Mostrando
+1–20 de 87". Mostrar el estado vacío con un icono de calendario y el texto "No hay horarios que
+coincidan con los filtros". Estilo institucional, alto contraste WCAG AA, filas con hover sutil,
+objetivos táctiles ≥44px. Responsive: en móvil la tabla colapsa a tarjetas apiladas por horario, con
+la misma barra de paginación al final del listado.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 **Mockup:** _(pendiente — `../mockups/02-coordinador/horarios-lista.png`)_
@@ -220,6 +244,16 @@ deshabilitado con un candado + tooltip "Resuelve los conflictos pendientes" cuan
 también un banner superior de advertencia "Este horario tiene 2 conflictos sin resolver" con un
 enlace "Ver panel de conflictos". Estilo institucional, WCAG AA, formularios con validación en
 línea. Responsive: en móvil el panel "Agregar sesión" se abre como hoja inferior (bottom sheet).
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 **Mockup:** _(pendiente — `../mockups/02-coordinador/horario-editar.png`)_
@@ -252,7 +286,14 @@ línea. Responsive: en móvil el panel "Agregar sesión" se abre como hoja infer
 por `conflict_type` (dos personas cruzadas = instructor doble-asignado; puerta cruzada = ambiente
 doble-asignado; flechas superpuestas = sesiones solapadas), texto `description`, referencia corta a
 `session_a_id`/`session_b_id`, fecha `detected_at`, badge "Pendiente" (crítico) / "Resuelto"
-(éxito) con icono + texto, botón "Marcar como resuelto" (solo si `is_resolved=false`).
+(éxito) con icono + texto, botón "Marcar como resuelto" (solo si `is_resolved=false`). Pie de lista
+con **paginación REAL y visible**, distinta por pestaña: en **"Este horario"** — barra ‹ anterior ·
+1 2 3 … › siguiente, selector de tamaño de página (`page_size`: 10/20/50) y "Mostrando X–Y de N",
+alineada a `page`/`page_size`/`sort` de `GET /schedules/{id}/conflicts`; en **"Todo mi centro"** —
+control ‹ anterior · siguiente › (sin salto directo a página, por ser paginación por cursor),
+selector de tamaño de página (`limit`: 10/20/50) y "Mostrando X de N" (N = conflictos cargados
+hasta el cursor actual), alineado a `cursor`/`limit` de `GET /reports/schedule-conflicts`. Nunca una
+lista infinita sin control.
 
 **Acciones:**
 | Control | Endpoint | Resultado |
@@ -278,9 +319,23 @@ un icono grande distintivo del tipo, el texto de descripción ("El instructor Ju
 sesiones que se solapan el 2026-02-10 de 07:00 a 10:00"), la fecha de detección, y un botón
 "Marcar como resuelto". Las tarjetas resueltas se muestran atenuadas con un icono de check verde y
 badge "Resuelto". Mostrar también el estado vacío como una tarjeta central con icono de check verde
-grande y el texto "Sin conflictos — este horario puede publicarse". Estilo institucional, alto
-contraste WCAG AA, el color nunca es la única señal (siempre icono + texto). Responsive: tarjetas
-en columna única en móvil.
+grande y el texto "Sin conflictos — este horario puede publicarse". Al pie de la lista, una barra de
+paginación REAL y visible: en la pestaña "Este horario", "‹ anterior · 1 2 3 · siguiente ›" con
+selector de tamaño de página ("10 / 20 / 50 por página") y "Mostrando 1–4 de 4"; en la pestaña
+"Todo mi centro" (paginación por cursor), "‹ anterior · siguiente ›" sin números de página, con el
+mismo selector de tamaño de página y "Mostrando 10 de 23". Estilo institucional, alto contraste WCAG
+AA, el color nunca es la única señal (siempre icono + texto). Responsive: tarjetas en columna única
+en móvil, con la barra de paginación al final.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 **Mockup:** _(pendiente — `../mockups/02-coordinador/panel-conflictos.png`)_
@@ -312,10 +367,15 @@ en columna única en móvil.
 **Layout:** selector de fecha + franja horaria (hora inicio/fin) arriba, compartido por ambos
 paneles; dos paneles/tabs — **Ambientes**: tarjetas/tabla con `name`, `environment_type`,
 `capacity`, `location`, badge "Disponible"/"No disponible" (icono+texto) según los parámetros
-`available_*`, enlace a reporte de utilización; **Instructores**: tabla con `full_name`,
-`document_number`, área(s) (`instructor_area.area_name`), `default_max_hours_per_week`, badge
-"Disponible"/"Con excepción" (derivado de cruzar `availability-exceptions` en la franja), enlace al
-reporte de carga.
+`available_*`, enlace a reporte de utilización, y pie de panel con **paginación REAL y visible**
+(barra ‹ anterior · 1 2 3 … › siguiente, selector de tamaño de página `page_size`: 10/20/50, y
+"Mostrando X–Y de N") alineada a `page`/`page_size` de `GET /training-environments`;
+**Instructores**: tabla con `full_name`, `document_number`, área(s)
+(`instructor_area.area_name`), `default_max_hours_per_week`, badge "Disponible"/"Con excepción"
+(derivado de cruzar `availability-exceptions` en la franja), enlace al reporte de carga, y su
+**propia** barra de paginación REAL y visible (misma mecánica: ‹ anterior · 1 2 3 … › siguiente,
+selector `page_size` 10/20/50, "Mostrando X–Y de N") alineada a `page`/`page_size` de `GET
+/instructors` — independiente de la del panel de Ambientes. Nunca una lista infinita sin control.
 
 **Acciones:**
 | Control | Endpoint | Resultado |
@@ -338,12 +398,26 @@ español. Encabezado "Disponibilidad" con un selector de fecha y un rango de hor
 compartido arriba. Debajo, dos pestañas: "Ambientes" (activa) e "Instructores". En "Ambientes": una
 cuadrícula de tarjetas, cada una con nombre del ambiente ("Aula 201"), tipo (Laboratorio/Aula/
 Taller), capacidad ("30 personas"), ubicación, y un badge "Disponible" (verde, icono de check) o
-"No disponible" (gris/rojo, icono de candado) según la franja seleccionada. En "Instructores": una
+"No disponible" (gris/rojo, icono de candado) según la franja seleccionada. Al pie de la cuadrícula
+de Ambientes, una barra de paginación REAL y visible: "‹ anterior · 1 2 3 · siguiente ›", selector
+de tamaño de página ("10 / 20 / 50 por página") y "Mostrando 1–20 de 34". En "Instructores": una
 tabla con columnas Nombre, Documento, Área, Horas máx./semana, y un badge "Disponible" o "Con
 excepción" (icono de calendario tachado) si tiene una licencia/incapacidad registrada en esa
-franja. Incluir un botón secundario "Ver reporte de ocupación" sobre el panel de Ambientes y "Ver
-reporte de carga" sobre el de Instructores. Estilo institucional, alto contraste WCAG AA,
-objetivos táctiles ≥44px pensando en uso en tablet dentro de los ambientes. Responsive.
+franja, con su propia barra de paginación al pie ("‹ anterior · 1 2 3 · siguiente ›", selector de
+tamaño de página y "Mostrando 1–20 de 41"), independiente de la de Ambientes. Incluir un botón
+secundario "Ver reporte de ocupación" sobre el panel de Ambientes y "Ver reporte de carga" sobre el
+de Instructores. Estilo institucional, alto contraste WCAG AA, objetivos táctiles ≥44px pensando en
+uso en tablet dentro de los ambientes. Responsive.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 **Mockup:** _(pendiente — `../mockups/02-coordinador/disponibilidad.png`)_
@@ -365,9 +439,12 @@ detalle completo de cada una.
 con columnas **Ficha** (`ficha_number`), **Programa** (`program_code` — `program_name`), **Estado**
 (badge icono+texto: Inducción / Ejecución / Etapa productiva / Finalizada / Cancelada),
 **Jornada** (`training_shift`), **Modalidad** (`training_modality`), **Cupo máximo**
-(`max_capacity`), **Fecha de inicio** (`start_date`); al hacer clic en una fila se abre un panel
-lateral de detalle con `GET /fichas/{id}` (incluye `program_version`, fechas de cierre esperada y
-real).
+(`max_capacity`), **Fecha de inicio** (`start_date`); pie de tabla con **paginación REAL y
+visible** — barra ‹ anterior · 1 2 3 … › siguiente, **selector de tamaño de página** (`page_size`:
+10/20/50) y texto **"Mostrando X–Y de N"** — alineada a `page`/`page_size` de
+`GET /reports/enrollment-by-ficha`; al hacer clic en una fila se abre un panel lateral de detalle
+con `GET /fichas/{id}` (incluye `program_version`, fechas de cierre esperada y real). Nunca una
+tabla infinita sin control.
 
 **Acciones:**
 | Control | Endpoint | Resultado |
@@ -386,11 +463,24 @@ dentro del app shell. Encabezado "Fichas". Barra de filtros: selector "Programa"
 selector "Estado" (Inducción / Ejecución / Etapa productiva / Finalizada / Cancelada), rango de
 fechas "Inicio". Tabla densa con columnas: Ficha (número), Programa (código — nombre), Estado
 (badge con icono + texto), Jornada (Diurna/Nocturna/Mixta), Modalidad (Presencial/Virtual/Híbrida),
-Cupo máximo, Fecha de inicio. Al hacer clic en una fila se abre un panel de detalle deslizante
+Cupo máximo, Fecha de inicio. Al pie de la tabla, una barra de paginación REAL y visible: "‹
+anterior · 1 2 3 … siguiente ›", un selector de tamaño de página ("10 / 20 / 50 por página") y el
+texto "Mostrando 1–20 de 56". Al hacer clic en una fila se abre un panel de detalle deslizante
 desde la derecha con los datos completos: versión del programa, fecha de inicio, fecha esperada de
 cierre, fecha real de cierre (si aplica). Mostrar el estado vacío con icono de carpeta y el texto
 "No hay fichas que coincidan con los filtros". Estilo institucional, alto contraste WCAG AA, filas
-con hover sutil. Responsive: en móvil la tabla colapsa a tarjetas apiladas por ficha.
+con hover sutil. Responsive: en móvil la tabla colapsa a tarjetas apiladas por ficha, con la misma
+barra de paginación al final del listado.
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 **Mockup:** _(pendiente — `../mockups/02-coordinador/fichas.png`)_

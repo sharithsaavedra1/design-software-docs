@@ -6,7 +6,7 @@ estado: draft
 dependencias_entrada: 07-api/contracts/openapi/scheduling.yaml, monitoring.yaml; 09-microservices/services/05-scheduling-service/data-model.md, 08-monitoring-service/data-model.md; 01-iam-service/rbac-design.md; 12-ux-ui/navigation-map.md, design-system.md; 04-requirements/functional.md, user-stories.md
 consumidores_siguientes: Google Stitch; validación de diseño
 tldr: 2 pantallas de solo lectura para el Aprendiz (Mi horario semanal, Notificaciones), derivadas de scheduling.yaml/monitoring.yaml, con prompts Stitch mobile-first.
-decisiones_clave: nombre de competencia/instructor/ambiente se resuelve por id externo (competency_id→academic-management, instructor_id/environment_id→actors/training-environment; ver RF-SCH-07); "leído/no leído" NO existe en sent_notification (solo send_status de entrega) — no se inventa, se documenta el gap.
+decisiones_clave: nombre de competencia/instructor/ambiente se resuelve por id externo (competency_id→academic-management, instructor_id/environment_id→actors/training-environment; ver RF-SCH-07); "leído/no leído" NO existe en sent_notification (solo send_status de entrega) — no se inventa, se documenta el gap; Notificaciones (LISTA) lleva paginación REAL visible por cursor (Anterior/Página N/Siguiente + selector page_size vía `limit`, "Mostrando X–Y de N aprox." al no haber `total` en CursorPagination), compacta en mobile — misma convención que Auditoría en flows/06-backoffice.md; Mi horario es calendario semanal, sin paginador de lista.
 halts_registrados: GAP-1 SCH_VIEW_OWN (scope OWN_FICHA_AS_LEARNER, rbac-design.md) no está cableado a ningún endpoint de scheduling.yaml (todos los GET usan SCH_VIEW_ALL); GAP-2 MON_NOTIFICATION_VIEW no figura en el catálogo/matriz de rbac-design.md (sin asignación explícita a LEARNER)
 -->
 
@@ -134,7 +134,20 @@ institucional SENA, verde institucional (placeholder), alto contraste WCAG AA, t
 sans-serif, esquinas suaves, tarjetas con sombra sutil. Mostrar también la variante de carga
 (skeletons de tarjetas). Todo pensado para pantalla de celular, con la navegación inferior o
 top bar simplificada de la app (icono de horario activo, icono de notificaciones con badge).
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
+
+> **Sin paginador de tabla:** esta pantalla es un **calendario semanal** (no una lista paginada);
+> la navegación es por semana (◀/▶), no aplica el anti-patrón #3 de paginación de listas.
 
 ---
 
@@ -146,9 +159,12 @@ top bar simplificada de la app (icono de horario activo, icono de notificaciones
   contrato real de `monitoring.yaml`).
 - **Endpoint:** `GET /api/v1/sent-notifications?recipient_id={jwt.sub}&channel=IN_APP&cursor={cursor}&limit={limit}`
   → paginación por **cursor** (colección append-only, retención 1 año, particionada por
-  `created_at`). `x-required-feature: MON_NOTIFICATION_VIEW` (ver GAP-2). Filtro adicional
+  `created_at`); respuesta trae `pagination: { next_cursor, limit, has_more }`
+  (`_shared.yaml#/components/schemas/CursorPagination` — **sin** `total` ni `prev_cursor`).
+  `x-required-feature: MON_NOTIFICATION_VIEW` (ver GAP-2). Filtro adicional
   disponible: `status` (`send_status`: `PENDING`/`SENT`/`FAILED`), `from`/`to` (rango de
-  `created_at`), `generated_alert_id`.
+  `created_at`), `generated_alert_id`. El parámetro `limit` es también el **`page_size`**
+  visible en la UI (10/20/50).
 - **Detalle (si se abre una notificación):** `GET /api/v1/sent-notifications/{id}`.
 - **Campos reales (`SentNotification`, monitoring-service data-model.md):** `id`,
   `generated_alert_id` (nullable — null si la notificación es manual), `recipient_id`,
@@ -173,9 +189,17 @@ conectividad móvil.
   `send_status` con icono + texto (`SENT` = éxito discreto — es el caso normal y no debe
   destacar en exceso; `PENDING` = neutro "Enviando…"; `FAILED` = crítico "No se pudo entregar",
   con `failure_reason` visible al expandir).
-- **Paginación:** botón/indicador "Cargar más" al final de la lista (cursor) o scroll infinito
-  con spinner de carga.
-- **Objetivos táctiles ≥44×44px** en cada tarjeta.
+- **Paginación REAL y visible, por CURSOR** (README anti-patrón #3 — excepción `cursor`/`limit`,
+  misma convención que "Auditoría" en `flows/06-backoffice.md`): barra al pie de la lista con
+  botón **"‹ Anterior"** (deshabilitado en la primera página; retrocede al cursor previo,
+  guardado en el cliente — el contrato **no** expone `prev_cursor`), indicador **"Página N"**,
+  botón **"Siguiente ›"** (avanza con `next_cursor`; deshabilitado si `has_more = false`), y
+  **selector de tamaño de página** (`limit`: 10/20/50). Encima de la barra, el texto
+  **"Mostrando X–Y de N aprox."** (`N` es aproximado: el contrato no expone un total exacto,
+  solo `has_more`). **Adaptación mobile (compacta):** en viewport ~375px la barra se reduce a
+  una sola fila "‹ · Página N · ›" con el selector de tamaño colapsado en un menú desplegable
+  pequeño junto al texto "Mostrando X–Y", para no competir con las tarjetas.
+- **Objetivos táctiles ≥44×44px** en cada tarjeta y en cada control de la barra de paginación.
 
 **Datos mostrados (campo → origen real):**
 
@@ -192,14 +216,17 @@ conectividad móvil.
 
 | Control | Endpoint | Resultado |
 |---|---|---|
-| Cargar más / scroll | `GET /sent-notifications?...&cursor={next_cursor}` | agrega la siguiente página al final de la lista |
+| Siguiente › | `GET /sent-notifications?...&cursor={next_cursor}&limit={limit}` | reemplaza la lista por la siguiente página; guarda el cursor actual en el historial local |
+| ‹ Anterior | — (cliente: cursor previo del historial local; el contrato no expone `prev_cursor`) | reemplaza la lista por la página anterior ya cargada |
+| Selector de tamaño de página (10/20/50) | `GET /sent-notifications?...&limit={limit}` (reinicia `cursor`) | recarga desde la primera página con el nuevo `limit` |
 | Pull-to-refresh | `GET /sent-notifications?...&cursor=` (primera página) | refresca la bandeja desde el inicio |
 | Tap en tarjeta | `GET /sent-notifications/{id}` | muestra detalle (asunto, resumen, estado, motivo de falla si aplica) |
 
 **Estados:** *loading* (skeleton de tarjetas) · *empty* ("No tienes notificaciones" con
 ilustración simple) · *error* (banner con icono + "No pudimos cargar tus notificaciones" y
 botón "Reintentar") · *offline* (banner "Sin conexión — mostrando las últimas notificaciones
-guardadas") · *cargando más* (spinner al pie de la lista, sin bloquear el contenido ya visible).
+guardadas") · *cambiando de página* (skeleton reemplaza la lista mientras carga Anterior/
+Siguiente; los controles de la barra de paginación se deshabilitan durante la carga).
 
 ```text
 PROMPT STITCH
@@ -213,14 +240,31 @@ cancelada por el instructor"), una marca de tiempo relativa a la derecha arriba 
 abajo a la derecha, un badge de estado de entrega con icono + texto: la mayoría en un tono
 discreto de éxito "Enviado", una tarjeta de ejemplo en gris neutro con icono de reloj
 "Enviando…", y una tarjeta de ejemplo en rojo/crítico con icono de alerta "No se pudo entregar"
-(nunca solo color). Al final de la lista, un botón secundario "Cargar más" con spinner de
-ejemplo. Incluir el estado vacío completo: ilustración simple + texto "No tienes
+(nunca solo color). Al final de la lista, una barra de paginación REAL y visible: encima el
+texto "Mostrando 1–10 de 34 aprox.", y debajo una fila compacta con botón "‹ Anterior"
+(atenuado/deshabilitado de ejemplo por estar en la primera página), indicador "Página 1",
+botón "Siguiente ›", y junto a ellos un selector pequeño de tamaño de página con las opciones
+"10 / 20 / 50". En el viewport móvil de ~375px esta barra se ve compacta, en una sola fila,
+con el selector de tamaño colapsado en un menú desplegable pequeño para no competir con las
+tarjetas. Incluir el estado vacío completo: ilustración simple + texto "No tienes
 notificaciones". Incluir un banner delgado superior para el estado sin conexión: "Sin conexión
 — mostrando las últimas notificaciones guardadas". Estilo institucional SENA, verde
 institucional (placeholder), alto contraste WCAG AA, tipografía sans-serif, esquinas suaves,
 tarjetas con sombra sutil, objetivos táctiles ≥44px. Mostrar también la variante de carga
-(skeletons de tarjetas). Pensado para pantalla de celular con top bar simplificada de la app
-(icono de horario, icono de notificaciones con badge activo en esta pantalla).
+(skeletons de tarjetas) y la variante de cambio de página (skeleton reemplazando la lista,
+controles de paginación deshabilitados). Pensado para pantalla de celular con top bar
+simplificada de la app (icono de horario, icono de notificaciones con badge activo en esta
+pantalla).
+
+Reglas de calidad: no dupliques ningún dato ni acción (cada CTA una sola vez; no repitas botones que
+ya están en la nav lateral o en las tarjetas; no agregues fila extra de accesos directos). Nombre y
+rol del usuario solo en el menú superior. Máximo 3–4 tarjetas KPI y una sección principal; densidad
+moderada, sin sobrecargar. Si es una PANTALLA DE LISTA, incluye paginación REAL visible (barra ‹
+anterior · 1 2 3 · siguiente ›, selector de tamaño de página, y "Mostrando X–Y de N"); si es un WIDGET
+de dashboard, usa "top N · Ver todos" sin paginador. Los números deben calzar con lo listado. Datos
+de ejemplo realistas y proporcionados (muy cercano a la realidad, sin lorem ipsum).
+ENTREGA SIEMPRE: un ZIP con las imágenes PNG (una desktop ~1440px y una móvil ~390px por pantalla) +
+el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que abra en el navegador.
 ```
 
 ---
