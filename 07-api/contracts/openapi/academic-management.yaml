@@ -703,10 +703,10 @@ paths:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
         - $ref: '_shared.yaml#/components/parameters/sort'
-        - name: program
+        - name: program_id
           in: query
           required: false
-          description: Filtra por UUID del programa de formación (`program_id`).
+          description: Filtra por UUID del programa de formación.
           schema: { type: string, format: uuid }
         - name: status
           in: query
@@ -714,10 +714,10 @@ paths:
           schema:
             type: string
             enum: [INDUCTION, EXECUTION, PRODUCTIVE_STAGE, COMPLETED, CANCELLED]
-        - name: ficha_code
+        - name: ficha_number
           in: query
           required: false
-          description: Filtra por número de ficha SENA (`ficha_number`), coincidencia exacta.
+          description: Filtra por número de ficha SENA, coincidencia exacta.
           schema: { type: string }
         - name: training_center_id
           in: query
@@ -882,10 +882,10 @@ paths:
           in: query
           required: false
           schema: { type: string, format: uuid }
-        - name: program
+        - name: program_id
           in: query
           required: false
-          description: Filtra por UUID del programa de formación (`program_id`).
+          description: Filtra por UUID del programa de formación.
           schema: { type: string, format: uuid }
         - name: status
           in: query
@@ -938,10 +938,10 @@ paths:
           in: query
           required: false
           schema: { type: string, format: uuid }
-        - name: program
+        - name: program_id
           in: query
           required: false
-          description: Filtra por UUID del programa de formación (`program_id`).
+          description: Filtra por UUID del programa de formación.
           schema: { type: string, format: uuid }
         - name: status
           in: query

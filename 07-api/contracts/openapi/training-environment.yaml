@@ -573,7 +573,9 @@ paths:
         calcular horas disponibles, reservadas y en mantenimiento por ambiente.
         Inventario — Usuarios: coordinadores, scheduling-service, monitoring-service;
         Frecuencia: on-demand; Formato: JSON; Fuente: `environment`, `availability_rule`,
-        `maintenance`, `reservation`.
+        `maintenance`, `reservation`. Mide disponibilidad/utilización física del ambiente a
+        partir de las tablas propias de training-environment; para la ocupación por sesiones
+        de horario efectivamente programadas, ver `environment-occupancy` en scheduling.yaml.
       x-required-feature: ENVIRONMENT_REPORT_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'

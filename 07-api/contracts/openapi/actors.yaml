@@ -42,7 +42,7 @@ paths:
           required: false
           description: Filtra por número de identificación tributaria.
           schema: { type: string }
-        - name: city_id
+        - name: municipality_id
           in: query
           required: false
           description: Filtra por municipio (reference-data-service).
@@ -1246,7 +1246,7 @@ components:
           description: Actividad económica principal (CIIU).
         address:
           type: [string, 'null']
-        city_id:
+        municipality_id:
           type: [string, 'null']
           format: uuid
           description: Referencia lógica a Municipality en reference-data-service (sin FK física).
@@ -1273,7 +1273,7 @@ components:
         trade_name: { type: string, maxLength: 200 }
         economic_activity: { type: string, maxLength: 100 }
         address: { type: string }
-        city_id: { type: string, format: uuid }
+        municipality_id: { type: string, format: uuid }
         contact_name: { type: string, maxLength: 200 }
         contact_email: { type: string, format: email }
         contact_phone: { type: string, maxLength: 20 }
@@ -1285,7 +1285,7 @@ components:
         trade_name: { type: string, maxLength: 200 }
         economic_activity: { type: string, maxLength: 100 }
         address: { type: string }
-        city_id: { type: string, format: uuid }
+        municipality_id: { type: string, format: uuid }
         contact_name: { type: string, maxLength: 200 }
         contact_email: { type: string, format: email }
         contact_phone: { type: string, maxLength: 20 }

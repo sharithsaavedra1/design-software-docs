@@ -881,7 +881,10 @@ paths:
         Reporte propio del dominio scheduling sobre `class_session` cruzado contra el
         catálogo `time_slot`, agregado por `environment_id`. Solo lectura. Inventario —
         Usuarios: gestores de ambientes y subdirectores de centro; Frecuencia:
-        on-demand/mensual; Formato: JSON; Fuente: `class_session` + `time_slot`.
+        on-demand/mensual; Formato: JSON; Fuente: `class_session` + `time_slot`. Mide la
+        ocupación por sesiones de horario efectivamente programadas a partir de las tablas
+        propias de scheduling; para la disponibilidad/utilización física del ambiente, ver
+        `environment-utilization` en training-environment.yaml.
       x-required-feature: SCH_REPORT_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'

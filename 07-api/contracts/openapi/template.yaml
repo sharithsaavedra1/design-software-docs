@@ -27,7 +27,7 @@ paths:
       operationId: listDocumentTemplates
       tags: [templates]
       summary: Lista paginada de plantillas (sin template_body).
-      x-required-feature: DOC_VIEW
+      x-required-feature: DOC_TEMPLATE_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -87,8 +87,6 @@ paths:
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
   /document-templates/{id}:
-    parameters:
-      - $ref: '#/components/parameters/DocumentTemplateId'
     get:
       operationId: getDocumentTemplate
       tags: [templates]
@@ -97,7 +95,9 @@ paths:
         `id` acepta el UUID de la plantilla o su `code` único (ej.
         SCHEDULE_CERTIFICATE, ENROLLMENT_RECORD); esto permite a los workers
         de renderizado resolver la plantilla por code sin una ruta adicional.
-      x-required-feature: DOC_VIEW
+      x-required-feature: DOC_TEMPLATE_VIEW
+      parameters:
+        - $ref: '#/components/parameters/DocumentTemplateIdOrCode'
       responses:
         '200':
           description: Plantilla.
@@ -116,6 +116,8 @@ paths:
         `document_version`: los documentos ya generados conservan su binario;
         solo las generaciones posteriores usan la nueva versión.
       x-required-feature: DOC_TEMPLATE_MANAGE
+      parameters:
+        - $ref: '#/components/parameters/DocumentTemplateId'
       requestBody:
         required: true
         content:
@@ -137,6 +139,8 @@ paths:
       tags: [templates]
       summary: Desactiva una plantilla (soft delete vía is_active).
       x-required-feature: DOC_TEMPLATE_MANAGE
+      parameters:
+        - $ref: '#/components/parameters/DocumentTemplateId'
       responses:
         '204':
           description: Plantilla desactivada.
@@ -146,8 +150,6 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
   /document-templates/{id}/preview:
-    parameters:
-      - $ref: '#/components/parameters/DocumentTemplateId'
     post:
       operationId: previewDocumentTemplate
       tags: [templates]
@@ -160,6 +162,8 @@ paths:
         conversión final a PDF/EXCEL/WORD la realiza el pdf-renderer-worker al
         generar un documento real.
       x-required-feature: DOC_TEMPLATE_MANAGE
+      parameters:
+        - $ref: '#/components/parameters/DocumentTemplateId'
       requestBody:
         required: true
         content:
@@ -192,7 +196,7 @@ paths:
         Frecuencia: on-demand; Formato: JSON; Fuente: `document_template` +
         `document` (agregación por template_id, filtrable por rango de
         `document.created_at`).
-      x-required-feature: DOC_VIEW
+      x-required-feature: DOC_REPORT_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -236,14 +240,22 @@ paths:
 
 components:
   parameters:
-    DocumentTemplateId:
+    DocumentTemplateIdOrCode:
       name: id
       in: path
       required: true
       description: >-
         UUID de la plantilla o su code único (ej. SCHEDULE_CERTIFICATE).
-        PUT/DELETE/preview operan solo por id; GET acepta ambos.
+        Solo GET /document-templates/{id} acepta ambos formatos.
       schema: { type: string, maxLength: 50 }
+    DocumentTemplateId:
+      name: id
+      in: path
+      required: true
+      description: >-
+        UUID de la plantilla. PUT, DELETE y preview operan solo por UUID
+        (no aceptan code).
+      schema: { type: string, format: uuid }
 
   schemas:
     DocumentTemplateListItem:

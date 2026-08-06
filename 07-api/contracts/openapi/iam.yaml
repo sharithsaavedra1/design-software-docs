@@ -104,6 +104,7 @@ paths:
       responses:
         '202':
           description: Aceptado. Siempre 202 (no revela si el email existe).
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
 
   /auth/password-reset/confirm:

@@ -37,9 +37,10 @@ Bearer JWT emitido por `iam-service`. Todos los endpoints requieren el header:
 Authorization: Bearer <token>
 ```
 
-Autorización RBAC por `feature` (módulo `MOD_DOCUMENTS`, ver `rbac-design.md`): lectura con
-`DOC_VIEW`, escritura y previsualización con `DOC_TEMPLATE_MANAGE` (único feature de plantillas
-definido hoy en el módulo; no existe un `DOC_TEMPLATE_VIEW` dedicado).
+Autorización RBAC por `feature` (módulo `MOD_DOCUMENTS`, ver `rbac-design.md`), alineada al
+esquema granular del módulo (como `document.yaml`): lectura de plantillas (listar/detalle) con
+`DOC_TEMPLATE_VIEW`, escritura y previsualización con `DOC_TEMPLATE_MANAGE`, y el reporte de uso
+con `DOC_REPORT_VIEW`.
 
 ## Entidad del contrato
 

@@ -41,7 +41,7 @@ halts_registrados: ninguno
 | `GET` `PUT` `DELETE` | `/competencies/{id}` | Detalle / reemplazo / baja lógica | `ACAD_READ` / `ACAD_MANAGE` / `ACAD_ADMIN` |
 | `GET` `POST` | `/competencies/{id}/learning-outcomes` | Resultados de aprendizaje / crear | `ACAD_READ` / `ACAD_MANAGE` |
 | `GET` `PUT` `DELETE` | `/learning-outcomes/{id}` | Detalle / reemplazo / baja lógica | `ACAD_READ` / `ACAD_MANAGE` / `ACAD_ADMIN` |
-| `GET` `POST` | `/fichas` | Listar fichas (filtros: `program`, `status`, `ficha_code`, `training_center_id`, `from`/`to`) / crear ficha | `ACAD_READ` / `ACAD_MANAGE` |
+| `GET` `POST` | `/fichas` | Listar fichas (filtros: `program_id`, `status`, `ficha_number`, `training_center_id`, `from`/`to`) / crear ficha | `ACAD_READ` / `ACAD_MANAGE` |
 | `GET` `PUT` `DELETE` | `/fichas/{id}` | Detalle / actualizar datos operativos / baja lógica (→ `CANCELLED`) | `ACAD_READ` / `ACAD_MANAGE` / `ACAD_ADMIN` |
 | `PATCH` | `/fichas/{id}/status` | Cambiar estado de la ficha (máquina de estados) | `ACAD_MANAGE` |
 
@@ -70,7 +70,7 @@ Capacidad y estado de oferta por ficha (proyección de `enrollment_ficha` con `p
 `program_name` de `training_program`).
 
 - **Feature requerido:** `ACAD_READ`.
-- **Filtros:** `training_center_id`, `program` (`program_id`), `status`, `from`/`to` (rango de `start_date`).
+- **Filtros:** `training_center_id`, `program_id`, `status`, `from`/`to` (rango de `start_date`).
 - **Inventario:** Usuarios: coordinadores académicos y dashboards de centro · Frecuencia:
   on-demand/diaria · Formato: JSON · Fuente: `enrollment_ficha` + `training_program`.
 
@@ -81,7 +81,7 @@ Avance temporal de fichas: días transcurridos desde `start_date`, días restant
 estado terminal (`COMPLETED`/`CANCELLED`).
 
 - **Feature requerido:** `ACAD_READ`.
-- **Filtros:** `training_center_id`, `program` (`program_id`), `status`, `from`/`to` (rango de `start_date`).
+- **Filtros:** `training_center_id`, `program_id`, `status`, `from`/`to` (rango de `start_date`).
 - **Inventario:** Usuarios: coordinadores académicos y subdirectores de centro · Frecuencia:
   on-demand/semanal · Formato: JSON · Fuente: `enrollment_ficha`.
 
