@@ -35,6 +35,24 @@ en Stitch**, pantalla por pantalla.
   construye contra los **contratos** (`09-microservices/**/openapi.yaml`) y el design-system,
   no contra estos artefactos. El mockup es insumo de diseño/validación, no dependencia de código.
 
+## Estado del mockup (implementación adoptada)
+
+El mockup generado y **adoptado** es una **SPA con hash-router** (no un build estático de un
+archivo `.html` por ruta). Cómo se abre y qué entrega:
+
+- **Punto de entrada:** `mockups/app/index.html`. Servir con `python -m http.server` y abrir
+  `#/inventory` (inventario maestro de pantallas), o abrir directamente `review.html`.
+- **Cobertura:** **45 pantallas + modales**. Validador: `node tools/validate-routes.js` → **45/45**.
+- **Rutas de revisión (hash + query):** rol activo `?as=<rol>`; estados `?state=loading|empty|error`
+  y `?offline=1`; modales `?modal=…`; panel de notificaciones `?overlay=notifications`; estados
+  globales `#/system-states?variant=403|404|500|session`. Acceso directo con rol no autorizado → **403**.
+- **Capturas:** **90 PNG** bajo `mockups/app/screenshots/` (**45 desktop** 1440×1000 + **45 móvil**
+  390×844), indexadas en `screenshots/README.md`.
+
+> Esto reemplaza cualquier descripción previa de un build estático (p. ej. "un `.html` por ruta").
+> El **contrato de entrega** de más abajo describe el artefacto por prompt; el mockup adoptado lo
+> materializa como esta SPA con las 90 capturas de referencia.
+
 ## Índice del spec del mockup
 
 | Documento | Qué contiene |

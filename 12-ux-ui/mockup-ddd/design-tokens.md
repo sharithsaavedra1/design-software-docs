@@ -18,6 +18,14 @@ halts_registrados: color/tipografía oficiales SENA pendientes de lineamiento
 > (si cambia el verde/tipografía, se actualiza aquí y se regenera). Complementa
 > [design-system.md](../design-system.md).
 
+> **Implementación canónica:** `mockups/app/assets/tokens.css` es la fuente de los valores
+> exactos. Además del subconjunto ratificado que lista este doc, `tokens.css` define
+> `--color-brand-hover` / `--color-brand-soft`, la escala tipográfica completa
+> (`--font-size-xs…3xl`, pesos, line-heights), la escala de espaciado (`--space-1…8`),
+> sombras (`--shadow-sm/md`), z-index y dimensiones de layout
+> (`--topbar-height: 72px`, `--sidebar-width: 264px`, `--sidebar-collapsed-width: 76px`).
+> Este documento lista el subconjunto ratificado; `tokens.css` manda para los valores exactos.
+
 ## Color
 
 | Token | Valor | Uso | Contraste (sobre blanco) |
@@ -35,6 +43,8 @@ halts_registrados: color/tipografía oficiales SENA pendientes de lineamiento
 | `color-warning-surface` | `#FFFAEB` | Fondo de aviso | — |
 | `color-success` | `#067647` | Éxito / PUBLICADO | ✅ |
 | `color-success-surface` | `#ECFDF3` | Fondo de éxito | — |
+| `color-info` | `#175CD3` | Informativo / enlaces | ✅ |
+| `color-info-surface` | `#EFF8FF` | Fondo informativo | — |
 
 ### Estados de negocio (siempre color + icono + texto, nunca solo color)
 | Estado | Color | Superficie | Icono sugerido |
