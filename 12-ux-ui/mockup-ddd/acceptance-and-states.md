@@ -6,7 +6,7 @@ estado: accepted
 dependencias_entrada: mockup-ddd/README.md (reglas/contrato de entrega); design-tokens.md; design-system.md; sitemap.md; ux-copy.md
 consumidores_siguientes: generación y validación de cada pantalla del mockup
 tldr: Define qué estados debe especificar cada tipo de pantalla y el checklist de aceptación (DoD) que una pantalla generada debe cumplir para marcarse aceptada.
-decisiones_clave: matriz tipo×estado obligatoria; DoD verificable por pantalla; los estados no se fragmentan en pantallas, se documentan como estados
+decisiones_clave: matriz tipo×estado obligatoria; DoD verificable por pantalla; los estados no se fragmentan en pantallas, se documentan como estados; render verificado por estilos computados (no basta con que el archivo exista); lecciones de construcción post-generación (§B.1)
 halts_registrados: ninguno
 -->
 
@@ -58,7 +58,29 @@ Una pantalla del mockup se marca **✅ aceptada** cuando cumple TODO:
       real (según [sitemap §convención de build](sitemap.md)); **prohibido `href="#"`** para navegar
       (solo válido en toggles JS). Los modales se abren con `data-toggle`, no con enlaces muertos.
       Cada pantalla es **alcanzable** desde el índice y desde la nav de su rol.
+- [ ] **Render verificado (no basta con que el archivo exista):** la pantalla se **abre en el
+      navegador y se inspecciona el layout renderizado** (estilos computados), no solo su HTML. Toda
+      clase referenciada (`.app-sidebar`, `.app-header`, shell, componentes) **tiene CSS definido** en
+      el CSS compartido o inline; **cero clases "huérfanas"** (referidas en el markup pero sin regla),
+      que renderizan como bloque sin estilo. Verificar: sidebar con ancho/borde real, iconos a tamaño
+      fijo (no expandidos por `viewBox`), `body`/shell con layout (flex/grid), no un apilado plano.
 - [ ] **Trazabilidad:** la pantalla declara `HU → endpoint → tabla → MFE` en su header.
+
+## B.1 Lecciones de construcción verificadas (post-generación)
+
+Hallazgos reales al auditar el mockup **ya generado** (herramienta agéntica). Se registran para que la
+verificación no vuelva a asumir "archivo existe = pantalla funciona":
+
+| # | Síntoma | Causa raíz | Regla que lo previene |
+|---|---|---|---|
+| L1 | Iconos de nav gigantes (~147px) | SVG con `viewBox` **sin `width/height`** y **sin** regla CSS de tamaño; además clase del markup (`.nav-item`) ≠ clase del CSS (`.sidebar-item`) | Regla de tamaño de icono en el CSS **compartido** por todas las páginas; nombres de clase markup↔CSS deben coincidir |
+| L2 | 15 pantallas (admin/backoffice/learner) con **sidebar colapsado sin estilo** | Clases del shell (`.app-header/.app-body/.app-sidebar/.nav-group`) **referenciadas pero nunca definidas** en CSS → renderizan como bloque plano | Criterio **"Render verificado"**: inspeccionar estilos computados; cero clases huérfanas |
+| L3 | Fondos incoherentes entre roles (blanco vs hueso) | Cada página duplicaba `:root` inline con **valores divergentes** (`--color-bg: #FFFFFF` vs `#F9FAFB`) | Tokens con **una sola fuente** (CSS compartido); si se duplica `:root`, los valores deben ser idénticos |
+| L4 | Colores "mágicos" (hex inline) fuera de tokens | Generación escribió hex crudos en `style=`/`<style>` | DoD "Tokens": **uso 100% `var(--color-*)`**; hex solo en la definición `:root` |
+
+> **Verificación mínima recomendada:** servir el mockup (`http.server`) + abrir cada pantalla y
+> comprobar por estilos computados: (a) el contenedor de layout es `flex`/`grid` (no `block` plano),
+> (b) el sidebar tiene ancho/borde, (c) los iconos miden ~20px, (d) no hay hex crudos en líneas de uso.
 
 ## C. Estado de aceptación
 El estado (⬜/✅) de cada pantalla se lleva en [screen-inventory.md](screen-inventory.md). Una pantalla
