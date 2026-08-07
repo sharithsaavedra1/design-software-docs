@@ -60,6 +60,8 @@ svg { width: 20px; height: 20px; flex-shrink: 0; display: block; fill: none; str
 .form-field input, .form-field select, .form-field textarea { width:100%;min-height:48px;border:1px solid #d0d5dd;border-radius:var(--radius-sm);background:#fff;color:var(--color-text);padding:11px 13px; }
 .form-field textarea { min-height:112px;resize:vertical; }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--color-brand);box-shadow:0 0 0 4px rgba(0,120,50,.12);outline:0; }
+/* Checkbox/radio: no deben heredar el sizing de input de formulario (evita cuadros gigantes) */
+input[type="checkbox"], input[type="radio"], .form-field input[type="checkbox"], .form-field input[type="radio"] { width:18px;height:18px;min-height:0;min-width:0;flex-shrink:0;padding:0;margin:0;accent-color:var(--color-brand);cursor:pointer;vertical-align:middle; }
 .field-help { color:var(--color-text-muted);font-size:var(--font-size-xs); }
 .field-error { display:flex;gap:6px;align-items:flex-start;color:var(--color-danger);font-size:var(--font-size-xs); }
 .field-error svg { width:15px;height:15px;margin-top:1px; }
