@@ -83,6 +83,7 @@
     ];
     let html=`${C().pageHeader('Parametrización — Catálogos de monitoreo','Tipos de KPI, estados, niveles de riesgo y tipos de alerta que usan indicadores, alertas y seguimiento.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
       <section class="panel">${C().tabs(['Tipos de KPI','Estados de KPI','Niveles de riesgo','Tipos de alerta'],0)}
+      <div class="tabpanel" data-tabpanel="0">
       <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Tipos de KPI</h2><p class="panel-subtitle">Definen qué mide cada indicador; los usa el panel de indicadores y el seguimiento de ficha.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo tipo de KPI</button></div>
       ${C().table([
         {label:'Código',render:r=>`<strong>${r.code}</strong>`},
@@ -92,16 +93,20 @@
         {label:'Estado',render:r=>C().status(r.is_active)},
         {label:'',render:r=>`<button class="btn btn-ghost btn-icon" data-open-modal="edit">${icon('edit')}</button>`}
       ],kpiTypes,{caption:'Tipos de KPI',total:8,start:1,end:kpiTypes.length,pageSize:10})}
+      </div>
 
-      <div class="panel-header" style="padding:16px 20px;border-top:1px solid var(--color-border)"><div><h2 class="panel-title">Estados de KPI</h2><p class="panel-subtitle">Clasifican cada medición y se asocian a un nivel de riesgo.</p></div><button class="btn btn-secondary" data-open-modal="status">${icon('plus')}Nuevo estado</button></div>
+      <div class="tabpanel" data-tabpanel="1" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Estados de KPI</h2><p class="panel-subtitle">Clasifican cada medición y se asocian a un nivel de riesgo.</p></div><button class="btn btn-secondary" data-open-modal="status">${icon('plus')}Nuevo estado</button></div>
       ${C().table([
         {label:'Código',render:r=>C().status(r.code)},
         {label:'Descripción',key:'description'},
         {label:'Nivel de riesgo',key:'risk'},
         {label:'',render:r=>`<button class="btn btn-ghost btn-icon" data-open-modal="status">${icon('edit')}</button>`}
       ],kpiStatuses,{caption:'Estados de KPI',total:3,start:1,end:kpiStatuses.length,pageSize:10})}
+      </div>
 
-      <div class="panel-header" style="padding:16px 20px;border-top:1px solid var(--color-border)"><div><h2 class="panel-title">Niveles de riesgo</h2><p class="panel-subtitle">Prioridad y color con que se resaltan estados y alertas en toda la app.</p></div><button class="btn btn-secondary" data-open-modal="risk">${icon('plus')}Nuevo nivel</button></div>
+      <div class="tabpanel" data-tabpanel="2" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Niveles de riesgo</h2><p class="panel-subtitle">Prioridad y color con que se resaltan estados y alertas en toda la app.</p></div><button class="btn btn-secondary" data-open-modal="risk">${icon('plus')}Nuevo nivel</button></div>
       ${C().table([
         {label:'Orden',render:r=>`<strong>${r.priority_order}</strong>`},
         {label:'Código',render:r=>`<strong>${r.code}</strong>`},
@@ -109,8 +114,10 @@
         {label:'Color',render:r=>`<span style="display:inline-flex;align-items:center;gap:8px"><span aria-hidden="true" style="width:14px;height:14px;border-radius:4px;border:1px solid var(--color-border);background:${r.color_hex}"></span>${r.color_hex}</span>`},
         {label:'',render:r=>`<button class="btn btn-ghost btn-icon" data-open-modal="risk">${icon('edit')}</button>`}
       ],riskLevels,{caption:'Niveles de riesgo',total:3,start:1,end:riskLevels.length,pageSize:10})}
+      </div>
 
-      <div class="panel-header" style="padding:16px 20px;border-top:1px solid var(--color-border)"><div><h2 class="panel-title">Tipos de alerta</h2><p class="panel-subtitle">Reglas que disparan alertas; su umbral por defecto puede afectar el estado de la ficha.</p></div><button class="btn btn-secondary" data-open-modal="alert">${icon('plus')}Nuevo tipo de alerta</button></div>
+      <div class="tabpanel" data-tabpanel="3" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Tipos de alerta</h2><p class="panel-subtitle">Reglas que disparan alertas; su umbral por defecto puede afectar el estado de la ficha.</p></div><button class="btn btn-secondary" data-open-modal="alert">${icon('plus')}Nuevo tipo de alerta</button></div>
       ${C().table([
         {label:'Código',render:r=>`<strong>${r.code}</strong>`},
         {label:'Nombre',render:r=>`<span style="display:inline-flex;align-items:center;gap:6px">${icon('warning')}${r.name}</span>`},
@@ -121,6 +128,7 @@
         {label:'Estado',render:r=>C().status(r.is_active)},
         {label:'',render:r=>`<button class="btn btn-ghost btn-icon" data-open-modal="alert">${icon('edit')}</button>`}
       ],alertTypes,{caption:'Tipos de alerta',total:12,start:1,end:alertTypes.length,pageSize:10})}
+      </div>
       </section>`;
     const modal=ctx.query.get('modal');
     if(modal==='edit') html+=C().modal('Nuevo / editar tipo de KPI',

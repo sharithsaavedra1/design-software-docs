@@ -62,42 +62,42 @@
     ];
     let html=`${C().pageHeader('Parametrización — RBAC (roles y permisos)','Roles, módulos, permisos (features) y su asignación. Define el x-required-feature que gobierna cada endpoint/pantalla.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
       <section class="panel">${C().tabs(['Roles','Módulos y permisos','Asignación rol↔permiso'],0)}
-        <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('users')}Roles</h2><p class="panel-subtitle">7 roles del sistema (rbac.role). Los roles del sistema no se eliminan; se ajustan sus permisos.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo rol</button></div>
-        ${C().table([
-          {label:'Rol',render:r=>`<strong>${r.name}</strong>`},
-          {label:'Descripción',key:'desc'},
-          {label:'Permisos',render:r=>r.count>0?`<span class="status-badge status-info">${icon('key')}${r.count}</span>`:`<span class="status-badge status-neutral">${icon('lock')}0</span>`},
-          {label:'Tipo',render:()=>C().status('INFO','Rol de sistema')},
-          {label:'Estado',render:()=>C().status('ACTIVE')},
-          {label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="edit">Editar</button>'}
-        ], roles, {caption:'Roles',total:7,start:1,end:roles.length,pageSize:10})}
-      </section>
-
-      <section class="panel" style="margin-top:20px">
-        <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('settings')}Módulos y permisos (features)</h2><p class="panel-subtitle">10 módulos · 62 features. El <code>code</code> es el x-required-feature exigido por cada endpoint/pantalla.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva feature</button></div>
-        ${C().filters([{label:'Módulo',options:['Todos','MOD_IDENTITY','MOD_REFERENCE','MOD_ACADEMIC','MOD_ENVIRONMENT','MOD_SCHEDULING','MOD_ACTORS','MOD_DOCUMENTS','MOD_MONITORING','MOD_AUDIT','MOD_DASHBOARD']},{label:'Nivel',options:['Todos','READ','WRITE','DELETE','PUBLISH']},{label:'Buscar',type:'search',placeholder:'Código o nombre de feature'}])}
-        ${C().table([
-          {label:'Feature (code)',render:r=>`<strong><code>${r.code}</code></strong>`},
-          {label:'Nombre',key:'name'},
-          {label:'Módulo',render:r=>C().status('INFO',r.mod)},
-          {label:'Nivel',render:r=>C().status(r.level==='READ'?'INFO':r.level==='PUBLISH'?'SUCCESS':'AT_RISK',r.level)},
-          {label:'Roles',render:r=>`${icon('users')}${r.roles}`},
-          {label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="edit">Editar</button>'}
-        ], features, {caption:'Features por módulo',total:62,start:1,end:features.length,pageSize:10})}
-      </section>
-
-      <section class="panel" style="margin-top:20px">
-        <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('lock')}Asignación rol ↔ permiso</h2><p class="panel-subtitle">Matriz rbac.role_feature (extracto). Marca ✓ = la feature está asignada al rol, con su scope (GLOBAL / TRAINING_CENTER / OWN_*).</p></div><button class="btn btn-secondary btn-sm" data-open-modal="edit">${icon('edit')}Editar asignación</button></div>
-        ${C().table([
-          {label:'Feature',render:r=>`<strong><code>${r.code}</code></strong>`},
-          {label:'SYSTEM_ADMIN',render:r=>yn(r.sys)},
-          {label:'CENTER_DIRECTOR',render:r=>yn(r.dir)},
-          {label:'COORDINATOR',render:r=>yn(r.coord)},
-          {label:'AREA_LEADER',render:r=>yn(r.area)},
-          {label:'INSTRUCTOR',render:r=>yn(r.instr)},
-          {label:'LEARNER',render:r=>yn(r.learn)},
-          {label:'ADMIN_STAFF',render:r=>yn(r.staff)}
-        ], matrix, {caption:'Matriz rol ↔ permiso',total:62,start:1,end:matrix.length,pageSize:10})}
+        <div class="tabpanel" data-tabpanel="0">
+          <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('users')}Roles</h2><p class="panel-subtitle">7 roles del sistema (rbac.role). Los roles del sistema no se eliminan; se ajustan sus permisos.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo rol</button></div>
+          ${C().table([
+            {label:'Rol',render:r=>`<strong>${r.name}</strong>`},
+            {label:'Descripción',key:'desc'},
+            {label:'Permisos',render:r=>r.count>0?`<span class="status-badge status-info">${icon('key')}${r.count}</span>`:`<span class="status-badge status-neutral">${icon('lock')}0</span>`},
+            {label:'Tipo',render:()=>C().status('INFO','Rol de sistema')},
+            {label:'Estado',render:()=>C().status('ACTIVE')},
+            {label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="edit">Editar</button>'}
+          ], roles, {caption:'Roles',total:7,start:1,end:roles.length,pageSize:10})}
+        </div>
+        <div class="tabpanel" data-tabpanel="1" hidden>
+          <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('settings')}Módulos y permisos (features)</h2><p class="panel-subtitle">10 módulos · 62 features. El <code>code</code> es el x-required-feature exigido por cada endpoint/pantalla.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva feature</button></div>
+          ${C().filters([{label:'Módulo',options:['Todos','MOD_IDENTITY','MOD_REFERENCE','MOD_ACADEMIC','MOD_ENVIRONMENT','MOD_SCHEDULING','MOD_ACTORS','MOD_DOCUMENTS','MOD_MONITORING','MOD_AUDIT','MOD_DASHBOARD']},{label:'Nivel',options:['Todos','READ','WRITE','DELETE','PUBLISH']},{label:'Buscar',type:'search',placeholder:'Código o nombre de feature'}])}
+          ${C().table([
+            {label:'Feature (code)',render:r=>`<strong><code>${r.code}</code></strong>`},
+            {label:'Nombre',key:'name'},
+            {label:'Módulo',render:r=>C().status('INFO',r.mod)},
+            {label:'Nivel',render:r=>C().status(r.level==='READ'?'INFO':r.level==='PUBLISH'?'SUCCESS':'AT_RISK',r.level)},
+            {label:'Roles',render:r=>`${icon('users')}${r.roles}`},
+            {label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="edit">Editar</button>'}
+          ], features, {caption:'Features por módulo',total:62,start:1,end:features.length,pageSize:10})}
+        </div>
+        <div class="tabpanel" data-tabpanel="2" hidden>
+          <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('lock')}Asignación rol ↔ permiso</h2><p class="panel-subtitle">Matriz rbac.role_feature (extracto). Marca ✓ = la feature está asignada al rol, con su scope (GLOBAL / TRAINING_CENTER / OWN_*).</p></div><button class="btn btn-secondary btn-sm" data-open-modal="edit">${icon('edit')}Editar asignación</button></div>
+          ${C().table([
+            {label:'Feature',render:r=>`<strong><code>${r.code}</code></strong>`},
+            {label:'SYSTEM_ADMIN',render:r=>yn(r.sys)},
+            {label:'CENTER_DIRECTOR',render:r=>yn(r.dir)},
+            {label:'COORDINATOR',render:r=>yn(r.coord)},
+            {label:'AREA_LEADER',render:r=>yn(r.area)},
+            {label:'INSTRUCTOR',render:r=>yn(r.instr)},
+            {label:'LEARNER',render:r=>yn(r.learn)},
+            {label:'ADMIN_STAFF',render:r=>yn(r.staff)}
+          ], matrix, {caption:'Matriz rol ↔ permiso',total:62,start:1,end:matrix.length,pageSize:10})}
+        </div>
       </section>`;
     if(ctx.query.get('modal')==='edit') html+=paramRbacModal();
     return html;
