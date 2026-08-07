@@ -989,3 +989,12 @@ img, picture {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Nav lateral: iconos SVG a tamaño fijo (sin esto los SVG con viewBox se expanden) */
+.nav-item svg,
+.nav-item .nav-icon,
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
