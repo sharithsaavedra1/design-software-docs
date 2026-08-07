@@ -48,6 +48,21 @@ provistos por **varios micro-frontends**. Espeja el backend: 9 microservicios (d
 | **audit-mfe** | audit-service | **Auditoría** (traza) | 06-backoffice |
 | **reference-mfe** | reference-data-service | **Parametrización / catálogos**, **Datos de referencia** (regionales/centros/sedes) | 05-administrador, 06-backoffice |
 
+## Parametrización (07 · director + soporte): pantalla nueva por MFE
+
+Las pantallas de parametrización configuran los catálogos y datos maestros que los flujos operativos
+exigen como prerequisito. Cada MFE afectado suma **una** pantalla de parametrización:
+
+| Micro-frontend | Pantalla de parametrización que suma | Prerequisito que habilita |
+|---|---|---|
+| **reference-mfe** | **Hub de parametrización** (`/admin/parametrizacion`, montado por el shell) + **Geografía institucional** | punto de entrada; regionales/centros/sedes |
+| **academic-mfe** | **Currículo académico** | currículo → fichas |
+| **scheduling-mfe** | **Jornadas / franjas horarias** | franjas → horarios |
+| **environment-mfe** | **Tipos de ambiente e inventario** | tipos de ambiente → ambientes |
+| **monitoring-mfe** | **Catálogos de monitoreo (KPI/alertas)** | catálogos → KPIs |
+| **actors-mfe** | **Estados de actores** | máquina de estados de actores |
+| **iam-mfe** | **RBAC — roles y permisos** | roles/permisos RBAC |
+
 ## Realización en el mockup
 
 El mockup adoptado (`mockups/app/`) realiza esta arquitectura **1:1** como SPA con hash-router:
@@ -58,7 +73,7 @@ El mockup adoptado (`mockups/app/`) realiza esta arquitectura **1:1** como SPA c
   `iam/ scheduling/ academic/ environment/ actors/ document/ monitoring/ audit/ reference/`.
 - **`assets/` compartido** (un solo set de tokens/componentes: `tokens.css`, `components.css`,
   `app.css`, `components.js`, `icons.js`) — ningún dominio redefine tokens.
-- **`tools/validate-routes.js`** valida la cobertura ruta↔pantalla (**45/45**).
+- **`tools/validate-routes.js`** valida la cobertura ruta↔pantalla (**53/53**).
 
 ## Cómo un flujo compone varios micro-frontends
 

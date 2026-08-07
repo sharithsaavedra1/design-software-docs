@@ -48,7 +48,15 @@
     {n:42,group:'06 · Back-office',name:'Modal generar documento',route:'/backoffice/documentos?modal=generate',role:'support',mfe:'document'},
     {n:43,group:'06 · Back-office',name:'Editor / preview de plantilla',route:'/backoffice/documentos/plantillas/tpl-01/editar',role:'support',mfe:'document'},
     {n:44,group:'06 · Back-office',name:'Modal detalle de auditoría',route:'/backoffice/auditoria?modal=audit',role:'support',mfe:'audit'},
-    {n:45,group:'06 · Back-office',name:'CRUD catálogo / valor / parámetro',route:'/backoffice/parametrizacion?modal=crud',role:'support',mfe:'reference'}
+    {n:45,group:'06 · Back-office',name:'CRUD catálogo / valor / parámetro',route:'/backoffice/parametrizacion?modal=crud',role:'support',mfe:'reference'},
+    {n:46,group:'07 · Parametrización',name:'Hub de parametrización',route:'/admin/parametrizacion',role:'director',mfe:'reference'},
+    {n:47,group:'07 · Parametrización',name:'Currículo académico',route:'/admin/parametrizacion/curriculo',role:'director',mfe:'academic'},
+    {n:48,group:'07 · Parametrización',name:'Jornadas / franjas horarias',route:'/admin/parametrizacion/jornadas',role:'director',mfe:'scheduling'},
+    {n:49,group:'07 · Parametrización',name:'Tipos de ambiente e inventario',route:'/admin/parametrizacion/ambientes',role:'director',mfe:'environment'},
+    {n:50,group:'07 · Parametrización',name:'Catálogos de monitoreo (KPI/alertas)',route:'/admin/parametrizacion/monitoreo',role:'director',mfe:'monitoring'},
+    {n:51,group:'07 · Parametrización',name:'Estados de actores',route:'/admin/parametrizacion/estados',role:'director',mfe:'actors'},
+    {n:52,group:'07 · Parametrización',name:'Geografía institucional',route:'/admin/parametrizacion/geografia',role:'director',mfe:'reference'},
+    {n:53,group:'07 · Parametrización',name:'RBAC — roles y permisos',route:'/admin/parametrizacion/rbac',role:'director',mfe:'iam'}
   ];
   M.routeDefinitions = [
     {pattern:/^\/login$/,public:true,screen:'login'},
@@ -83,13 +91,21 @@
     {pattern:/^\/backoffice\/documentos\/plantillas\/([^/]+)\/editar$/,roles:['support'],screen:'templateEditor'},
     {pattern:/^\/backoffice\/documentos\/([^/]+)$/,roles:['support'],screen:'documentDetail'},
     {pattern:/^\/backoffice\/auditoria$/,roles:['support'],screen:'auditList'},
-    {pattern:/^\/backoffice\/parametrizacion$/,roles:['support'],screen:'parametersList'}
+    {pattern:/^\/backoffice\/parametrizacion$/,roles:['support'],screen:'parametersList'},
+    {pattern:/^\/admin\/parametrizacion$/,roles:['director','support'],screen:'paramHub'},
+    {pattern:/^\/admin\/parametrizacion\/curriculo$/,roles:['director','support'],screen:'paramCurriculum'},
+    {pattern:/^\/admin\/parametrizacion\/jornadas$/,roles:['director','support'],screen:'paramTimeSlots'},
+    {pattern:/^\/admin\/parametrizacion\/ambientes$/,roles:['director','support'],screen:'paramEnvironmentTypes'},
+    {pattern:/^\/admin\/parametrizacion\/monitoreo$/,roles:['director','support'],screen:'paramMonitoring'},
+    {pattern:/^\/admin\/parametrizacion\/estados$/,roles:['director','support'],screen:'paramActorStatus'},
+    {pattern:/^\/admin\/parametrizacion\/geografia$/,roles:['director','support'],screen:'paramGeography'},
+    {pattern:/^\/admin\/parametrizacion\/rbac$/,roles:['director','support'],screen:'paramRbac'}
   ];
   M.navByRole = {
     coordinator:[['Inicio','/','home'],['Horarios','/horarios','calendar'],['Disponibilidad','/disponibilidad','clock'],['Fichas','/fichas','folder']],
     instructor:[['Mi horario','/instructor/mi-horario','calendar'],['Mi disponibilidad','/instructor/mi-disponibilidad','clock'],['Seguimiento','/instructor/seguimiento','activity']],
     learner:[['Mi horario','/mi-horario','calendar'],['Notificaciones','/notificaciones','bell']],
-    director:[['Indicadores','/admin/indicadores','chart'],['Usuarios','/admin/usuarios','users'],['Datos de referencia','/admin/datos-referencia','settings']],
-    support:[['Documentos','/backoffice/documentos','file'],['Plantillas','/backoffice/documentos/plantillas','edit'],['Auditoría','/backoffice/auditoria','activity'],['Parametrización','/backoffice/parametrizacion','settings']]
+    director:[['Indicadores','/admin/indicadores','chart'],['Usuarios','/admin/usuarios','users'],['Datos de referencia','/admin/datos-referencia','file'],['Parametrización','/admin/parametrizacion','settings']],
+    support:[['Documentos','/backoffice/documentos','file'],['Plantillas','/backoffice/documentos/plantillas','edit'],['Auditoría','/backoffice/auditoria','activity'],['Parametrización','/admin/parametrizacion','settings']]
   };
 })();
