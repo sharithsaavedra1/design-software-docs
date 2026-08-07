@@ -152,8 +152,7 @@
         <label class="field"><span>Nivel de formación</span><select><option>TECNÓLOGO</option><option>TÉCNICO</option><option>ESPECIALIZACIÓN TECNOLÓGICA</option><option>OPERARIO</option></select></label>
         <label class="field"><span>Horas totales</span><input type="number" value="2640" placeholder="Ej. 2640"></label>
         <label class="field"><span>Versión</span><input type="number" value="104" placeholder="Ej. 1"></label>
-        <label class="field"><span>Línea tecnológica</span><select><option>LT-TIC · Tecnologías de la Información y las Comunicaciones</option><option>LT-IND · Industria y Manufactura</option><option>LT-AGR · Actividad Física, Recreación y Deporte</option></select></label>
-        <label class="field"><span>Red de conocimiento</span><select><option>RC-PROG · Programación y Bases de Datos</option><option>RC-WEB · Desarrollo Web y Móvil</option><option>RC-CLD · Servicios en la Nube</option></select></label>
+        <label class="field full"><span>Red de conocimiento (padre)</span><select><option>RC-PROG · Programación y Bases de Datos</option><option>RC-WEB · Desarrollo Web y Móvil</option><option>RC-CLD · Servicios en la Nube</option></select><small class="field-help">Padre directo del programa (taxonomía SENA). La línea tecnológica no se asigna aquí: se hereda por la cadena red de conocimiento → red tecnológica → línea.</small></label>
         <label class="field full"><span>Competencias asociadas</span><div class="check-list">${progComps.map(x=>`<label class="check-row"><input type="checkbox" ${x.on?'checked':''}> ${x.label}</label>`).join('')}</div></label>
         <label class="field"><span>Estado</span><select><option>Activo</option><option>Inactivo</option></select></label>
       </div>`,footer);
