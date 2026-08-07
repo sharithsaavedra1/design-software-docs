@@ -452,7 +452,7 @@ paths:
         Usa paginación por cursor por ser una colección grande/continua (guidelines §6).
         Inventario — Usuarios: seguridad/administración; Frecuencia: on-demand;
         Formato: JSON; Fuente: `identity_audit.audit_login`.
-      x-required-feature: IDENTITY_AUDIT_VIEW
+      x-required-feature: AUDIT_LOG_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/cursor'
         - $ref: '_shared.yaml#/components/parameters/limit'

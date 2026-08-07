@@ -263,7 +263,7 @@ Log inmutable de intentos de autenticación. Solo INSERT en `iam_db`.
 |----------|------|-----|
 | `id` | UUID PK | — |
 | `municipality_id` | FK → Municipality | — |
-| `sena_code` | VARCHAR(10) UNIQUE | — |
+| `center_code` | VARCHAR(10) UNIQUE | — |
 | `name` | VARCHAR(200) | — |
 | `address` | TEXT | — |
 | `phone` | VARCHAR(20) | ✓ |
@@ -298,13 +298,25 @@ Valores individuales dentro de un catálogo.
 | `id` | UUID PK |
 | `catalog_id` | FK → Catalog |
 | `code` | VARCHAR(50) |
-| `label` | VARCHAR(200) |
+| `label` | VARCHAR(255) |
 | `display_order` | INTEGER |
 | `is_active` | BOOLEAN |
+
+#### `Parameter`
+Parámetro de sistema clave-valor (EAV). Tabla independiente, sin relaciones.
+
+| Atributo | Tipo | Restricciones |
+|----------|------|---------------|
+| `id` | UUID | PK |
+| `key` | VARCHAR(100) | UNIQUE, NOT NULL — ej: `MAX_HOURS_PER_WEEK` |
+| `value` | TEXT | NOT NULL — almacenado como string; validado según `value_type` en la capa de aplicación |
+| `value_type` | ENUM(`integer`, `string`, `boolean`, `json`) | NOT NULL |
+| `description` | TEXT | nullable |
 
 **Relaciones**:
 - `Macroregion` 1──* `Microregion` ──* `Department` ──* `Municipality` ──* `TrainingCenter` ──* `InstitutionalUnit`
 - `Catalog` 1──* `CatalogDetail`
+- `Parameter` — sin relaciones (EAV independiente)
 
 ---
 
@@ -338,7 +350,7 @@ Valores individuales dentro de un catálogo.
 |----------|------|---------------|
 | `id` | UUID | PK |
 | `knowledge_network_id` | UUID | FK → KnowledgeNetwork |
-| `sena_code` | VARCHAR(20) | UNIQUE |
+| `program_code` | VARCHAR(20) | UNIQUE |
 | `name` | VARCHAR(200) | NOT NULL |
 | `training_level` | ENUM(`AUXILIARY`, `OPERATOR`, `TECHNICIAN`, `TECHNOLOGIST`) | NOT NULL |
 | `total_hours` | INTEGER | NOT NULL |
@@ -482,7 +494,7 @@ Franja horaria recurrente (lunes de 07:00 a 10:00).
 | `day_of_week` | SMALLINT (1=lunes…7=domingo) |
 | `start_time` | TIME |
 | `end_time` | TIME |
-| `label` | VARCHAR(50) |
+| `name` | VARCHAR(50) |
 
 #### `ClassSession`
 Instancia de una clase: ficha + instructor + ambiente + franja.
@@ -497,16 +509,6 @@ Instancia de una clase: ficha + instructor + ambiente + franja.
 | `time_slot_id` | UUID | FK → TimeSlot |
 | `session_date` | DATE | NOT NULL |
 | `notes` | TEXT | — |
-
-#### `InstructorScheduleAssignment`
-Vinculación de un instructor con un horario (nivel de ficha).
-
-| Atributo | Tipo |
-|----------|------|
-| `id` | UUID PK |
-| `schedule_id` | FK → Schedule |
-| `instructor_id` | UUID (referencia externa) |
-| `assigned_hours_per_week` | DECIMAL(4,1) |
 
 #### `SchedulingConflict`
 Conflicto detectado durante la validación. Se elimina al corregir o al descartar el borrador.
@@ -523,7 +525,6 @@ Conflicto detectado durante la validación. Se elimina al corregir o al descarta
 
 **Relaciones**:
 - `Schedule` 1──* `ClassSession`
-- `Schedule` 1──* `InstructorScheduleAssignment`
 - `Schedule` 1──* `SchedulingConflict`
 - `ClassSession` *──1 `TimeSlot`
 
@@ -591,7 +592,7 @@ Empresa que participa en etapa productiva.
 |----------|------|-----|
 | `id` | UUID PK | — |
 | `nit` | VARCHAR(20) UNIQUE | — |
-| `name` | VARCHAR(200) | — |
+| `business_name` | VARCHAR(200) | — |
 | `contact_name` | VARCHAR(200) | ✓ |
 | `contact_email` | VARCHAR(255) | ✓ |
 | `contact_phone` | VARCHAR(20) | ✓ |
@@ -607,7 +608,7 @@ Etapa productiva de un aprendiz en una empresa.
 | `start_date` | DATE |
 | `end_date` | DATE |
 | `supervisor_instructor_id` | FK → Instructor |
-| `status` | ENUM(`ACTIVE`, `COMPLETED`, `INTERRUPTED`) |
+| `status_id` | UUID FK → Status (catálogo `status`) |
 
 #### `CompanyVisit`
 Visita de seguimiento a empresa por el instructor supervisor.
@@ -647,8 +648,8 @@ Documento generado en el sistema.
 | `id` | UUID | PK |
 | `template_id` | UUID | FK → DocumentTemplate (nullable si es libre) |
 | `title` | VARCHAR(300) | NOT NULL |
-| `source_entity_type` | VARCHAR(50) | Ej: `Schedule`, `EnrollmentFicha` |
-| `source_entity_id` | UUID | ID del objeto de negocio referenciado |
+| `owner_service` | VARCHAR(50) | Servicio propietario. Ej: `scheduling`, `academic-management` |
+| `owner_entity_id` | UUID | ID del objeto de negocio propietario en `owner_service` |
 | `storage_key` | VARCHAR(500) | Ruta en object storage |
 | `mime_type` | VARCHAR(100) | |
 | `size_bytes` | BIGINT | |
@@ -668,18 +669,6 @@ Versiones de un documento.
 | `storage_key` | VARCHAR(500) |
 | `created_by` | UUID |
 | `created_at` | TIMESTAMPTZ |
-
-#### `DigitalSignature`
-Firma digital aplicada a un documento.
-
-| Atributo | Tipo | PII |
-|----------|------|-----|
-| `id` | UUID PK | — |
-| `document_id` | FK → Document | — |
-| `signer_id` | UUID | — |
-| `signer_name` | VARCHAR(200) | ✓ |
-| `signature_hash` | VARCHAR(500) | — |
-| `signed_at` | TIMESTAMPTZ | — |
 
 **Retención**: `Document` → política variable según tipo; mínimo 5 años para documentos académicos
 
