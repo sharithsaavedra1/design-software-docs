@@ -103,6 +103,10 @@ body.nav-collapsed .nav-link { justify-content:center; }
 .system-state-content { max-width:620px; }
 .system-code { font-size:72px;font-weight:700;color:var(--color-brand);line-height:1; }
 
+/* Toggles del topbar: la hamburguesa solo aplica al drawer móvil -> oculta en escritorio;
+   el colapsar es de escritorio -> se oculta en móvil (ver @media 767). Evita el botón muerto. */
+.topbar [data-mobile-nav] { display:none; }
+
 @media (max-width:1100px) {
   .availability-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .inventory-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -112,6 +116,8 @@ body.nav-collapsed .nav-link { justify-content:center; }
 @media (max-width:767px) {
   :root { --topbar-height:64px; }
   .topbar { padding:0 12px; }
+  .topbar [data-mobile-nav] { display:grid; }
+  .topbar .desktop-collapse { display:none; }
   .topbar .brand-mark { width:40px;height:40px;border-radius:11px; }
   .brand-copy span,.user-copy,.user-trigger>svg { display:none; }
   .brand-copy strong { max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
