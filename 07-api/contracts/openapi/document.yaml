@@ -380,7 +380,7 @@ components:
         domain: { $ref: '#/components/schemas/DocumentDomain' }
         owner_service:
           type: string
-          maxLength: 50
+          maxLength: 100
           description: Servicio que solicitó/originó el documento.
         owner_entity_id:
           type: string
@@ -415,7 +415,7 @@ components:
           format: uuid
         title: { type: string, maxLength: 300 }
         domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service: { type: string, maxLength: 50 }
+        owner_service: { type: string, maxLength: 100 }
         owner_entity_id: { type: string, format: uuid }
         storage_key:
           type: string
@@ -450,7 +450,7 @@ components:
           description: Referencia a `document_template.code`.
           example: SCHEDULE_CERTIFICATE
         domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service: { type: string, maxLength: 50 }
+        owner_service: { type: string, maxLength: 100 }
         owner_entity_id: { type: string, format: uuid }
         title: { type: string, maxLength: 300 }
         data:
@@ -519,7 +519,7 @@ components:
         id: { type: string, format: uuid }
         title: { type: string, maxLength: 300 }
         domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service: { type: string, maxLength: 50 }
+        owner_service: { type: string, maxLength: 100 }
         owner_entity_id: { type: string, format: uuid }
         status: { $ref: '#/components/schemas/DocumentStatus' }
         current_version_number:
