@@ -9,7 +9,7 @@
         /* Inline basic layout for structural presentation */
         :root {
             --color-brand: #007832;
-            --color-bg: #FFFFFF;
+            --color-bg: #F9FAFB;
             --color-surface: #FFFFFF;
             --color-surface-muted: #F2F4F7;
             --color-text: #101828;
@@ -50,8 +50,8 @@
         .meta-text { color: var(--color-text-muted); font-size: 0.9rem; }
         
         .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: 500; }
-        .status-badge.published, .status-badge.active, .status-badge.resolved { background: var(--color-success-surface); color: var(--color-success); border: 1px solid #A6F4C5; }
-        .status-badge.cancelled, .status-badge.pending { background: var(--color-danger-surface); color: var(--color-danger); border: 1px solid #FECDCA; }
+        .status-badge.published, .status-badge.active, .status-badge.resolved { background: var(--color-success-surface); color: var(--color-success); border: 1px solid var(--color-success-border); }
+        .status-badge.cancelled, .status-badge.pending { background: var(--color-danger-surface); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
         .status-badge.draft { background: var(--color-surface-muted); color: var(--color-text-muted); border: 1px solid var(--color-border); }
         
         .btn { padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; text-decoration: none; }
@@ -61,7 +61,7 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left; }
         th { padding: 16px; background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); font-weight: 600; color: var(--color-text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
         td { padding: 16px; border-bottom: 1px solid var(--color-border); font-size: 0.95rem; }
-        tr:hover td { background: #F9FAFB; }
+        tr:hover td { background: var(--color-bg); }
         tr.cancelled td { color: var(--color-text-muted); text-decoration: line-through; }
         
         .pagination { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 0.9rem; }
