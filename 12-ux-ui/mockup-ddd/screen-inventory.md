@@ -5,14 +5,14 @@ fase: diseño (UX/UI)
 estado: draft
 dependencias_entrada: mockup-ddd/flows/*.md; micro-frontends.md
 consumidores_siguientes: generación del mockup (por pantalla), construcción del frontend (por MFE)
-tldr: Índice único de las ~45 pantallas/modales, mapeadas a su MFE dueño, rol y estado de generación. Doble lente: por flujo (experiencia) y por micro-frontend (build).
+tldr: Índice único de las ~53 pantallas/modales, mapeadas a su MFE dueño, rol y estado de generación. Doble lente: por flujo (experiencia) y por micro-frontend (build).
 decisiones_clave: la unidad de experiencia es el flujo; la unidad de build es el MFE; el detalle por pantalla (endpoint/HU/tabla) vive en flows/*.md
 halts_registrados: ninguno
 -->
 
 # Inventario maestro de pantallas del mockup
 
-> **ESTADO: PRELIMINAR (v0).** 45 pantallas/modales. El detalle de cada una (endpoints, campos,
+> **ESTADO: PRELIMINAR (v0).** 53 pantallas/modales. El detalle de cada una (endpoints, campos,
 > layout, PROMPT STITCH, HU) está en su archivo de `flows/`. Aquí: el índice + MFE dueño + estado.
 
 **Leyenda estado:** ✅ generado (mockup hecho) · ⬜ pendiente de generar.
@@ -88,23 +88,39 @@ halts_registrados: ninguno
 | 8 | Modal: Detalle de auditoría | modal | audit-mfe | ✅ |
 | 9 | Formularios CRUD catálogos/parámetros | form | reference-mfe | ✅ |
 
+### 07-parametrización (director + soporte)
+> Configuración de catálogos y datos maestros que los flujos operativos exigen como prerequisito
+> (currículo → fichas; jornadas → horarios; tipos de ambiente → ambientes; catálogos → KPIs;
+> máquina de estados de actores; geografía institucional; roles/permisos RBAC).
+
+| # | Pantalla | Rol | MFE | Estado |
+|---|---|---|---|:--:|
+| 1 | Hub de parametrización | director + soporte | reference-mfe (shell) | ✅ |
+| 2 | Currículo académico | director + soporte | academic-mfe | ✅ |
+| 3 | Jornadas / franjas horarias | director + soporte | scheduling-mfe | ✅ |
+| 4 | Tipos de ambiente e inventario | director + soporte | environment-mfe | ✅ |
+| 5 | Catálogos de monitoreo (KPI/alertas) | director + soporte | monitoring-mfe | ✅ |
+| 6 | Estados de actores | director + soporte | actors-mfe | ✅ |
+| 7 | Geografía institucional | director + soporte | reference-mfe | ✅ |
+| 8 | RBAC — roles y permisos | director + soporte | iam-mfe | ✅ |
+
 ## Lente 2 — por MICRO-FRONTEND (build)
 
 | MFE | # pantallas (dueño/compone) | Pantallas |
 |---|:--:|---|
 | **shell-host** | 4 | App Shell, Panel de notificaciones, Estados globales, Dashboard (compone) |
-| **iam-mfe** | 7 | Login, Recuperar, Nueva contraseña, Usuarios, Crear/editar usuario, Detalle usuario, Asignar rol |
-| **scheduling-mfe** | ~11 | Horarios, Detalle horario, Crear/editar, Modal sesión, Confirmar publicación, Panel conflictos, Resolver conflicto, Mi horario (instr/aprendiz), Detalle sesión/clase |
-| **academic-mfe** | 2 | Fichas, Detalle de ficha |
-| **environment-mfe** | 2 | Disponibilidad (ambientes), Detalle de ambiente |
-| **actors-mfe** | 3 | Disponibilidad (instructores), Mi disponibilidad, Crear excepción |
+| **iam-mfe** | 8 | Login, Recuperar, Nueva contraseña, Usuarios, Crear/editar usuario, Detalle usuario, Asignar rol, Param: RBAC roles/permisos |
+| **scheduling-mfe** | ~12 | Horarios, Detalle horario, Crear/editar, Modal sesión, Confirmar publicación, Panel conflictos, Resolver conflicto, Mi horario (instr/aprendiz), Detalle sesión/clase, Param: Jornadas/franjas |
+| **academic-mfe** | 3 | Fichas, Detalle de ficha, Param: Currículo académico |
+| **environment-mfe** | 3 | Disponibilidad (ambientes), Detalle de ambiente, Param: Tipos de ambiente e inventario |
+| **actors-mfe** | 4 | Disponibilidad (instructores), Mi disponibilidad, Crear excepción, Param: Estados de actores |
 | **document-mfe** | 5 | Documentos, Plantillas, Detalle+versiones, Generar, Editor plantilla |
-| **monitoring-mfe** | 6 | KPIs, Drill-down, Seguimiento, Registrar seguimiento, Notificaciones, Detalle notificación |
+| **monitoring-mfe** | 7 | KPIs, Drill-down, Seguimiento, Registrar seguimiento, Notificaciones, Detalle notificación, Param: Catálogos de monitoreo |
 | **audit-mfe** | 2 | Auditoría, Detalle de auditoría |
-| **reference-mfe** | 4 | Datos de referencia, Editar catálogo, Parametrización, CRUD catálogos |
+| **reference-mfe** | 6 | Datos de referencia, Editar catálogo, Parametrización, CRUD catálogos, Param: Hub de parametrización, Param: Geografía institucional |
 
-> Totales: **45 pantallas/modales**, **10 unidades de build** (9 MFE de dominio + shell-host).
-> Generadas hasta ahora: **45**. Pendientes: **0**.
+> Totales: **53 pantallas/modales**, **10 unidades de build** (9 MFE de dominio + shell-host).
+> Generadas hasta ahora: **53**. Pendientes: **0**.
 
 ## Prioridad de generación (MVP primero)
 1. Completar **Coordinador** (núcleo): Crear/editar horario → Panel de conflictos → Resolver conflicto → Disponibilidad → Fichas.

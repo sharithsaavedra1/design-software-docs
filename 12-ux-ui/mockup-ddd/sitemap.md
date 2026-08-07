@@ -79,7 +79,16 @@ halts_registrados: ninguno
    ├ modal Crear/editar usuario (05 P4) · modal Asignar/revocar rol (05 P6)
 /admin/datos-referencia     → Datos de referencia (05 P7, solo-lectura para Director)
    └ modal Editar (05 P8)                                    · reference-mfe
+/admin/parametrizacion      → Hub de parametrización (07 P1) · reference (shell)
+/admin/parametrizacion/curriculo  → Currículo académico (07 P2)      · academic-mfe
+/admin/parametrizacion/jornadas   → Jornadas / franjas horarias (07 P3) · scheduling-mfe
+/admin/parametrizacion/ambientes  → Tipos de ambiente e inventario (07 P4) · environment-mfe
+/admin/parametrizacion/monitoreo  → Catálogos de monitoreo (07 P5)   · monitoring-mfe
+/admin/parametrizacion/estados    → Estados de actores (07 P6)       · actors-mfe
+/admin/parametrizacion/geografia  → Geografía institucional (07 P7)  · reference-mfe
+/admin/parametrizacion/rbac       → RBAC — roles y permisos (07 P8)  · iam-mfe
 ```
+> Las rutas `/admin/parametrizacion/*` son visibles para Director y Soporte (director + support).
 
 ### Back-office (`ADMIN_STAFF` / `SYSTEM_ADMIN`)
 ```
@@ -138,11 +147,18 @@ halts_registrados: ninguno
 | `#/mi-horario` · `#/mi-horario/sesiones/:id` · `#/notificaciones` · `#/notificaciones/:id` | `scheduling` · `monitoring` |
 | `#/admin/indicadores` · `#/admin/indicadores/:ft/:kpi` · `#/admin/usuarios` · `#/admin/usuarios/:id` · `#/admin/datos-referencia` | `monitoring` · `iam` · `reference` |
 | `#/backoffice/documentos` · `/:id` · `/plantillas` · `/plantillas/:id/editar` · `#/backoffice/auditoria` · `#/backoffice/parametrizacion` | `document` · `audit` · `reference` |
+| `#/admin/parametrizacion` (hub) · `#/admin/parametrizacion/geografia` | `reference` (shell monta el hub) |
+| `#/admin/parametrizacion/curriculo` | `academic` |
+| `#/admin/parametrizacion/jornadas` | `scheduling` |
+| `#/admin/parametrizacion/ambientes` | `environment` |
+| `#/admin/parametrizacion/monitoreo` | `monitoring` |
+| `#/admin/parametrizacion/estados` | `actors` |
+| `#/admin/parametrizacion/rbac` | `iam` |
 
 **Modales (estado `?modal=…`, sin ruta propia):** agregar/editar sesión, confirmar publicación,
 resolver conflicto (coordinator); crear excepción, registrar seguimiento (instructor); crear/editar
 usuario, asignar rol (admin); generar documento, detalle de auditoría, CRUD catálogos (back-office).
 
-> La tabla completa **ruta → pantalla → rol → MFE** (45 filas) vive en
+> La tabla completa **ruta → pantalla → rol → MFE** (53 filas) vive en
 > [`mockups/app/README.md`](mockups/app/README.md); la cobertura se valida con
-> `node mockups/app/tools/validate-routes.js` (45/45).
+> `node mockups/app/tools/validate-routes.js` (53/53).
