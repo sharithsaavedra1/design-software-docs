@@ -22,4 +22,99 @@
     if(ctx.query.get('modal')==='role') html+=C().modal('Asignar rol a Juan Pérez',`<div class="form-grid"><div class="form-field full"><label>Rol</label><select><option>Instructor</option><option>Coordinador Académico</option><option>Director de Centro</option></select><div class="field-error">${icon('warning')}Este usuario ya tiene este rol asignado.</div></div><div class="form-field full"><label>Centro de formación (opcional)</label><select><option value="">Vacío = rol global</option><option>Centro de la Industria, la Empresa y los Servicios</option></select></div><div class="form-field full"><label>Expira el (opcional)</label><input type="date"></div></div>`,`<button class="btn btn-secondary" data-close-modal>Cancelar</button><button class="btn btn-primary">Asignar</button>`);
     return html;
   };
+
+  M.screens.paramRbac=(ctx)=>{
+    const state=stateView(ctx,'roles y permisos'); if(state)return `${C().pageHeader('Parametrización — RBAC (roles y permisos)','',null,{href:'/admin/parametrizacion',label:'Parametrización'})}${state}`;
+    // Roles reales (rbac.role). #Permisos = features asignadas en 001_seed_rbac.sql (rbac.role_feature).
+    const roles=[
+      {name:'SYSTEM_ADMIN',desc:'Gestión técnica del sistema',count:45,system:true},
+      {name:'CENTER_DIRECTOR',desc:'Subdirector de Centro — máxima autoridad operativa',count:36,system:true},
+      {name:'COORDINATOR',desc:'Coordinador Académico — fichas, instructores y horarios',count:33,system:true},
+      {name:'AREA_LEADER',desc:'Líder de Área Tecnológica — coordina instructores de un área',count:0,system:true},
+      {name:'INSTRUCTOR',desc:'Ve su horario; registra seguimiento',count:17,system:true},
+      {name:'LEARNER',desc:'Ve el horario y estado de su ficha',count:5,system:true},
+      {name:'ADMIN_STAFF',desc:'Funcionario Administrativo — catálogos y parámetros',count:7,system:true}
+    ];
+    // Módulos reales (rbac_catalog.module) con features (rbac_catalog.feature). total = 62 features.
+    const features=[
+      {code:'IDENTITY_USER_VIEW',name:'Ver usuarios',mod:'MOD_IDENTITY',level:'READ',roles:2},
+      {code:'IDENTITY_USER_MANAGE',name:'Gestionar usuarios',mod:'MOD_IDENTITY',level:'WRITE',roles:2},
+      {code:'IDENTITY_ROLE_MANAGE',name:'Gestionar roles',mod:'MOD_IDENTITY',level:'WRITE',roles:1},
+      {code:'IDENTITY_ROLE_ASSIGN',name:'Asignar roles a usuarios',mod:'MOD_IDENTITY',level:'WRITE',roles:2},
+      {code:'ACADEMIC_FICHA_MANAGE',name:'Gestionar fichas',mod:'MOD_ACADEMIC',level:'WRITE',roles:3},
+      {code:'ENV_MANAGE',name:'CRUD de ambientes',mod:'MOD_ENVIRONMENT',level:'WRITE',roles:3},
+      {code:'SCH_CREATE',name:'Crear borrador',mod:'MOD_SCHEDULING',level:'WRITE',roles:2},
+      {code:'SCH_PUBLISH',name:'Publicar horario',mod:'MOD_SCHEDULING',level:'PUBLISH',roles:3},
+      {code:'DOC_VIEW',name:'Ver documentos',mod:'MOD_DOCUMENTS',level:'READ',roles:0},
+      {code:'MON_KPI_VIEW',name:'Ver KPIs',mod:'MOD_MONITORING',level:'READ',roles:4}
+    ];
+    const yn=v=>v?`<span class="status-badge status-success">${icon('check')}</span>`:'<span style="color:var(--color-text-muted)">—</span>';
+    // Matriz rol↔permiso (extracto). true = feature asignada al rol en el seed.
+    const matrix=[
+      {code:'IDENTITY_USER_MANAGE',sys:true,dir:true,coord:false,area:false,instr:false,learn:false,staff:false},
+      {code:'REF_CATALOG_MANAGE',sys:true,dir:false,coord:false,area:false,instr:false,learn:false,staff:true},
+      {code:'ACADEMIC_FICHA_MANAGE',sys:true,dir:true,coord:true,area:false,instr:false,learn:false,staff:false},
+      {code:'ENV_MANAGE',sys:true,dir:true,coord:true,area:false,instr:false,learn:false,staff:false},
+      {code:'SCH_CREATE',sys:true,dir:false,coord:true,area:false,instr:false,learn:false,staff:false},
+      {code:'SCH_PUBLISH',sys:true,dir:true,coord:true,area:false,instr:false,learn:false,staff:false},
+      {code:'MON_KPI_VIEW',sys:true,dir:true,coord:true,area:false,instr:true,learn:false,staff:false},
+      {code:'SCH_VIEW_OWN',sys:true,dir:true,coord:true,area:false,instr:true,learn:true,staff:false}
+    ];
+    let html=`${C().pageHeader('Parametrización — RBAC (roles y permisos)','Roles, módulos, permisos (features) y su asignación. Define el x-required-feature que gobierna cada endpoint/pantalla.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
+      <section class="panel">${C().tabs(['Roles','Módulos y permisos','Asignación rol↔permiso'],0)}
+        <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('users')}Roles</h2><p class="panel-subtitle">7 roles del sistema (rbac.role). Los roles del sistema no se eliminan; se ajustan sus permisos.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo rol</button></div>
+        ${C().table([
+          {label:'Rol',render:r=>`<strong>${r.name}</strong>`},
+          {label:'Descripción',key:'desc'},
+          {label:'Permisos',render:r=>r.count>0?`<span class="status-badge status-info">${icon('key')}${r.count}</span>`:`<span class="status-badge status-neutral">${icon('lock')}0</span>`},
+          {label:'Tipo',render:()=>C().status('INFO','Rol de sistema')},
+          {label:'Estado',render:()=>C().status('ACTIVE')},
+          {label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="edit">Editar</button>'}
+        ], roles, {caption:'Roles',total:7,start:1,end:roles.length,pageSize:10})}
+      </section>
+
+      <section class="panel" style="margin-top:20px">
+        <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('settings')}Módulos y permisos (features)</h2><p class="panel-subtitle">10 módulos · 62 features. El <code>code</code> es el x-required-feature exigido por cada endpoint/pantalla.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva feature</button></div>
+        ${C().filters([{label:'Módulo',options:['Todos','MOD_IDENTITY','MOD_REFERENCE','MOD_ACADEMIC','MOD_ENVIRONMENT','MOD_SCHEDULING','MOD_ACTORS','MOD_DOCUMENTS','MOD_MONITORING','MOD_AUDIT','MOD_DASHBOARD']},{label:'Nivel',options:['Todos','READ','WRITE','DELETE','PUBLISH']},{label:'Buscar',type:'search',placeholder:'Código o nombre de feature'}])}
+        ${C().table([
+          {label:'Feature (code)',render:r=>`<strong><code>${r.code}</code></strong>`},
+          {label:'Nombre',key:'name'},
+          {label:'Módulo',render:r=>C().status('INFO',r.mod)},
+          {label:'Nivel',render:r=>C().status(r.level==='READ'?'INFO':r.level==='PUBLISH'?'SUCCESS':'AT_RISK',r.level)},
+          {label:'Roles',render:r=>`${icon('users')}${r.roles}`},
+          {label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="edit">Editar</button>'}
+        ], features, {caption:'Features por módulo',total:62,start:1,end:features.length,pageSize:10})}
+      </section>
+
+      <section class="panel" style="margin-top:20px">
+        <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">${icon('lock')}Asignación rol ↔ permiso</h2><p class="panel-subtitle">Matriz rbac.role_feature (extracto). Marca ✓ = la feature está asignada al rol, con su scope (GLOBAL / TRAINING_CENTER / OWN_*).</p></div><button class="btn btn-secondary btn-sm" data-open-modal="edit">${icon('edit')}Editar asignación</button></div>
+        ${C().table([
+          {label:'Feature',render:r=>`<strong><code>${r.code}</code></strong>`},
+          {label:'SYSTEM_ADMIN',render:r=>yn(r.sys)},
+          {label:'CENTER_DIRECTOR',render:r=>yn(r.dir)},
+          {label:'COORDINATOR',render:r=>yn(r.coord)},
+          {label:'AREA_LEADER',render:r=>yn(r.area)},
+          {label:'INSTRUCTOR',render:r=>yn(r.instr)},
+          {label:'LEARNER',render:r=>yn(r.learn)},
+          {label:'ADMIN_STAFF',render:r=>yn(r.staff)}
+        ], matrix, {caption:'Matriz rol ↔ permiso',total:62,start:1,end:matrix.length,pageSize:10})}
+      </section>`;
+    if(ctx.query.get('modal')==='edit') html+=paramRbacModal();
+    return html;
+  };
+
+  function paramRbacModal(){
+    // Features del módulo pre-marcadas según la asignación de COORDINATOR en el seed.
+    const mods=[
+      {mod:'MOD_ACADEMIC',feats:[['ACADEMIC_FICHA_VIEW',true],['ACADEMIC_FICHA_MANAGE',true],['ACADEMIC_FICHA_STATUS',true],['ACADEMIC_PROGRAM_MANAGE',false]]},
+      {mod:'MOD_SCHEDULING',feats:[['SCH_CREATE',true],['SCH_EDIT',true],['SCH_PUBLISH',true],['SCH_CONFLICT_RESOLVE',true],['SCH_ARCHIVE',true]]},
+      {mod:'MOD_ENVIRONMENT',feats:[['ENV_VIEW',true],['ENV_MANAGE',true],['ENV_MAINTENANCE_MANAGE',true]]},
+      {mod:'MOD_MONITORING',feats:[['MON_KPI_VIEW',true],['MON_ALERT_RESOLVE',true],['MON_IMPROVEMENT_PLAN_MANAGE',true],['MON_NOTIFICATION_SEND',false]]},
+      {mod:'MOD_IDENTITY',feats:[['IDENTITY_USER_MANAGE',false],['IDENTITY_ROLE_MANAGE',false]]}
+    ];
+    const groups=mods.map(g=>`<fieldset style="border:1px solid var(--color-border);border-radius:8px;padding:12px 14px;margin:0"><legend style="padding:0 6px"><strong>${g.mod}</strong></legend><div style="display:grid;gap:8px">${g.feats.map(([code,on])=>`<label style="display:flex;align-items:center;gap:8px;font-weight:400"><input type="checkbox" ${on?'checked':''}><code>${code}</code></label>`).join('')}</div></fieldset>`).join('');
+    return C().modal('Rol y sus permisos — COORDINATOR',
+      `<div class="form-grid"><div class="form-field"><label>Nombre del rol</label><input value="COORDINATOR"></div><div class="form-field"><label>Descripción</label><input value="Coordinador Académico"></div><div class="form-field full"><label>Scope por defecto</label><select><option>TRAINING_CENTER</option><option>GLOBAL</option><option>OWN_FICHAS</option></select></div><div class="form-field full"><label>Permisos asignados</label><div class="alert alert-info">${icon('info')}Marque los features (por módulo) que este rol puede ejecutar. Cada feature es el <code>x-required-feature</code> que gobierna el endpoint/pantalla asociado.</div></div><div class="form-field full" style="display:grid;gap:12px">${groups}</div></div>`,
+      `<button class="btn btn-secondary" data-close-modal>Cancelar</button><button class="btn btn-primary">Guardar</button>`);
+  }
 })();

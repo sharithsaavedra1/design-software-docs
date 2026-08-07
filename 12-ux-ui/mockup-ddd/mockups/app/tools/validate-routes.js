@@ -28,8 +28,8 @@ for (const file of files) {
 }
 
 const mockup = global.Mockup;
-if (!mockup || mockup.inventory.length !== 45) {
-  throw new Error(`Inventario inválido: ${mockup?.inventory?.length ?? 0}/45`);
+if (!mockup || mockup.inventory.length !== 53) {
+  throw new Error(`Inventario inválido: ${mockup?.inventory?.length ?? 0}/53`);
 }
 
 let failures = 0;
@@ -73,4 +73,4 @@ for (const item of mockup.inventory) {
 }
 
 if (failures > 0) process.exit(1);
-console.log('\n45/45 pantallas y modales renderizados correctamente.');
+console.log('\n53/53 pantallas y modales renderizados correctamente.');

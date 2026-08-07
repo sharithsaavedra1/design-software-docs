@@ -125,11 +125,11 @@ No se inventaron endpoints para los gaps documentados:
 
 Las vistas relacionadas usan datos mock limitados y mantienen comentarios `TODO` en el código.
 
-## Mapa de las 45 pantallas y modales
+## Mapa de las 53 pantallas y modales
 
 El índice interactivo está disponible en `review.html` y en `#/inventory`.
 
-Las 90 capturas de referencia están documentadas en [`screenshots/README.md`](screenshots/README.md): 45 desktop y 45 móviles.
+Las 90 capturas de referencia están documentadas en [`screenshots/README.md`](screenshots/README.md): 45 desktop y 45 móviles. **Nota:** las 8 nuevas pantallas de parametrización (46–53) aún no tienen captura; quedan pendientes de captura (desktop y móvil).
 
 | # | Grupo | Pantalla / modal | Rol | MFE | Ruta de revisión |
 |---:|---|---|---|---|---|
@@ -178,6 +178,14 @@ Las 90 capturas de referencia están documentadas en [`screenshots/README.md`](s
 | 43 | Back-office | Editor / preview de plantilla | support | document | `index.html#/backoffice/documentos/plantillas/tpl-01/editar?as=support` |
 | 44 | Back-office | Modal detalle de auditoría | support | audit | `index.html#/backoffice/auditoria?modal=audit&as=support` |
 | 45 | Back-office | CRUD catálogo / valor / parámetro | support | reference | `index.html#/backoffice/parametrizacion?modal=crud&as=support` |
+| 46 | Parametrización | Hub de parametrización | director + support | reference | `index.html#/admin/parametrizacion?as=director` |
+| 47 | Parametrización | Currículo académico | director + support | academic | `index.html#/admin/parametrizacion/curriculo?as=director` |
+| 48 | Parametrización | Jornadas / franjas horarias | director + support | scheduling | `index.html#/admin/parametrizacion/jornadas?as=director` |
+| 49 | Parametrización | Tipos de ambiente e inventario | director + support | environment | `index.html#/admin/parametrizacion/ambientes?as=director` |
+| 50 | Parametrización | Catálogos de monitoreo (KPI/alertas) | director + support | monitoring | `index.html#/admin/parametrizacion/monitoreo?as=director` |
+| 51 | Parametrización | Estados de actores | director + support | actors | `index.html#/admin/parametrizacion/estados?as=director` |
+| 52 | Parametrización | Geografía institucional | director + support | reference | `index.html#/admin/parametrizacion/geografia?as=director` |
+| 53 | Parametrización | RBAC — roles y permisos | director + support | iam | `index.html#/admin/parametrizacion/rbac?as=director` |
 
 ## Restricciones del prototipo
 

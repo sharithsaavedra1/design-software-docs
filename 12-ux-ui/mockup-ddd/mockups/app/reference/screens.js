@@ -30,4 +30,36 @@
   function referenceModal(readOnlyRole){
     return C().modal(readOnlyRole?'Editar parámetro — MAX_HOURS_PER_WEEK':'Nuevo valor de catálogo',`<div class="form-grid">${readOnlyRole?`<div class="alert alert-warning full">${icon('lock')}Esta composición está documentada para ADMIN_STAFF/SYSTEM_ADMIN. El Director mantiene esta vista en solo lectura.</div>`:''}<div class="form-field full"><label>${readOnlyRole?'Clave':'Catálogo padre'}</label><input value="${readOnlyRole?'MAX_HOURS_PER_WEEK':'TRAINING_MODALITY — Modalidad'}" readonly></div><div class="form-field"><label>${readOnlyRole?'Valor':'Código'}</label><input value="${readOnlyRole?'48':'PRESENTIAL'}"></div><div class="form-field"><label>${readOnlyRole?'Tipo':'Etiqueta'}</label>${readOnlyRole?'<select><option>integer</option><option>string</option><option>boolean</option><option>json</option></select>':'<input value="Presencial">'}</div><div class="form-field full"><label>${readOnlyRole?'Descripción':'Orden'}</label>${readOnlyRole?'<textarea>Máximo de horas semanales por instructor.</textarea>':'<input type="number" value="1">'}</div><div class="field-error full">${icon('warning')}Este código ya existe en este catálogo.</div></div>`,`<button class="btn btn-secondary" data-close-modal>Cancelar</button><button class="btn btn-primary" ${readOnlyRole?'disabled':''}>${readOnlyRole?'Actualizar valor':'Guardar'}</button>`);
   }
+
+  M.screens.paramHub=(ctx)=>{
+    const areas=[
+      ['Currículo académico','/admin/parametrizacion/curriculo','student','Líneas, redes, programas, competencias y resultados de aprendizaje. Requisito de las fichas.'],
+      ['Jornadas / franjas','/admin/parametrizacion/jornadas','clock','Franjas horarias que las sesiones ocupan al construir un horario.'],
+      ['Tipos de ambiente e inventario','/admin/parametrizacion/ambientes','building','Tipos de ambiente, tipos de inventario y reglas de disponibilidad.'],
+      ['Catálogos de monitoreo','/admin/parametrizacion/monitoreo','chart','Tipos y estados de KPI, niveles de riesgo y tipos de alerta.'],
+      ['Estados de actores','/admin/parametrizacion/estados','activity','Categorías, estados y transiciones de instructores, aprendices, empresas y etapas.'],
+      ['Geografía institucional','/admin/parametrizacion/geografia','folder','Macroregión → microregión → departamento → municipio → centro → unidad.'],
+      ['RBAC — roles y permisos','/admin/parametrizacion/rbac','key','Roles, módulos, permisos (features) y su asignación.'],
+      ['Catálogos y parámetros','/backoffice/parametrizacion','settings','Catálogos genéricos, valores y parámetros del sistema.'],
+      ['Datos de referencia (mi centro)','/admin/datos-referencia','file','Información institucional del centro, sedes y unidades.']
+    ];
+    return `${C().pageHeader('Parametrización','Configure los catálogos y datos maestros que los flujos operativos requieren como prerrequisito.')}
+      <div class="alert alert-info">${icon('info')}Complete la parametrización antes de operar: crear fichas requiere <strong>currículo</strong>; construir horarios requiere <strong>jornadas</strong>; registrar ambientes requiere sus <strong>tipos</strong>; el seguimiento requiere <strong>catálogos de KPI</strong>.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px">${areas.map(([t,h,ic,d])=>`<a class="card" href="#${h}" style="display:block;padding:20px;text-decoration:none"><div style="display:flex;align-items:center;gap:10px;color:var(--color-brand);margin-bottom:8px">${icon(ic)}<strong style="color:var(--color-text)">${t}</strong></div><p style="margin:0;color:var(--color-text-muted);font-size:14px;line-height:1.5">${d}</p></a>`).join('')}</div>`;
+  };
+
+  M.screens.paramGeography=(ctx)=>{
+    const state=stateView(ctx,'geografía institucional'); if(state)return `${C().pageHeader('Parametrización — Geografía institucional')}${state}`;
+    const centers=[
+      {code:'9226',name:'Centro de la Industria, la Empresa y los Servicios',municipality:'Neiva',address:'Carrera 5 No. 16-20',phone:'(608) 875 7224',active:true},
+      {code:'9301',name:'Centro Agroempresarial y Desarrollo Pecuario del Huila',municipality:'Garzón',address:'Km 1 vía Garzón-Gigante',phone:'(608) 833 2020',active:true},
+      {code:'9302',name:'Centro de Formación Agroindustrial La Angostura',municipality:'Campoalegre',address:'Km 38 vía Neiva-Campoalegre',phone:'(608) 838 1010',active:false}
+    ];
+    let html=`${C().pageHeader('Parametrización — Geografía institucional','Jerarquía territorial y organizacional donde se ubican los centros y ambientes.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
+      <section class="panel">${C().tabs(['Macroregiones','Microregiones','Departamentos','Municipios','Centros de formación','Unidades'],4)}
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Centros de formación</h2><p class="panel-subtitle">Cada centro se ubica en un municipio y agrupa sedes/unidades y ambientes.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo centro</button></div>
+      ${C().table([{label:'Código',key:'code'},{label:'Nombre',render:r=>`<strong>${r.name}</strong>`},{label:'Municipio',key:'municipality'},{label:'Dirección',key:'address'},{label:'Teléfono',key:'phone'},{label:'Estado',render:r=>C().status(r.active?'ACTIVE':'INACTIVE')},{label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm">Editar</button>'}],centers,{caption:'Centros de formación',total:33,start:1,end:centers.length,pageSize:10})}</section>`;
+    if(ctx.query.get('modal')==='edit') html+=C().modal('Nuevo / editar centro de formación',`<div class="form-grid"><div class="form-field"><label>Código del centro</label><input value="9226"></div><div class="form-field"><label>Nombre</label><input value="Centro de la Industria, la Empresa y los Servicios"></div><div class="form-field"><label>Municipio</label><select><option>Neiva</option><option>Garzón</option><option>Pitalito</option></select></div><div class="form-field"><label>Teléfono</label><input value="(608) 875 7224"></div><div class="form-field full"><label>Dirección</label><input value="Carrera 5 No. 16-20, Neiva"></div></div>`,`<button class="btn btn-secondary" data-close-modal>Cancelar</button><button class="btn btn-primary">Guardar</button>`);
+    return html;
+  };
 })();
