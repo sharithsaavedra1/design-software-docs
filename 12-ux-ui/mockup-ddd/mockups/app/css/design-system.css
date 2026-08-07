@@ -25,7 +25,12 @@
   
   --color-success: #067647;
   --color-success-surface: #ECFDF3;
-  
+  --color-success-border: #A6F4C5;
+  --color-danger-border: #FECDCA;
+
+  --color-info: #026AA2;
+  --color-info-surface: #F0F9FF;
+
   /* Typography */
   --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   
@@ -990,7 +995,28 @@ img, picture {
   to { opacity: 1; }
 }
 
-/* Nav lateral: iconos SVG a tamaño fijo (sin esto los SVG con viewBox se expanden) */
+/* ==========================================================================
+   Nav lateral (canónico, compartido por todas las páginas)
+   ========================================================================== */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.nav-item:hover {
+  background-color: var(--color-surface-muted);
+}
+.nav-item.active {
+  background-color: var(--color-success-surface);
+  color: var(--color-success);
+  border-right: 3px solid var(--color-brand);
+}
+/* Iconos SVG del nav a tamaño fijo (sin esto los SVG con viewBox se expanden) */
 .nav-item svg,
 .nav-item .nav-icon,
 .nav-icon {
