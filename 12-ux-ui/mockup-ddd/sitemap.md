@@ -119,26 +119,30 @@ halts_registrados: ninguno
 > lo no permitido (no "controles deshabilitados escondidos", conforme al design-system §1). El acceso
 > directo por URL a un área no permitida → **403** ([Estados globales](flows/01-auth.md)).
 
-## Convención de build (ruta → archivo del prototipo)
+## Convención de build (ruta → registro en el MFE)
 
-> Para que la generación del mockup cablee la navegación sin placeholders. El prototipo estático vive
-> en `mockups/app/<carpeta-por-rol-o-MFE>/<archivo>.html`. **Regla:** TODO enlace de navegación
-> apunta a un archivo real; **prohibido `href="#"`** para navegación (solo válido en toggles JS).
-> Los **modales** no son archivos: se abren en su página padre (`data-toggle="modal"`).
+> El mockup adoptado es un **SPA con router por hash** (no un archivo por pantalla). Cada ruta se
+> **registra en el `screens.js` de su dominio** y el `shell/` la monta según rol/RBAC. La navegación
+> usa `#/<ruta>?as=<rol>`; **prohibido `href="#"`** para navegar (solo válido en toggles JS). Los
+> **modales** no tienen ruta propia: se abren como estado sobre su ruta padre vía `?modal=<nombre>`.
 
-| Ruta | Archivo del prototipo |
+| Ruta (hash) | MFE dueño (`mockups/app/<dominio>/screens.js`) |
 |---|---|
-| `/login`, `/forgot-password`, `/reset-password` | `iam/login.html`, `iam/forgot-password.html`, `iam/reset-password.html` |
-| 403/404/500/sesión | `global/error-states.html` |
-| `/` (Coordinador) | `coordinator/dashboard.html` |
-| `/horarios` · `/horarios/nuevo`·`:id` · `:id/conflictos` | `coordinator/schedules-list.html` · `schedule-edit.html` / `schedule-detail.html` · `conflicts.html` |
-| `/disponibilidad` · `/ambientes/:id` | `coordinator/availability.html` · `environment-detail.html` |
-| `/fichas` · `/fichas/:id` | `coordinator/fichas-list.html` · `ficha-detail.html` |
-| `/instructor/mi-horario` · `/mi-disponibilidad` · `/seguimiento` | `instructor/my-schedule.html` · `my-availability.html` · `tracking.html` |
-| `/mi-horario` · `/sesiones/:id` · `/notificaciones` · `/:id` | `learner/my-schedule.html` · `session-detail.html` · `notifications.html` · `notification-detail.html` |
-| `/admin/indicadores` · `/:ft/:kpi` · `/usuarios` · `/:id` · `/datos-referencia` | `admin/kpi-dashboard.html` · `kpi-detail.html` · `users-list.html` · `user-detail.html` · `reference-data.html` |
-| `/backoffice/documentos` · `/:id` · `/plantillas` · `/:id/editar` · `/auditoria` · `/parametrizacion` | `backoffice/documents.html` · `document-detail.html` · `templates.html` · `template-editor.html` · `audit.html` · `parametrization.html` |
+| `#/login` · `#/forgot-password` · `#/reset-password` | `iam` |
+| `#/system-states?variant=403\|404\|500\|session` | `shell` |
+| `#/` (Coordinador, dashboard) | `shell` (compone `scheduling`+`academic`) |
+| `#/horarios` · `#/horarios/nuevo` · `#/horarios/:id` · `#/horarios/:id/conflictos` | `scheduling` |
+| `#/disponibilidad` · `#/disponibilidad/ambientes/:id` | `environment` (+`actors`) |
+| `#/fichas` · `#/fichas/:id` | `academic` |
+| `#/instructor/mi-horario` · `#/instructor/mi-disponibilidad` · `#/instructor/seguimiento` | `scheduling` · `actors` · `monitoring` |
+| `#/mi-horario` · `#/mi-horario/sesiones/:id` · `#/notificaciones` · `#/notificaciones/:id` | `scheduling` · `monitoring` |
+| `#/admin/indicadores` · `#/admin/indicadores/:ft/:kpi` · `#/admin/usuarios` · `#/admin/usuarios/:id` · `#/admin/datos-referencia` | `monitoring` · `iam` · `reference` |
+| `#/backoffice/documentos` · `/:id` · `/plantillas` · `/plantillas/:id/editar` · `#/backoffice/auditoria` · `#/backoffice/parametrizacion` | `document` · `audit` · `reference` |
 
-**Modales (se abren en su página, sin ruta/archivo):** agregar/editar sesión, confirmar publicación,
+**Modales (estado `?modal=…`, sin ruta propia):** agregar/editar sesión, confirmar publicación,
 resolver conflicto (coordinator); crear excepción, registrar seguimiento (instructor); crear/editar
 usuario, asignar rol (admin); generar documento, detalle de auditoría, CRUD catálogos (back-office).
+
+> La tabla completa **ruta → pantalla → rol → MFE** (45 filas) vive en
+> [`mockups/app/README.md`](mockups/app/README.md); la cobertura se valida con
+> `node mockups/app/tools/validate-routes.js` (45/45).
