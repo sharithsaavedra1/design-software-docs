@@ -55,6 +55,29 @@
     ];
     let html=`${C().pageHeader('Parametrización — Currículo académico','Jerarquía curricular: línea → red tecnológica → red de conocimiento → programa → competencia → resultado de aprendizaje.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
       <section class="panel">${C().tabs(['Líneas','Redes tecnológicas','Redes de conocimiento','Programas','Competencias','Resultados'],3)}
+
+      <div class="tabpanel" data-tabpanel="0" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Líneas tecnológicas</h2><p class="panel-subtitle">Primer nivel de la jerarquía; agrupan las redes tecnológicas del centro.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva línea</button></div>
+      ${C().table([
+        {label:'Código',render:r=>`<strong>${r.code}</strong>`},{label:'Línea tecnológica',key:'name'},{label:'Estado',render:r=>C().status(r.is_active)},{label:'Actualizado',key:'updated'}
+      ],techLines,{caption:'Líneas tecnológicas',total:6,start:1,end:techLines.length,pageSize:10})}
+      </div>
+
+      <div class="tabpanel" data-tabpanel="1" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Redes tecnológicas</h2><p class="panel-subtitle">Segundo nivel; cada red tecnológica pertenece a una línea tecnológica.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva red tecnológica</button></div>
+      ${C().table([
+        {label:'Código',render:r=>`<strong>${r.code}</strong>`},{label:'Red tecnológica',key:'name'},{label:'Línea',key:'line'},{label:'Estado',render:r=>C().status(r.is_active)},{label:'Actualizado',key:'updated'}
+      ],techNetworks,{caption:'Redes tecnológicas',total:9,start:1,end:techNetworks.length,pageSize:10})}
+      </div>
+
+      <div class="tabpanel" data-tabpanel="2" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Redes de conocimiento</h2><p class="panel-subtitle">Tercer nivel; cada red de conocimiento pertenece a una red tecnológica.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva red de conocimiento</button></div>
+      ${C().table([
+        {label:'Código',render:r=>`<strong>${r.code}</strong>`},{label:'Red de conocimiento',key:'name'},{label:'Red tecnológica',key:'network'},{label:'Estado',render:r=>C().status(r.is_active)},{label:'Actualizado',key:'updated'}
+      ],knowledgeNetworks,{caption:'Redes de conocimiento',total:15,start:1,end:knowledgeNetworks.length,pageSize:10})}
+      </div>
+
+      <div class="tabpanel" data-tabpanel="3">
       <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Programas de formación</h2><p class="panel-subtitle">Los programas se asocian a competencias y son requisito de las fichas.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo programa</button></div>
       ${C().table([
         {label:'Código',render:r=>`<strong>${r.program_code}</strong>`},
@@ -65,36 +88,28 @@
         {label:'Red de conocimiento',key:'knowledge'},
         {label:'Estado',render:r=>C().status(r.is_active)},
         {label:'',render:r=>`<button class="btn btn-ghost btn-icon" data-open-modal="edit">${icon('edit')}</button>`}
-      ],programs,{caption:'Programas de formación',total:42,start:1,end:programs.length,pageSize:10})}</section>
+      ],programs,{caption:'Programas de formación',total:42,start:1,end:programs.length,pageSize:10})}
+      </div>
 
-      <section class="panel" style="margin-top:20px"><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Competencias del programa</h2><p class="panel-subtitle">Unidades de competencia asociadas al programa seleccionado (ADSO 228106).</p></div><button class="btn btn-secondary" data-open-modal="edit">${icon('plus')}Nueva competencia</button></div>
+      <div class="tabpanel" data-tabpanel="4" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Competencias del programa</h2><p class="panel-subtitle">Unidades de competencia asociadas al programa seleccionado (ADSO 228106).</p></div><button class="btn btn-secondary" data-open-modal="edit">${icon('plus')}Nueva competencia</button></div>
       ${C().table([
         {label:'Código SENA',render:r=>`<strong>${r.sena_code}</strong>`},
         {label:'Nombre',key:'name'},
         {label:'Horas',key:'hours'},
         {label:'Programa',key:'program'},
         {label:'Estado',render:r=>C().status(r.is_active)}
-      ],competencies,{caption:'Competencias',total:18,start:1,end:competencies.length,pageSize:10})}</section>
+      ],competencies,{caption:'Competencias',total:18,start:1,end:competencies.length,pageSize:10})}
+      </div>
 
-      <section class="panel" style="margin-top:20px"><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Resultados de aprendizaje</h2><p class="panel-subtitle">Resultados esperados por competencia, base para la planeación de horarios.</p></div></div>
+      <div class="tabpanel" data-tabpanel="5" hidden>
+      <div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Resultados de aprendizaje</h2><p class="panel-subtitle">Resultados esperados por competencia, base para la planeación de horarios.</p></div></div>
       ${C().table([
         {label:'Código',render:r=>`<strong>${r.code}</strong>`},
         {label:'Descripción',key:'description'},
         {label:'Competencia',key:'competency'},
         {label:'Estado',render:r=>C().status(r.is_active)}
-      ],outcomes,{caption:'Resultados de aprendizaje',total:64,start:1,end:outcomes.length,pageSize:10})}</section>
-
-      <section class="panel" style="margin-top:20px"><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Niveles superiores de la jerarquía</h2><p class="panel-subtitle">Líneas, redes tecnológicas y redes de conocimiento que agrupan los programas.</p></div></div>
-      <div class="panel-body">
-      ${C().table([
-        {label:'Código',render:r=>`<strong>${r.code}</strong>`},{label:'Línea tecnológica',key:'name'},{label:'Estado',render:r=>C().status(r.is_active)},{label:'Actualizado',key:'updated'}
-      ],techLines,{caption:'Líneas tecnológicas',total:6,start:1,end:techLines.length,pageSize:10})}
-      ${C().table([
-        {label:'Código',render:r=>`<strong>${r.code}</strong>`},{label:'Red tecnológica',key:'name'},{label:'Línea',key:'line'},{label:'Estado',render:r=>C().status(r.is_active)},{label:'Actualizado',key:'updated'}
-      ],techNetworks,{caption:'Redes tecnológicas',total:9,start:1,end:techNetworks.length,pageSize:10})}
-      ${C().table([
-        {label:'Código',render:r=>`<strong>${r.code}</strong>`},{label:'Red de conocimiento',key:'name'},{label:'Red tecnológica',key:'network'},{label:'Estado',render:r=>C().status(r.is_active)},{label:'Actualizado',key:'updated'}
-      ],knowledgeNetworks,{caption:'Redes de conocimiento',total:15,start:1,end:knowledgeNetworks.length,pageSize:10})}
+      ],outcomes,{caption:'Resultados de aprendizaje',total:64,start:1,end:outcomes.length,pageSize:10})}
       </div></section>`;
     if(ctx.query.get('modal')==='edit') html+=C().modal('Nuevo / editar programa',
       `<div class="form-grid">

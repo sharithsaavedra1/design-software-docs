@@ -16,8 +16,6 @@
   };
   M.screens.paramActorStatus=(ctx)=>{
     const state=stateView(ctx,'estados de actores'); if(state)return `${C().pageHeader('Parametrización — Estados de actores')}${state}`;
-    const tab=ctx.query.get('tab')||'estados';
-    const activeIndex=tab==='categorias'?0:tab==='transiciones'?2:1;
     const entityLabel={INSTRUCTOR:'Instructor',LEARNER:'Aprendiz',COMPANY:'Empresa',PRODUCTIVE_STAGE:'Etapa productiva'};
     const categories=[
       {code:'INSTRUCTOR_STATUS',name:'Estado de instructor',description:'Ciclo de vida del instructor frente a la programación académica.',applies_to_entity:'INSTRUCTOR',is_active:true},
@@ -79,16 +77,11 @@
       {label:'Estado',render:r=>C().status(r.is_active?'ACTIVE':'INACTIVE')},
       {label:'Acción',render:r=>`<div class="table-actions"><button class="btn btn-secondary btn-sm" data-open-modal="edit-transition">${icon('edit')}Editar</button><button class="icon-btn" aria-label="Eliminar transición">${icon('trash')}</button></div>`}
     ];
-    let section;
-    if(activeIndex===0){
-      section=`<div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Categorías de estado</h2><p class="panel-subtitle">Cada categoría agrupa los estados de una entidad (instructor, aprendiz, empresa o etapa productiva).</p></div><button class="btn btn-primary" data-open-modal="edit-category">${icon('plus')}Nueva categoría</button></div>${C().table(catCols,categories,{caption:'Categorías de estado',total:categories.length,start:1,end:categories.length,pageSize:10})}`;
-    } else if(activeIndex===2){
-      section=`<div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Transiciones permitidas</h2><p class="panel-subtitle">Define qué cambios de estado son válidos y qué permiso los habilita.</p></div><button class="btn btn-primary" data-open-modal="edit-transition">${icon('plus')}Nueva transición</button></div>${C().table(transitionCols,transitions,{caption:'Transiciones permitidas',total:transitions.length,start:1,end:transitions.length,pageSize:10})}`;
-    } else {
-      section=`<div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Estados</h2><p class="panel-subtitle">Cada estado pertenece a una categoría y define si es inicial, terminal, su orden y color.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo estado</button></div>${C().table(statusCols,statuses,{caption:'Estados',total:18,start:1,end:statuses.length,pageSize:10})}`;
-    }
     let html=`${C().pageHeader('Parametrización — Estados de actores','Máquina de estados (categorías, estados y transiciones permitidas) para instructores, aprendices, empresas y etapas productivas.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
-      <section class="panel"><div class="tab-nav">${['categorias','estados','transiciones'].map((t,i)=>`<a class="tab ${i===activeIndex?'active':''}" role="tab" aria-selected="${i===activeIndex}" href="#/admin/parametrizacion/estados?tab=${t}">${['Categorías','Estados','Transiciones'][i]}</a>`).join('')}</div>${section}</section>`;
+      <section class="panel">${C().tabs(['Categorías','Estados','Transiciones'],1)}
+        <div class="tabpanel" data-tabpanel="0" hidden><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Categorías de estado</h2><p class="panel-subtitle">Cada categoría agrupa los estados de una entidad (instructor, aprendiz, empresa o etapa productiva).</p></div><button class="btn btn-primary" data-open-modal="edit-category">${icon('plus')}Nueva categoría</button></div>${C().table(catCols,categories,{caption:'Categorías de estado',total:categories.length,start:1,end:categories.length,pageSize:10})}</div>
+        <div class="tabpanel" data-tabpanel="1"><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Estados</h2><p class="panel-subtitle">Cada estado pertenece a una categoría y define si es inicial, terminal, su orden y color.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nuevo estado</button></div>${C().table(statusCols,statuses,{caption:'Estados',total:18,start:1,end:statuses.length,pageSize:10})}</div>
+        <div class="tabpanel" data-tabpanel="2" hidden><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Transiciones permitidas</h2><p class="panel-subtitle">Define qué cambios de estado son válidos y qué permiso los habilita.</p></div><button class="btn btn-primary" data-open-modal="edit-transition">${icon('plus')}Nueva transición</button></div>${C().table(transitionCols,transitions,{caption:'Transiciones permitidas',total:transitions.length,start:1,end:transitions.length,pageSize:10})}</div></section>`;
     if(ctx.query.get('modal')==='edit') html+=C().modal('Nuevo / editar estado',
       `<div class="form-grid"><div class="form-field"><label>Categoría</label><select>${categories.map(c=>`<option>${c.name}</option>`).join('')}</select></div><div class="form-field"><label>Nombre</label><input value="En formación"></div><div class="form-field"><label>Código</label><input value="LRN_IN_TRAINING"></div><div class="form-field"><label>Orden de visualización</label><input type="number" value="1" min="1"></div><div class="form-field"><label>Color</label><input type="color" value="#2563EB"></div><div class="form-field"><label>Marcadores</label><div class="checkbox-row"><label><input type="checkbox" checked> Estado inicial</label><label><input type="checkbox"> Estado terminal</label></div></div><div class="form-field full"><label>Descripción</label><textarea placeholder="Ej. Aprendiz cursando la etapa lectiva del programa"></textarea></div><div class="form-field full"><label><input type="checkbox" checked> Activo</label></div></div>`,
       `<button class="btn btn-secondary" data-close-modal>Cancelar</button><button class="btn btn-primary">${icon('check')}Guardar</button>`);
