@@ -55,6 +55,7 @@
     document.querySelector('[data-notifications]')?.addEventListener('click',()=>updateQuery({overlay:'notifications'}));
     document.querySelector('[data-close-notifications]')?.addEventListener('click',()=>updateQuery({},['overlay']));
     document.querySelectorAll('[data-open-modal]').forEach(btn=>btn.addEventListener('click',()=>updateQuery({modal:btn.dataset.openModal})));
+    document.querySelectorAll('.tabs').forEach(bar=>{const scope=bar.closest('.panel')||bar.parentElement;bar.querySelectorAll('.tab[data-tab]').forEach(tab=>tab.addEventListener('click',()=>{const i=tab.dataset.tab;bar.querySelectorAll('.tab').forEach(t=>{const a=t===tab;t.classList.toggle('active',a);t.setAttribute('aria-selected',String(a));});const panels=scope.querySelectorAll('[data-tabpanel]');if(panels.length)panels.forEach(p=>{p.hidden=p.dataset.tabpanel!==i;});}));});
     document.querySelectorAll('[data-navigate]').forEach(btn=>btn.addEventListener('click',()=>{location.hash='#'+btn.dataset.navigate;}));
     document.querySelectorAll('[data-session-id]').forEach(btn=>btn.addEventListener('click',()=>updateQuery({panel:'session'})));
     document.querySelectorAll('[data-close-modal], [data-modal-backdrop]').forEach(el=>el.addEventListener('click',e=>{if(el.matches('[data-modal-backdrop]')&&e.target!==el)return;updateQuery({},['modal','panel','preview']);}));
