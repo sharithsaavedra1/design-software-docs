@@ -125,4 +125,37 @@
     const state=stateView(ctx,'detalle de la clase'); if(state) return `${C().pageHeader('Detalle de clase','',null,{label:'Volver a Mi horario',href:'/mi-horario'})}${state}`;
     return `${C().pageHeader('Detalle de clase','Lunes 10 de agosto de 2026 · 07:00–10:00',null,{label:'Volver a Mi horario',href:'/mi-horario'})}<section class="panel"><header class="panel-header"><div><h2 class="panel-title">Desarrollo de software</h2><p class="panel-subtitle">Ficha 2874412 — ADSO</p></div>${C().status('ACTIVE')}</header><div class="panel-body">${C().details([['Competencia','Desarrollar software según requerimientos'],['Instructor','Juan Pérez'],['Ambiente','Laboratorio A-204'],['Ubicación','Bloque A, piso 2'],['Fecha','10/08/2026'],['Franja','07:00–10:00']])}<h3>Notas de la sesión</h3><p>Traer equipo portátil y acceso al repositorio del proyecto.</p></div></section>`;
   };
+
+  M.screens.paramTimeSlots = (ctx) => {
+    const state=stateView(ctx,'franjas horarias'); if(state) return `${C().pageHeader('Parametrización — Jornadas')}${state}`;
+    const shiftLabel={DAY:'Diurna',NIGTH:'Nocturna',MIXED:'Mixta'};
+    const dayLabel={1:'Lunes',2:'Martes',3:'Miércoles',4:'Jueves',5:'Viernes',6:'Sábado',7:'Domingo'};
+    const slots=[
+      {name:'Mañana 1',day_of_week:1,start:'07:00',end:'10:00',shift:'DAY'},
+      {name:'Mañana 2',day_of_week:1,start:'10:00',end:'13:00',shift:'DAY'},
+      {name:'Tarde 1',day_of_week:1,start:'13:00',end:'16:00',shift:'DAY'},
+      {name:'Tarde 2',day_of_week:2,start:'16:00',end:'18:00',shift:'DAY'},
+      {name:'Noche 1',day_of_week:2,start:'18:00',end:'20:00',shift:'NIGTH'},
+      {name:'Noche 2',day_of_week:3,start:'20:00',end:'22:00',shift:'NIGTH'},
+      {name:'Mañana sabatina',day_of_week:6,start:'07:00',end:'12:00',shift:'MIXED'},
+      {name:'Tarde sabatina',day_of_week:6,start:'12:00',end:'17:00',shift:'MIXED'},
+      {name:'Mañana 3',day_of_week:4,start:'07:00',end:'10:00',shift:'DAY'},
+      {name:'Tarde 3',day_of_week:5,start:'13:00',end:'16:00',shift:'DAY'}
+    ];
+    const cols=[
+      {label:'Nombre',render:r=>`<strong>${r.name}</strong>`},
+      {label:'Día',render:r=>dayLabel[r.day_of_week]},
+      {label:'Inicio',render:r=>`${icon('clock')}${r.start}`},
+      {label:'Fin',render:r=>r.end},
+      {label:'Jornada',render:r=>shiftLabel[r.shift]},
+      {label:'Estado',render:r=>C().status('ACTIVE')},
+      {label:'Acción',render:r=>`<div class="table-actions"><button class="btn btn-secondary btn-sm" data-open-modal="edit">${icon('edit')}Editar</button><button class="icon-btn" aria-label="Eliminar franja">${icon('trash')}</button></div>`}
+    ];
+    let html=`${C().pageHeader('Parametrización — Jornadas / franjas horarias','Franjas que las sesiones de clase ocupan al construir un horario. Configúrelas por jornada (mañana/tarde/noche) antes de crear horarios.',null,{href:'/admin/parametrizacion',label:'Parametrización'})}
+      <section class="panel"><div class="panel-header" style="padding:16px 20px"><div><h2 class="panel-title">Franjas horarias</h2><p class="panel-subtitle">Cada franja define día, hora de inicio, hora de fin y jornada.</p></div><button class="btn btn-primary" data-open-modal="edit">${icon('plus')}Nueva franja</button></div>${C().table(cols,slots,{caption:'Franjas horarias',total:12,start:1,end:slots.length,pageSize:10})}</section>`;
+    if(ctx.query.get('modal')==='edit') html+=C().modal('Nueva / editar franja',
+      `<div class="form-grid"><div class="form-field"><label>Nombre</label><input value="Mañana 1"></div><div class="form-field"><label>Día de la semana</label><select><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select></div><div class="form-field"><label>Jornada</label><select><option value="DAY">Diurna</option><option value="NIGTH">Nocturna</option><option value="MIXED">Mixta</option></select></div><div class="form-field"><label>Hora inicio</label><input type="time" value="07:00"></div><div class="form-field"><label>Hora fin</label><input type="time" value="10:00"></div><div class="form-field full"><div class="field-hint">${icon('warning')}La hora de inicio debe ser menor que la hora de fin.</div></div></div>`,
+      `<button class="btn btn-secondary" data-close-modal>Cancelar</button><button class="btn btn-primary">${icon('check')}Guardar</button>`);
+    return html;
+  };
 })();
