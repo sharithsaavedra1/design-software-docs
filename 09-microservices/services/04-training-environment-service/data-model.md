@@ -138,7 +138,7 @@ Esta protección a nivel de BD **complementa, no reemplaza**, la validación de 
 ## Remediación de congruencia — R3 (2026-08-06)
 
 Cierre de brechas contrato↔BD detectadas en la evaluación de congruencia
-([CONGRUENCIA-contratos-docs-bd.md](../../../../../../delivery/status/CONGRUENCIA-contratos-docs-bd.md)).
+(`CONGRUENCIA-contratos-docs-bd.md`, en `delivery/status/` — bitácora fuera del repo de docs).
 Se implementa vía **changeset nuevo** `remediation-training-960` (no se modifica ningún
 changeset corrido). Columnas agregadas (todas nullable o con default → seguras sobre datos existentes):
 
