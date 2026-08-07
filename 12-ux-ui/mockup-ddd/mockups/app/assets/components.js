@@ -52,7 +52,7 @@
       return `<div class="modal-backdrop" data-modal-backdrop><section class="modal ${cls}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><h2 id="modal-title">${title}</h2><button class="icon-btn" type="button" data-close-modal aria-label="Cerrar">${icon('x')}</button></header><div class="modal-body">${body}</div><footer class="modal-footer">${footer}</footer></section></div>`;
     },
     toast(message) { return `<div class="toast" role="status">${icon('check')}${message}</div>`; },
-    tabs(labels, active=0) { return `<div class="tabs" role="tablist">${labels.map((l,i)=>`<button class="tab ${i===active?'active':''}" role="tab" aria-selected="${i===active}">${l}</button>`).join('')}</div>`; },
+    tabs(labels, active=0) { return `<div class="tabs" role="tablist">${labels.map((l,i)=>`<button class="tab ${i===active?'active':''}" data-tab="${i}" type="button" role="tab" aria-selected="${i===active}">${l}</button>`).join('')}</div>`; },
     weekCalendar(sessions) {
       const days=['Lunes 10','Martes 11','Miércoles 12','Jueves 13','Viernes 14'];
       const slots=['07:00','10:00','13:00','16:00'];
