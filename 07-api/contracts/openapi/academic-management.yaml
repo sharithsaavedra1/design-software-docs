@@ -29,7 +29,7 @@ paths:
       operationId: listTechLines
       tags: [curriculum]
       summary: Lista paginada de líneas tecnológicas.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -58,7 +58,7 @@ paths:
       operationId: createTechLine
       tags: [curriculum]
       summary: Crea una línea tecnológica.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -83,7 +83,7 @@ paths:
       operationId: getTechLine
       tags: [curriculum]
       summary: Detalle de una línea tecnológica.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
           description: Línea tecnológica.
@@ -97,7 +97,7 @@ paths:
       operationId: updateTechLine
       tags: [curriculum]
       summary: Reemplaza los datos de una línea tecnológica.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -119,7 +119,7 @@ paths:
       operationId: deleteTechLine
       tags: [curriculum]
       summary: Baja lógica de una línea tecnológica (is_active = false).
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
           description: Línea tecnológica desactivada.
@@ -134,7 +134,7 @@ paths:
       operationId: listTechNetworks
       tags: [curriculum]
       summary: Lista paginada de redes tecnológicas.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -167,7 +167,7 @@ paths:
       operationId: createTechNetwork
       tags: [curriculum]
       summary: Crea una red tecnológica dentro de una línea tecnológica.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -193,7 +193,7 @@ paths:
       operationId: getTechNetwork
       tags: [curriculum]
       summary: Detalle de una red tecnológica.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
           description: Red tecnológica.
@@ -207,7 +207,7 @@ paths:
       operationId: updateTechNetwork
       tags: [curriculum]
       summary: Reemplaza los datos de una red tecnológica.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -229,7 +229,7 @@ paths:
       operationId: deleteTechNetwork
       tags: [curriculum]
       summary: Baja lógica de una red tecnológica (is_active = false).
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
           description: Red tecnológica desactivada.
@@ -244,7 +244,7 @@ paths:
       operationId: listKnowledgeNetworks
       tags: [curriculum]
       summary: Lista paginada de redes de conocimiento.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -277,7 +277,7 @@ paths:
       operationId: createKnowledgeNetwork
       tags: [curriculum]
       summary: Crea una red de conocimiento dentro de una red tecnológica.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -303,7 +303,7 @@ paths:
       operationId: getKnowledgeNetwork
       tags: [curriculum]
       summary: Detalle de una red de conocimiento.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
           description: Red de conocimiento.
@@ -317,7 +317,7 @@ paths:
       operationId: updateKnowledgeNetwork
       tags: [curriculum]
       summary: Reemplaza los datos de una red de conocimiento.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -339,7 +339,7 @@ paths:
       operationId: deleteKnowledgeNetwork
       tags: [curriculum]
       summary: Baja lógica de una red de conocimiento (is_active = false).
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
           description: Red de conocimiento desactivada.
@@ -354,7 +354,7 @@ paths:
       operationId: listTrainingPrograms
       tags: [curriculum]
       summary: Lista paginada de programas de formación.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -398,7 +398,7 @@ paths:
       operationId: createTrainingProgram
       tags: [curriculum]
       summary: Crea un programa de formación (versión inicial = 1).
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -424,7 +424,7 @@ paths:
       operationId: getTrainingProgram
       tags: [curriculum]
       summary: Detalle de un programa de formación (incluye versión vigente).
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
           description: Programa de formación.
@@ -441,7 +441,7 @@ paths:
       description: >-
         Actualizar `version` representa una nueva definición curricular vigente. Las fichas
         ya abiertas conservan su `program_version` congelada y no se ven afectadas.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -463,7 +463,7 @@ paths:
       operationId: deleteTrainingProgram
       tags: [curriculum]
       summary: Baja lógica de un programa de formación (is_active = false).
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
           description: Programa de formación desactivado.
@@ -484,7 +484,7 @@ paths:
       operationId: listProgramCompetencies
       tags: [competencies]
       summary: Lista paginada de competencias de un programa.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -513,7 +513,7 @@ paths:
       operationId: createProgramCompetency
       tags: [competencies]
       summary: Crea una competencia dentro del programa.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -539,7 +539,7 @@ paths:
       operationId: getCompetency
       tags: [competencies]
       summary: Detalle de una competencia.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
           description: Competencia.
@@ -553,7 +553,7 @@ paths:
       operationId: updateCompetency
       tags: [competencies]
       summary: Reemplaza los datos de una competencia.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -575,7 +575,7 @@ paths:
       operationId: deleteCompetency
       tags: [competencies]
       summary: Baja lógica de una competencia (is_active = false).
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
           description: Competencia desactivada.
@@ -592,7 +592,7 @@ paths:
       operationId: listCompetencyLearningOutcomes
       tags: [competencies]
       summary: Lista paginada de resultados de aprendizaje de una competencia.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -621,7 +621,7 @@ paths:
       operationId: createCompetencyLearningOutcome
       tags: [competencies]
       summary: Crea un resultado de aprendizaje dentro de la competencia.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -647,7 +647,7 @@ paths:
       operationId: getLearningOutcome
       tags: [competencies]
       summary: Detalle de un resultado de aprendizaje.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
           description: Resultado de aprendizaje.
@@ -661,7 +661,7 @@ paths:
       operationId: updateLearningOutcome
       tags: [competencies]
       summary: Reemplaza los datos de un resultado de aprendizaje.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
         content:
@@ -683,7 +683,7 @@ paths:
       operationId: deleteLearningOutcome
       tags: [competencies]
       summary: Baja lógica de un resultado de aprendizaje (is_active = false).
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
           description: Resultado de aprendizaje desactivado.
@@ -698,7 +698,7 @@ paths:
       operationId: listFichas
       tags: [fichas]
       summary: Lista paginada de fichas de matrícula.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -756,7 +756,7 @@ paths:
       description: >-
         `program_version` se calcula en el servidor como snapshot de `training_program.version`
         vigente al momento de abrir la ficha; no se recibe en el request.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_FICHA_MANAGE
       requestBody:
         required: true
         content:
@@ -782,7 +782,7 @@ paths:
       operationId: getFicha
       tags: [fichas]
       summary: Detalle de una ficha de matrícula.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_FICHA_VIEW
       responses:
         '200':
           description: Ficha.
@@ -799,7 +799,7 @@ paths:
       description: >-
         No modifica `status`; los cambios de estado se realizan vía
         `PATCH /fichas/{id}/status` respetando la máquina de estados.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_FICHA_MANAGE
       requestBody:
         required: true
         content:
@@ -824,7 +824,7 @@ paths:
       description: >-
         No elimina físicamente el registro. Aplica la transición de estado a `CANCELLED`
         (guidelines ADR-004); falla con 409 si la ficha ya está en un estado terminal.
-      x-required-feature: ACAD_ADMIN
+      x-required-feature: ACADEMIC_FICHA_STATUS
       responses:
         '204':
           description: Ficha dada de baja.
@@ -843,7 +843,7 @@ paths:
       description: >-
         Transiciones válidas: INDUCTION → EXECUTION|CANCELLED; EXECUTION → PRODUCTIVE_STAGE|CANCELLED;
         PRODUCTIVE_STAGE → COMPLETED|CANCELLED. COMPLETED y CANCELLED son terminales.
-      x-required-feature: ACAD_MANAGE
+      x-required-feature: ACADEMIC_FICHA_STATUS
       requestBody:
         required: true
         content:
@@ -873,7 +873,7 @@ paths:
         derivados de `training_program`). Solo lectura. Inventario — Usuarios: coordinadores
         académicos y dashboards de centro; Frecuencia: on-demand/diaria; Formato: JSON;
         Fuente: `enrollment_ficha` + `training_program`.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -929,7 +929,7 @@ paths:
         temporal a partir de `start_date`, `expected_end_date` y `actual_end_date`. Solo lectura.
         Inventario — Usuarios: coordinadores académicos y subdirectores de centro; Frecuencia:
         on-demand/semanal; Formato: JSON; Fuente: `enrollment_ficha`.
-      x-required-feature: ACAD_READ
+      x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
