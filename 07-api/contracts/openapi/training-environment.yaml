@@ -35,7 +35,7 @@ paths:
       operationId: listEnvironmentTypes
       tags: [environment-types]
       summary: Lista el catálogo de tipos de ambiente.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       responses:
         '200':
           description: Catálogo de tipos de ambiente.
@@ -50,7 +50,7 @@ paths:
       operationId: createEnvironmentType
       tags: [environment-types]
       summary: Crea un tipo de ambiente (catálogo administrativo).
-      x-required-feature: ENVIRONMENT_TYPE_MANAGE
+      x-required-feature: ENV_MANAGE
       requestBody:
         required: true
         content:
@@ -75,7 +75,7 @@ paths:
       operationId: getEnvironmentType
       tags: [environment-types]
       summary: Detalle de un tipo de ambiente.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       responses:
         '200':
           description: Tipo de ambiente.
@@ -92,7 +92,7 @@ paths:
       operationId: listTrainingEnvironments
       tags: [training-environments]
       summary: Lista paginada de ambientes de formación.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -148,7 +148,7 @@ paths:
       operationId: createTrainingEnvironment
       tags: [training-environments]
       summary: Registra un nuevo ambiente de formación.
-      x-required-feature: ENVIRONMENT_MANAGE
+      x-required-feature: ENV_MANAGE
       requestBody:
         required: true
         content:
@@ -173,7 +173,7 @@ paths:
       operationId: getTrainingEnvironment
       tags: [training-environments]
       summary: Detalle de un ambiente de formación.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       responses:
         '200':
           description: Ambiente.
@@ -187,7 +187,7 @@ paths:
       operationId: updateTrainingEnvironment
       tags: [training-environments]
       summary: Reemplaza los datos editables del ambiente.
-      x-required-feature: ENVIRONMENT_MANAGE
+      x-required-feature: ENV_MANAGE
       requestBody:
         required: true
         content:
@@ -208,7 +208,7 @@ paths:
       operationId: patchTrainingEnvironment
       tags: [training-environments]
       summary: Actualiza parcialmente el ambiente.
-      x-required-feature: ENVIRONMENT_MANAGE
+      x-required-feature: ENV_MANAGE
       requestBody:
         required: true
         content:
@@ -229,7 +229,7 @@ paths:
       operationId: deactivateTrainingEnvironment
       tags: [training-environments]
       summary: Da de baja lógica al ambiente (is_active = false).
-      x-required-feature: ENVIRONMENT_MANAGE
+      x-required-feature: ENV_MANAGE
       responses:
         '204':
           description: Ambiente dado de baja.
@@ -245,7 +245,7 @@ paths:
       operationId: listAvailabilityRules
       tags: [availability-rules]
       summary: Reglas de disponibilidad recurrente del ambiente (hasta 24 por ambiente).
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       parameters:
         - name: day_of_week
           in: query
@@ -270,7 +270,7 @@ paths:
       description: >-
         Publica el evento `environment.availability.changed` (change_type=RULE_ADDED);
         scheduling-service re-sincroniza su read model al recibirlo.
-      x-required-feature: ENVIRONMENT_AVAILABILITY_MANAGE
+      x-required-feature: ENV_AVAILABILITY_QUERY
       requestBody:
         required: true
         content:
@@ -296,7 +296,7 @@ paths:
       operationId: getAvailabilityRule
       tags: [availability-rules]
       summary: Detalle de una regla de disponibilidad.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       responses:
         '200':
           description: Regla de disponibilidad.
@@ -312,7 +312,7 @@ paths:
       summary: Reemplaza una regla de disponibilidad.
       description: >-
         Publica el evento `environment.availability.changed` (change_type=RULE_MODIFIED).
-      x-required-feature: ENVIRONMENT_AVAILABILITY_MANAGE
+      x-required-feature: ENV_AVAILABILITY_QUERY
       requestBody:
         required: true
         content:
@@ -337,7 +337,7 @@ paths:
         Eliminación física: la tabla `availability_rule` no tiene columnas de soft
         delete (ver data-model.md). Publica `environment.availability.changed`
         (change_type=RULE_REMOVED).
-      x-required-feature: ENVIRONMENT_AVAILABILITY_MANAGE
+      x-required-feature: ENV_AVAILABILITY_QUERY
       responses:
         '204':
           description: Regla eliminada.
@@ -353,7 +353,7 @@ paths:
       operationId: listMaintenancePeriods
       tags: [maintenance]
       summary: Períodos de mantenimiento del ambiente.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       parameters:
         - name: from
           in: query
@@ -383,7 +383,7 @@ paths:
       description: >-
         Publica el evento `environment.maintenance.started`; scheduling-service
         re-sincroniza su read model al recibirlo.
-      x-required-feature: ENVIRONMENT_MAINTENANCE_MANAGE
+      x-required-feature: ENV_MAINTENANCE_MANAGE
       requestBody:
         required: true
         content:
@@ -412,7 +412,7 @@ paths:
       description: >-
         Registro append-only (sin columnas de actualización ni borrado en el
         modelo de datos): no admite PUT/PATCH/DELETE.
-      x-required-feature: ENVIRONMENT_VIEW
+      x-required-feature: ENV_VIEW
       responses:
         '200':
           description: Período de mantenimiento.
@@ -429,7 +429,7 @@ paths:
       operationId: listReservations
       tags: [reservations]
       summary: Lista paginada de reservas puntuales.
-      x-required-feature: ENVIRONMENT_RESERVATION_VIEW
+      x-required-feature: ENV_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -484,7 +484,7 @@ paths:
         base de datos impone no-solapamiento por ambiente mediante una constraint
         `EXCLUDE` GiST sobre reservas no canceladas (ver data-model.md). Publica el
         evento `environment.reservation.created` al confirmarse.
-      x-required-feature: ENVIRONMENT_RESERVATION_MANAGE
+      x-required-feature: ENV_RESERVATION_MANAGE
       requestBody:
         required: true
         content:
@@ -510,7 +510,7 @@ paths:
       operationId: getReservation
       tags: [reservations]
       summary: Detalle de una reserva.
-      x-required-feature: ENVIRONMENT_RESERVATION_VIEW
+      x-required-feature: ENV_VIEW
       responses:
         '200':
           description: Reserva.
@@ -527,7 +527,7 @@ paths:
       description: >-
         Reprogramar horario/fecha puede fallar con `409 Conflict`
         (`RESERVATION_OVERLAP`) por la misma constraint `EXCLUDE`.
-      x-required-feature: ENVIRONMENT_RESERVATION_MANAGE
+      x-required-feature: ENV_RESERVATION_MANAGE
       requestBody:
         required: true
         content:
@@ -553,7 +553,7 @@ paths:
         Eliminación lógica por defecto (ADR-004): la tabla `reservation` no tiene
         `deleted_at`; el estado de negocio `status` cumple ese rol, por lo que
         cancelar transiciona `status` a `CANCELLED` en vez de borrar la fila.
-      x-required-feature: ENVIRONMENT_RESERVATION_MANAGE
+      x-required-feature: ENV_RESERVATION_MANAGE
       responses:
         '204':
           description: Reserva cancelada.

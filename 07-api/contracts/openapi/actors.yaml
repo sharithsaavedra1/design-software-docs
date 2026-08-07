@@ -812,7 +812,7 @@ paths:
       operationId: listProductiveStages
       tags: [tracking]
       summary: Lista paginada de etapas productivas.
-      x-required-feature: ACT_TRACKING_VIEW
+      x-required-feature: ACT_ACTIVITY_LOG_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -849,7 +849,7 @@ paths:
       operationId: createProductiveStage
       tags: [tracking]
       summary: Registra el inicio de una etapa productiva.
-      x-required-feature: ACT_TRACKING_MANAGE
+      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
         content:
@@ -874,7 +874,7 @@ paths:
       operationId: getProductiveStage
       tags: [tracking]
       summary: Detalle de una etapa productiva.
-      x-required-feature: ACT_TRACKING_VIEW
+      x-required-feature: ACT_ACTIVITY_LOG_VIEW
       responses:
         '200':
           description: Etapa productiva.
@@ -888,7 +888,7 @@ paths:
       operationId: updateProductiveStage
       tags: [tracking]
       summary: Actualiza avance, cierre o interrupción de la etapa productiva.
-      x-required-feature: ACT_TRACKING_MANAGE
+      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
         content:
@@ -914,7 +914,7 @@ paths:
       operationId: listCompanyVisits
       tags: [tracking]
       summary: Visitas de seguimiento registradas en la etapa productiva.
-      x-required-feature: ACT_TRACKING_VIEW
+      x-required-feature: ACT_ACTIVITY_LOG_VIEW
       responses:
         '200':
           description: Lista de visitas.
@@ -930,7 +930,7 @@ paths:
       operationId: createCompanyVisit
       tags: [tracking]
       summary: Registra una visita de seguimiento a la empresa.
-      x-required-feature: ACT_TRACKING_MANAGE
+      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
         content:
@@ -959,7 +959,7 @@ paths:
       operationId: getCompanyVisit
       tags: [tracking]
       summary: Detalle de una visita de seguimiento.
-      x-required-feature: ACT_TRACKING_VIEW
+      x-required-feature: ACT_ACTIVITY_LOG_VIEW
       responses:
         '200':
           description: Visita.
@@ -973,7 +973,7 @@ paths:
       operationId: updateCompanyVisit
       tags: [tracking]
       summary: Corrige o completa el registro de una visita.
-      x-required-feature: ACT_TRACKING_MANAGE
+      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
         content:
@@ -996,7 +996,7 @@ paths:
       operationId: listImprovementPlans
       tags: [tracking]
       summary: Lista paginada de planes de mejoramiento individual.
-      x-required-feature: ACT_TRACKING_VIEW
+      x-required-feature: ACT_ACTIVITY_LOG_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -1033,7 +1033,7 @@ paths:
       operationId: createImprovementPlan
       tags: [tracking]
       summary: Crea un plan de mejoramiento para un instructor o un aprendiz (arco exclusivo).
-      x-required-feature: ACT_TRACKING_MANAGE
+      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
         content:
@@ -1062,7 +1062,7 @@ paths:
       operationId: getImprovementPlan
       tags: [tracking]
       summary: Detalle de un plan de mejoramiento.
-      x-required-feature: ACT_TRACKING_VIEW
+      x-required-feature: ACT_ACTIVITY_LOG_VIEW
       responses:
         '200':
           description: Plan de mejoramiento.
@@ -1076,7 +1076,7 @@ paths:
       operationId: updateImprovementPlan
       tags: [tracking]
       summary: Actualiza el avance o cierre del plan de mejoramiento.
-      x-required-feature: ACT_TRACKING_MANAGE
+      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
         content:
