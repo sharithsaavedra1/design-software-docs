@@ -23,70 +23,70 @@ halts_registrados: ninguno
 | # | Pantalla | Rol | MFE | Estado |
 |---|---|---|---|:--:|
 | 1 | Login | anónimo | iam-mfe | ✅ |
-| 2 | Recuperar contraseña | anónimo | iam-mfe | ⬜ |
-| 3 | Nueva contraseña (reset) | anónimo | iam-mfe | ⬜ |
+| 2 | Recuperar contraseña | anónimo | iam-mfe | ✅ |
+| 3 | Nueva contraseña (reset) | anónimo | iam-mfe | ✅ |
 | 4 | App Shell (marco por rol) | todos | shell-host | ✅ |
-| 5 | Panel de notificaciones (campana) | todos | shell-host + monitoring-mfe | ⬜ |
-| 6 | Estados globales (403/404/500/sesión) | todos | shell-host | ⬜ |
+| 5 | Panel de notificaciones (campana) | todos | shell-host + monitoring-mfe | ✅ |
+| 6 | Estados globales (403/404/500/sesión) | todos | shell-host | ✅ |
 
 ### 02-coordinador (núcleo)
 | # | Pantalla | Tipo | MFE | Estado |
 |---|---|---|---|:--:|
 | 1 | Dashboard / Inicio | pantalla | shell-host + scheduling + academic | ✅ |
 | 2 | Horarios (lista) | lista | scheduling-mfe | ✅ |
-| 3 | Detalle de horario | detalle | scheduling-mfe | ⬜ |
-| 4 | Crear / editar horario | form | scheduling-mfe | ⬜ |
-| 5 | Modal: Agregar/editar sesión | modal | scheduling-mfe | ⬜ |
-| 6 | Modal: Confirmar publicación | modal | scheduling-mfe | ⬜ |
-| 7 | Panel de conflictos | lista | scheduling-mfe | ⬜ |
-| 8 | Modal: Resolver conflicto | modal | scheduling-mfe | ⬜ |
-| 9 | Disponibilidad | consulta | environment-mfe + actors-mfe | ⬜ |
-| 10 | Detalle de ambiente / disponibilidad | detalle | environment-mfe | ⬜ |
-| 11 | Fichas | lista | academic-mfe | ⬜ |
-| 12 | Detalle de ficha | detalle | academic-mfe | ⬜ |
+| 3 | Detalle de horario | detalle | scheduling-mfe | ✅ |
+| 4 | Crear / editar horario | form | scheduling-mfe | ✅ |
+| 5 | Modal: Agregar/editar sesión | modal | scheduling-mfe | ✅ |
+| 6 | Modal: Confirmar publicación | modal | scheduling-mfe | ✅ |
+| 7 | Panel de conflictos | lista | scheduling-mfe | ✅ |
+| 8 | Modal: Resolver conflicto | modal | scheduling-mfe | ✅ |
+| 9 | Disponibilidad | consulta | environment-mfe + actors-mfe | ✅ |
+| 10 | Detalle de ambiente / disponibilidad | detalle | environment-mfe | ✅ |
+| 11 | Fichas | lista | academic-mfe | ✅ |
+| 12 | Detalle de ficha | detalle | academic-mfe | ✅ |
 
 ### 03-instructor
 | # | Pantalla | Tipo | MFE | Estado |
 |---|---|---|---|:--:|
-| 1 | Mi horario (semana) | calendario | scheduling-mfe | ⬜ |
-| 2 | Detalle de sesión | detalle | scheduling-mfe | ⬜ |
-| 3 | Mi disponibilidad | lista | actors-mfe | ⬜ |
-| 4 | Modal: Crear excepción de disponibilidad | modal/form | actors-mfe | ⬜ |
-| 5 | Seguimiento de ficha | lista | monitoring-mfe | ⬜ |
-| 6 | Form: Registrar seguimiento | form | monitoring-mfe | ⬜ |
+| 1 | Mi horario (semana) | calendario | scheduling-mfe | ✅ |
+| 2 | Detalle de sesión | detalle | scheduling-mfe | ✅ |
+| 3 | Mi disponibilidad | lista | actors-mfe | ✅ |
+| 4 | Modal: Crear excepción de disponibilidad | modal/form | actors-mfe | ✅ |
+| 5 | Seguimiento de ficha | lista | monitoring-mfe | ✅ |
+| 6 | Form: Registrar seguimiento | form | monitoring-mfe | ✅ |
 
 ### 04-aprendiz (mobile-first)
 | # | Pantalla | Tipo | MFE | Estado |
 |---|---|---|---|:--:|
-| 1 | Mi horario (semana) | calendario | scheduling-mfe | ⬜ |
-| 2 | Notificaciones | lista | monitoring-mfe | ⬜ |
-| 3 | Detalle de clase/sesión | detalle | scheduling-mfe | ⬜ |
-| 4 | Detalle de notificación | detalle | monitoring-mfe | ⬜ |
+| 1 | Mi horario (semana) | calendario | scheduling-mfe | ✅ |
+| 2 | Notificaciones | lista | monitoring-mfe | ✅ |
+| 3 | Detalle de clase/sesión | detalle | scheduling-mfe | ✅ |
+| 4 | Detalle de notificación | detalle | monitoring-mfe | ✅ |
 
 ### 05-administrador
 | # | Pantalla | Tipo | MFE | Estado |
 |---|---|---|---|:--:|
-| 1 | Panel de indicadores (KPIs) | dashboard | monitoring-mfe | ⬜ |
-| 2 | Drill-down de KPI | detalle | monitoring-mfe | ⬜ |
-| 3 | Administración — Usuarios | lista | iam-mfe | ⬜ |
-| 4 | Form: Crear/editar usuario | form | iam-mfe | ⬜ |
-| 5 | Detalle de usuario | detalle | iam-mfe | ⬜ |
-| 6 | Modal: Asignar/revocar rol | modal | iam-mfe | ⬜ |
-| 7 | Administración — Datos de referencia | lista | reference-mfe | ⬜ |
-| 8 | Form: Editar catálogo/valor/parámetro | form | reference-mfe | ⬜ |
+| 1 | Panel de indicadores (KPIs) | dashboard | monitoring-mfe | ✅ |
+| 2 | Drill-down de KPI | detalle | monitoring-mfe | ✅ |
+| 3 | Administración — Usuarios | lista | iam-mfe | ✅ |
+| 4 | Form: Crear/editar usuario | form | iam-mfe | ✅ |
+| 5 | Detalle de usuario | detalle | iam-mfe | ✅ |
+| 6 | Modal: Asignar/revocar rol | modal | iam-mfe | ✅ |
+| 7 | Administración — Datos de referencia | lista | reference-mfe | ✅ |
+| 8 | Form: Editar catálogo/valor/parámetro | form | reference-mfe | ✅ |
 
 ### 06-backoffice
 | # | Pantalla | Tipo | MFE | Estado |
 |---|---|---|---|:--:|
-| 1 | Documentos | lista | document-mfe | ⬜ |
-| 2 | Plantillas de documento | lista | document-mfe | ⬜ |
-| 3 | Auditoría | lista | audit-mfe | ⬜ |
-| 4 | Parametrización / catálogos | lista | reference-mfe | ⬜ |
-| 5 | Detalle de documento + versiones | detalle | document-mfe | ⬜ |
-| 6 | Modal: Generar documento | modal/form | document-mfe | ⬜ |
-| 7 | Editor / Preview de plantilla | editor | document-mfe | ⬜ |
-| 8 | Modal: Detalle de auditoría | modal | audit-mfe | ⬜ |
-| 9 | Formularios CRUD catálogos/parámetros | form | reference-mfe | ⬜ |
+| 1 | Documentos | lista | document-mfe | ✅ |
+| 2 | Plantillas de documento | lista | document-mfe | ✅ |
+| 3 | Auditoría | lista | audit-mfe | ✅ |
+| 4 | Parametrización / catálogos | lista | reference-mfe | ✅ |
+| 5 | Detalle de documento + versiones | detalle | document-mfe | ✅ |
+| 6 | Modal: Generar documento | modal/form | document-mfe | ✅ |
+| 7 | Editor / Preview de plantilla | editor | document-mfe | ✅ |
+| 8 | Modal: Detalle de auditoría | modal | audit-mfe | ✅ |
+| 9 | Formularios CRUD catálogos/parámetros | form | reference-mfe | ✅ |
 
 ## Lente 2 — por MICRO-FRONTEND (build)
 
@@ -104,7 +104,7 @@ halts_registrados: ninguno
 | **reference-mfe** | 4 | Datos de referencia, Editar catálogo, Parametrización, CRUD catálogos |
 
 > Totales: **45 pantallas/modales**, **10 unidades de build** (9 MFE de dominio + shell-host).
-> Generadas hasta ahora: **4** (Login, App Shell, Dashboard v2, Horarios lista). Pendientes: **41**.
+> Generadas hasta ahora: **45**. Pendientes: **0**.
 
 ## Prioridad de generación (MVP primero)
 1. Completar **Coordinador** (núcleo): Crear/editar horario → Panel de conflictos → Resolver conflicto → Disponibilidad → Fichas.
