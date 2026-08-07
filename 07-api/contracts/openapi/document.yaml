@@ -29,7 +29,7 @@ paths:
       operationId: listDocuments
       tags: [documents]
       summary: Lista paginada de documentos.
-      x-required-feature: DOC_DOCUMENT_VIEW
+      x-required-feature: DOC_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -78,7 +78,7 @@ paths:
         MinIO/S3 (p. ej. mediante una URL de subida firmada emitida fuera de esta
         API) y solo necesita registrar los metadatos. `storage_key` es de solo
         escritura: nunca se retorna en las respuestas (ver `GET /documents/{id}/download-url`).
-      x-required-feature: DOC_DOCUMENT_MANAGE
+      x-required-feature: DOC_CREATE
       requestBody:
         required: true
         content:
@@ -107,7 +107,7 @@ paths:
         inmediato. El cliente debe sondear `GET /documents/{id}` hasta observar
         `status = AVAILABLE` o `GENERATION_FAILED` (decisión 02 de decisions.md).
         La generación es siempre asíncrona; no existe variante síncrona.
-      x-required-feature: DOC_DOCUMENT_GENERATE
+      x-required-feature: DOC_CREATE
       requestBody:
         required: true
         content:
@@ -131,7 +131,7 @@ paths:
       operationId: getDocument
       tags: [documents]
       summary: Detalle de un documento.
-      x-required-feature: DOC_DOCUMENT_VIEW
+      x-required-feature: DOC_VIEW
       responses:
         '200':
           description: Documento.
@@ -148,7 +148,7 @@ paths:
       description: >-
         Actualización parcial. `row_version` es obligatorio para bloqueo optimista;
         si no coincide con el valor actual del recurso, responde `409 Conflict`.
-      x-required-feature: DOC_DOCUMENT_MANAGE
+      x-required-feature: DOC_CREATE
       requestBody:
         required: true
         content:
@@ -170,7 +170,7 @@ paths:
       operationId: archiveDocument
       tags: [documents]
       summary: Archiva el documento (soft delete; status = ARCHIVED).
-      x-required-feature: DOC_DOCUMENT_MANAGE
+      x-required-feature: DOC_ARCHIVE
       responses:
         '204':
           description: Documento archivado.
@@ -211,7 +211,7 @@ paths:
       operationId: listDocumentVersions
       tags: [versions]
       summary: Historial de versiones del documento.
-      x-required-feature: DOC_VERSION_VIEW
+      x-required-feature: DOC_VIEW
       responses:
         '200':
           description: Lista de versiones, orden descendente por `version_number`.
@@ -233,7 +233,7 @@ paths:
         `document_version` con `version_number` autoincremental y actualiza
         `document.storage_key`/`status = AVAILABLE` para apuntar a esta versión
         (desnormalización intencional, ver data-model.md).
-      x-required-feature: DOC_VERSION_UPLOAD
+      x-required-feature: DOC_CREATE
       requestBody:
         required: true
         content:
@@ -262,7 +262,7 @@ paths:
       operationId: getDocumentVersion
       tags: [versions]
       summary: Detalle de una versión específica del documento.
-      x-required-feature: DOC_VERSION_VIEW
+      x-required-feature: DOC_VIEW
       responses:
         '200':
           description: Versión del documento.
