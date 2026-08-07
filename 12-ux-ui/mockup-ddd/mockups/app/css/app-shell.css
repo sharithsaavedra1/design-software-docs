@@ -266,6 +266,15 @@
   flex-shrink: 0;
 }
 
+/* Nav lateral: los iconos SVG deben ir a tamaño fijo (evita que se expandan) */
+.nav-item svg,
+.nav-item .nav-icon,
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .sidebar-item:hover {
   background-color: var(--color-surface-muted);
   color: var(--color-text);
