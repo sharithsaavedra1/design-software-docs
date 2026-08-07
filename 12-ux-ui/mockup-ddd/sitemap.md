@@ -15,6 +15,12 @@ halts_registrados: ninguno
 > **ESTADO: PRELIMINAR (v0).** Rutas derivadas de los `flows/*.md`. Los **modales** no tienen ruta
 > propia (se abren por estado de UI sobre su ruta padre). Guard = rol/feature exigido (RBAC).
 
+> **Implementación en el mockup:** estas rutas se realizan como **hash-routes** con query params de
+> revisión: `?as=<rol>` (rol activo), `?state=loading|empty|error` y `?offline=1` (estados de
+> revisión), `?modal=…` (modales — sin ruta propia, como ya se indica), `?overlay=notifications`
+> (panel de notificaciones), y los estados globales en `#/system-states?variant=403|404|500|session`.
+> El **inventario maestro** de pantallas está en `#/inventory` (también `review.html`).
+
 ## Árbol de rutas
 
 ### Público (anónimo) — `iam-mfe`

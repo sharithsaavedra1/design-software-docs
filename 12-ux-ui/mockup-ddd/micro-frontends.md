@@ -48,6 +48,18 @@ provistos por **varios micro-frontends**. Espeja el backend: 9 microservicios (d
 | **audit-mfe** | audit-service | **Auditoría** (traza) | 06-backoffice |
 | **reference-mfe** | reference-data-service | **Parametrización / catálogos**, **Datos de referencia** (regionales/centros/sedes) | 05-administrador, 06-backoffice |
 
+## Realización en el mockup
+
+El mockup adoptado (`mockups/app/`) realiza esta arquitectura **1:1** como SPA con hash-router:
+
+- **`shell/`** = `shell-host`: router (`app.js`), `routes.js`, `screens.js`, `shell.js` — marco,
+  navegación por rol, guards RBAC y estados globales. No contiene lógica de dominio.
+- **Una carpeta por dominio**, cada una dueña de su `screens.js`:
+  `iam/ scheduling/ academic/ environment/ actors/ document/ monitoring/ audit/ reference/`.
+- **`assets/` compartido** (un solo set de tokens/componentes: `tokens.css`, `components.css`,
+  `app.css`, `components.js`, `icons.js`) — ningún dominio redefine tokens.
+- **`tools/validate-routes.js`** valida la cobertura ruta↔pantalla (**45/45**).
+
 ## Cómo un flujo compone varios micro-frontends
 
 Ejemplo — **Dashboard del Coordinador** (una sola pantalla, varios MFE):
