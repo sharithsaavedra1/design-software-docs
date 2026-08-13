@@ -23,7 +23,10 @@ aquí quedan como feedback para refinar contratos / HU / RBAC **más adelante** 
 > INSTRUCTOR→OWN_SCHEDULE) y `MON_DASHBOARD_OWN` (INSTRUCTOR→OWN_FICHAS); el hueco real estaba en el OpenAPI, que
 > exigía solo `SCH_VIEW_ALL`/`MON_DASHBOARD_FULL`. Se corrigió con `x-required-feature-any` en
 > `07-api/contracts/openapi/{scheduling,monitoring}.yaml` (5 GET de horarios/sesiones + `/ficha-trackings`).
-> **B1** sigue vivo (audit-service sin API REST).
+> **B1 RESUELTO**: se agregó el API de solo lectura de auditoría — contrato
+> [`07-api/contracts/openapi/audit.yaml`](../../07-api/contracts/openapi/audit.yaml) + componente
+> `audit-query-api` (GET `/audit-records` cursor+filtros, `/{id}`, `/export`; features `AUDIT_LOG_VIEW`/`AUDIT_EXPORT`
+> que ya existían en rbac). La pantalla de auditoría ya es construible. **Sin bloqueantes abiertos.**
 
 ## 🔴 Bloqueantes (para cuando se construya)
 
