@@ -82,10 +82,19 @@ Conflicto detectado durante la validación del horario en estado DRAFT.
 | `schedule_id` | UUID | No | FK → schedule |
 | `session_a_id` | UUID | No | FK → class_session |
 | `session_b_id` | UUID | Sí | FK → class_session (null si conflicto simple) |
-| `conflict_type` | VARCHAR(50) | No | INSTRUCTOR_DOUBLE_BOOKED / ENVIRONMENT_DOUBLE_BOOKED / SESSIONS_OVERLAP — `CHECK (conflict_type IN ('INSTRUCTOR_DOUBLE_BOOKED','ENVIRONMENT_DOUBLE_BOOKED','SESSIONS_OVERLAP'))` |
+| `conflict_type` | VARCHAR(50) | No | 6 valores — `CHECK (conflict_type IN ('INSTRUCTOR_DOUBLE_BOOKED','ENVIRONMENT_DOUBLE_BOOKED','SESSIONS_OVERLAP','ENVIRONMENT_MAINTENANCE','INSTRUCTOR_UNAVAILABLE','INSTRUCTOR_TRAVEL_CONFLICT'))` |
 | `description` | TEXT | No | Detalle legible del conflicto |
 | `is_resolved` | BOOLEAN | No | false = pendiente de corrección |
 | `detected_at` | TIMESTAMPTZ | No | |
+| `severity` | VARCHAR(10) | No | LOW/MEDIUM/HIGH/CRITICAL (default MEDIUM) — *(refinamiento G1)* |
+| `resolved_by` | UUID | Sí | actor que resolvió — *(G1)* |
+| `resolved_at` | TIMESTAMPTZ | Sí | *(G1)* |
+| `resolution_reason` | TEXT | Sí | justificación obligatoria al resolver — *(G1)* |
+| `is_blocking_publication` | BOOLEAN | No | si bloquea publicar (default true) — *(G1)* |
+
+**`class_session`** añade `execution_status` VARCHAR(15) `CHECK (PENDING/EXECUTED/NOT_EXECUTED/CANCELLED)` (default PENDING) — hecho de ejecución, distinto de `status` de programación *(D-4; asistencia individual = V2)*.
+
+**`site_travel_time`** *(D-11)* — matriz de tiempos de traslado entre sedes para el conflicto `INSTRUCTOR_TRAVEL_CONFLICT`: `id`, `origin_site_id` (ref lógica), `destination_site_id` (ref lógica), `travel_minutes`, `is_active`, timestamps. `UNIQUE(origin_site_id, destination_site_id)`.
 
 ## Referencias externas
 

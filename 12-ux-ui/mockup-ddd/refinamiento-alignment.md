@@ -60,11 +60,11 @@ Publicación controlada + estados + `row_version` (schedule) · aforo/mantenimie
 `instructor.default_max_hours_per_week` · auditoría normalizada e indexada · `learner_ficha_enrollment` (múltiples fichas) ·
 `class_session.competency_id` · paginación/filtros (limitación del mockup, no de la BD).
 
-### 🟣 DECISIÓN PM (💬)
-D-4 ejecución de sesión vs asistencia individual · D-5 Director vs Admin + RBAC territorial (Regional→Centro→Sede) ·
-D-6 versión inmutable de horario publicado · D-7 entidad "Reportar problema"/soporte · D-8 patrón transversal `status_transition` ·
-D-9 ciclo de vida de plantillas documentales · D-10 estados de matrícula Acuerdo 007/2012 · D-11 matriz de traslado entre sedes ·
-D-12 idempotencia + acuse de notificaciones.
+### 🟣 DECISIÓN PM (💬) — RESUELTAS
+D-4…D-12 fueron resueltas y registradas en **[refinamiento-decisions-D4-D12.md](refinamiento-decisions-D4-D12.md)**.
+Implementadas en BD (aditivo, 4 ambientes): D-4 (`execution_status`), D-9 (versionado de plantillas), D-11
+(`INSTRUCTOR_TRAVEL_CONFLICT` + `site_travel_time`), D-12 (índice de dedup). Reglas sin cambio de BD: D-5, D-6, D-8.
+Postergadas: D-7 (soporte), D-10 (estados de matrícula — validación institucional).
 
 ### 🔴 FUERA DE ALCANCE (❌ — consenso)
 IA generadora · MFA/SSO/2FA/SMS · SOFIA Plus/ZAJUNA · PWA offline/nativa · control por voz · multi-idioma · modo oscuro ·
