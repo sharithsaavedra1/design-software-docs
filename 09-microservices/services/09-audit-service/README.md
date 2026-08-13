@@ -37,14 +37,17 @@ Transversal — sin módulo de dominio directo (soporta trazabilidad de M1–M10
 |----------|------|--------|
 | Todos los servicios | async | Consume sus eventos de dominio por suscripción wildcard (`*-events`) |
 
-> Este servicio **no** tiene dependencias síncronas. No expone API. Se activa únicamente
-> por mensajes del bus (fan-out global, ADR-001).
+> Este servicio **no** tiene dependencias síncronas y **no expone escritura externa**: los
+> eventos entran únicamente por el bus (fan-out global, ADR-001). **Sí** expone un **API de
+> solo lectura** (`audit-query-api`) para consultar y exportar el log desde la pantalla de
+> auditoría, gated por RBAC (`MOD_AUDIT`). Contrato: [`07-api/contracts/openapi/audit.yaml`](../../../07-api/contracts/openapi/audit.yaml).
 
 ## Componentes desplegables
 
 | Componente | Sufijo | Descripción |
 |------------|--------|-------------|
 | [`audit-worker`](./components/audit-worker/README.md) | `-worker` | Consumidor universal: se suscribe a todos los topics y escribe `audit_record` (append-only) |
+| [`audit-query-api`](./components/audit-query-api/README.md) | `-api` | API REST **solo lectura**: consulta/exporta `audit_record` (cursor, filtros por índice, `AUDIT_LOG_VIEW`/`AUDIT_EXPORT`) |
 
 ## Base de datos
 
