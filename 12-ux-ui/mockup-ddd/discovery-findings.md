@@ -16,6 +16,12 @@ Al derivar las 22 pantallas **de los contratos y el data-model reales** (no de s
 emergieron vacíos entre lo que la UI necesita y lo que hoy existe. **No se inventó nada**;
 aquí quedan como feedback para refinar contratos / HU / RBAC **más adelante** (no ahora).
 
+> **Actualización (refinamiento con retros de aprendices).** El triage de las 22 retrospectivas contra
+> el estado real de los repos, más su materialización en el mockup y el spec de cambio de modelo aditivo,
+> viven ahora en **[refinamiento-alignment.md](refinamiento-alignment.md)**. Estado de los bloqueantes de
+> abajo: **B2** resuelto en diseño (feature/scope `SCH_VIEW_OWN`, materializado en `#/mi-horario`);
+> **B1** sigue vivo (audit-service sin API REST = contrato); **B3** pendiente (falta `MON_TRACK_OWN`).
+
 ## 🔴 Bloqueantes (para cuando se construya)
 
 | # | Flujo | Hallazgo | Impacto |

@@ -16,6 +16,13 @@
       const [label, cls, ico] = statusConfig[value] || [labelOverride || value,'status-neutral','info'];
       return `<span class="status-badge ${cls}">${icon(ico)}${labelOverride || label}</span>`;
     },
+    // G2 · badges de notificación accionable: no-leída + prioridad + categoría.
+    notifBadges(n) {
+      const pr = {HIGH:['status-danger','Alta'],NORMAL:['status-info','Normal'],LOW:['status-neutral','Baja']}[n.priority] || ['status-neutral', n.priority||'—'];
+      const cat = {SCHEDULE_PUBLISHED:'Horario publicado',SCHEDULE_CHANGED:'Cambio de horario',CONFLICT:'Conflicto',INSTRUCTOR_EXCEPTION:'Novedad instructor',GENERAL:'General'}[n.category] || n.category || 'General';
+      const nueva = n.isRead ? '' : `<span class="status-badge status-info">${icon('circle')}Nueva</span>`;
+      return `${nueva}<span class="status-badge ${pr[0]}">${icon('warning')}Prioridad: ${pr[1]}</span><span class="status-badge status-neutral">${icon('bell')}${cat}</span>`;
+    },
     pageHeader(title, subtitle='', primary=null, back=null) {
       return `${back ? `<a class="back-link" href="#${back.href}">${icon('arrowLeft')}${back.label}</a>` : ''}
       <header class="page-header"><div><h1>${title}</h1>${subtitle?`<p>${subtitle}</p>`:''}</div>${primary?`<div class="page-actions"><a class="btn btn-primary" href="#${primary.href}" ${primary.attrs||''}>${icon(primary.icon||'plus')}${primary.label}</a></div>`:''}</header>`;
