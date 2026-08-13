@@ -2,7 +2,7 @@
   const M = window.Mockup = window.Mockup || {};
   const icon = (...args) => M.icon(...args);
   const statusConfig = {
-    DRAFT:['Borrador','status-draft','circle'], UNDER_REVIEW:['En revisión','status-review','warning'], PUBLISHED:['Publicado','status-published','check'], ARCHIVED:['Archivado','status-neutral','lock'],
+    DRAFT:['Borrador','status-draft','circle'], UNDER_REVIEW:['En revisión','status-review','warning'], PUBLISHED:['Publicado','status-published','check'], ARCHIVED:['Archivado','status-neutral','lock'], OBSOLETE:['Obsoleta','status-neutral','lock'],
     CONFLICT:['Pendiente','status-conflict','warning'], RESOLVED:['Resuelto','status-success','check'], ACTIVE:['Activo','status-success','check'], INACTIVE:['Inactivo','status-neutral','lock'],
     AVAILABLE:['Disponible','status-success','check'], UNAVAILABLE:['No disponible','status-danger','lock'], EXCEPTION:['Con excepción','status-warning','warning'], CANCELLED:['Cancelada','status-neutral','x'],
     INDUCTION:['Inducción','status-info','info'], EXECUTION:['Ejecución','status-success','check'], PRODUCTIVE_STAGE:['Etapa productiva','status-warning','clock'], COMPLETED:['Finalizada','status-neutral','check'],
