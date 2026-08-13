@@ -363,7 +363,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [INSTRUCTOR_DOUBLE_BOOKED, ENVIRONMENT_DOUBLE_BOOKED, SESSIONS_OVERLAP]
+            enum: [INSTRUCTOR_DOUBLE_BOOKED, ENVIRONMENT_DOUBLE_BOOKED, SESSIONS_OVERLAP, ENVIRONMENT_MAINTENANCE, INSTRUCTOR_UNAVAILABLE, INSTRUCTOR_TRAVEL_CONFLICT]
       responses:
         '200':
           description: Página de conflictos.
@@ -841,7 +841,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [INSTRUCTOR_DOUBLE_BOOKED, ENVIRONMENT_DOUBLE_BOOKED, SESSIONS_OVERLAP]
+            enum: [INSTRUCTOR_DOUBLE_BOOKED, ENVIRONMENT_DOUBLE_BOOKED, SESSIONS_OVERLAP, ENVIRONMENT_MAINTENANCE, INSTRUCTOR_UNAVAILABLE, INSTRUCTOR_TRAVEL_CONFLICT]
         - name: is_resolved
           in: query
           required: false
