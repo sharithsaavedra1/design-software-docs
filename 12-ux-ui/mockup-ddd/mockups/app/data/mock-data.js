@@ -48,6 +48,7 @@
       { id:'conf-02', type:'ENVIRONMENT_DOUBLE_BOOKED', title:'Ambiente doble-asignado', schedule:'Ficha 3011550 · Ambiente A-204', date:'05/08/2026', description:'El ambiente A-204 está reservado para dos sesiones en la misma franja.', severity:'HIGH', isBlocking:true, resolved:false },
       { id:'conf-03', type:'SESSIONS_OVERLAP', title:'Sesiones solapadas', schedule:'EME 2987701 · Bloque 10:00–12:00', date:'05/08/2026', description:'Dos sesiones de la misma ficha se solapan parcialmente.', severity:'MEDIUM', isBlocking:true, resolved:false },
       { id:'conf-05', type:'ENVIRONMENT_MAINTENANCE', title:'Ambiente en mantenimiento', schedule:'Ficha 3124508 · Taller T-301', date:'04/08/2026', description:'El taller T-301 tiene un mantenimiento programado que solapa la sesión del jueves.', severity:'MEDIUM', isBlocking:false, resolved:false },
+      { id:'conf-06', type:'INSTRUCTOR_TRAVEL_CONFLICT', title:'Traslado entre sedes insuficiente', schedule:'Ficha 2874412 · Sede Norte → Sede Sur', date:'03/08/2026', description:'Carlos Mesa tiene 15 min entre sesiones en sedes distintas; el traslado requiere 30 min.', severity:'HIGH', isBlocking:true, resolved:false },
       { id:'conf-04', type:'INSTRUCTOR_UNAVAILABLE', title:'Instructor no disponible', schedule:'Ficha 2763450 · Jornada tarde', date:'04/08/2026', description:'Laura Gómez registró una excepción de disponibilidad (capacitación) que choca con una sesión.', severity:'HIGH', isBlocking:true, resolved:true, resolvedBy:'María García', resolvedAt:'04/08/2026, 12:18', resolutionReason:'Se reprogramó la sesión al viernes y se notificó a la ficha.' }
     ],
     environments: [
@@ -95,10 +96,10 @@
       { id:'doc-04', title:'Constancia de matrícula — Ficha 2987701', template:'CONSTANCIA_MATRICULA', domain:'academic', owner:'fic-03', status:'AVAILABLE', version:2, created:'04/08/2026, 11:16' }
     ],
     templates: [
-      { id:'tpl-01', code:'CONSTANCIA_HORARIO', name:'Constancia de horario', output:'PDF', version:3, active:true, updated:'05/08/2026' },
-      { id:'tpl-02', code:'REPORTE_CONFLICTOS', name:'Reporte de conflictos', output:'PDF', version:2, active:true, updated:'01/08/2026' },
-      { id:'tpl-03', code:'SEGUIMIENTO_FICHA', name:'Seguimiento de ficha', output:'PDF', version:4, active:true, updated:'30/07/2026' },
-      { id:'tpl-04', code:'CONSTANCIA_MATRICULA', name:'Constancia de matrícula', output:'PDF', version:2, active:false, updated:'22/07/2026' }
+      { id:'tpl-01', code:'CONSTANCIA_HORARIO', name:'Constancia de horario', output:'PDF', version:3, versionStatus:'PUBLISHED', active:true, updated:'05/08/2026' },
+      { id:'tpl-02', code:'REPORTE_CONFLICTOS', name:'Reporte de conflictos', output:'PDF', version:2, versionStatus:'PUBLISHED', active:true, updated:'01/08/2026' },
+      { id:'tpl-03', code:'SEGUIMIENTO_FICHA', name:'Seguimiento de ficha', output:'PDF', version:5, versionStatus:'UNDER_REVIEW', active:true, updated:'30/07/2026' },
+      { id:'tpl-04', code:'CONSTANCIA_MATRICULA', name:'Constancia de matrícula', output:'PDF', version:2, versionStatus:'OBSOLETE', active:false, updated:'22/07/2026' }
     ],
     audit: [
       { id:'evt-01', event:'SCHEDULE_PUBLISHED', entity:'schedule', entityId:'sch-03', actor:'María García', service:'scheduling-service', date:'06/08/2026, 08:45', outcome:'SUCCESS' },
