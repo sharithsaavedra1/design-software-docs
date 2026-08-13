@@ -7,7 +7,9 @@ info:
     seguimiento periódico, planes de mejoramiento a nivel de ficha y notificaciones
     enviadas. Alineado con el modelo de datos de monitoring-service (`monitoring_db`)
     y con 07-api/guidelines.md. Fuente de verdad del contrato. La extensión
-    `x-required-feature` declara el feature RBAC que exige cada operación (ver
+    `x-required-feature` declara el feature RBAC que exige cada operación (o
+    `x-required-feature-any: [A, B]` cuando acepta cualquiera de varios, p. ej.
+    `MON_DASHBOARD_FULL` o `MON_DASHBOARD_OWN`) (ver
     rbac-design.md, módulo `MOD_MONITORING`). Reportes descentralizados: este servicio
     sólo publica los KPIs/indicadores de su propio dominio (guidelines §11).
 servers:
@@ -288,7 +290,7 @@ paths:
       operationId: listFichaTrackings
       tags: [tracking]
       summary: Lista paginada de seguimientos de ficha.
-      x-required-feature: MON_DASHBOARD_FULL
+      x-required-feature-any: [MON_DASHBOARD_FULL, MON_DASHBOARD_OWN]
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
