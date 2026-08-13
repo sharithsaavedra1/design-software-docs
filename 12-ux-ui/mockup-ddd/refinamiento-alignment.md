@@ -7,7 +7,7 @@ dependencias_entrada: retros de refinamiento (22 docs); repos design-software-*-
 consumidores_siguientes: changesets aditivos por repo -db (cuando se autorice), refinamiento de contratos/HU/RBAC
 tldr: Cierra el ciclo "mejorar mockup → detectar fugas → validar aporte al core sin dañar la BD". Tría cada propuesta de las retros contra el estado REAL de los repos (que las retros no vieron), materializa en el mockup lo que sobrevive, y especifica el cambio de modelo aditivo. Nada de la BD congelada se recrea.
 decisiones_clave: retros ciegas a repos → triar contra estado real; solo cambios aditivos; mockup-first; D-1=5 tipos de conflicto, D-2=evento de dominio, D-3=RAP opcional en MVP
-halts_registrados: B1 (audit-service sin API REST) sigue bloqueando la pantalla de auditoría (es contrato, no BD)
+halts_registrados: ninguno (B1 resuelto con audit.yaml — API de solo lectura de auditoría)
 -->
 
 # Refinamiento — Alineación retros ↔ modelo ↔ BD ↔ mockup
@@ -71,7 +71,7 @@ IA generadora · MFA/SSO/2FA/SMS · SOFIA Plus/ZAJUNA · PWA offline/nativa · c
 export .ics / sync Google-Outlook · firma digital/TRD. *(Divergencias: 2FA-admin y .ics tienen proponentes minoritarios → V2.)*
 
 ### Bloqueantes reales que NO son de BD (contrato/RBAC)
-- **B1** · audit-service sin API REST → pantalla de auditoría no construible.
+- **B1** · ~~audit-service sin API REST~~ **RESUELTO** → `audit.yaml` (API solo lectura: `/audit-records` cursor+filtros, `/{id}`, `/export`) + componente `audit-query-api`. Pantalla de auditoría ya construible.
 - **B2** · `SCH_VIEW_OWN` ausente → aprendiz no ve su horario (resuelto en diseño vía G5).
 - **B3** · "mis fichas" del instructor exige `MON_DASHBOARD_FULL` (falta `MON_TRACK_OWN`).
 
@@ -114,5 +114,5 @@ validada en app, no con CHECK.
 1. **Cerrar decisiones 💬** (al menos las del core: D-1/D-2/D-3 ya con default; faltan D-4…D-12).
 2. **Redactar changesets** de la §5 en rama hija de `develop` — requiere autorización expresa para escribir
    SQL y, aparte, para commitear/pushear (ver skill design-software-git-flow).
-3. **B2/B3 cerrados** en contrato (`x-required-feature-any` en scheduling/monitoring). Falta solo **B1** (audit-service sin API REST).
+3. **B1/B2/B3 cerrados**: B2/B3 con `x-required-feature-any` (scheduling/monitoring); B1 con `audit.yaml` (API solo lectura). **Sin bloqueantes abiertos** — quedan solo las decisiones D-4…D-12.
 4. Regenerar capturas de referencia de las pantallas tocadas cuando el diseño se estabilice.
