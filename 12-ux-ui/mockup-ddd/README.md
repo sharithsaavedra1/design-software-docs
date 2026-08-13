@@ -67,6 +67,7 @@ archivo `.html` por ruta). Cómo se abre y qué entrega:
 | [ux-copy.md](ux-copy.md) | microcopy canónica (errores, vacíos, confirmaciones, labels) |
 | [acceptance-and-states.md](acceptance-and-states.md) | estados obligatorios por tipo + Definition of Done |
 | [discovery-findings.md](discovery-findings.md) | vacíos de contrato/RBAC detectados (feedback) |
+| [refinamiento-alignment.md](refinamiento-alignment.md) | triage de las 22 retros × estado real + materialización en mockup + spec de cambio aditivo |
 | `flows/01-auth.md … 06-backoffice.md` | las pantallas con su `PROMPT STITCH` (por flujo/rol) |
 
 ## Fuente única de verdad (de dónde deriva cada pantalla)
