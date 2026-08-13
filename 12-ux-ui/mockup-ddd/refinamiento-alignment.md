@@ -102,7 +102,8 @@ Solo se aplica lo que sobrevivió el triage y se validó en el mockup. Cada uno 
 | scheduling-db | `scheduling_conflict` | +5 columnas; ampliar CHECK `conflict_type` a 5 | `refinamiento-scheduling-conflict-001` |
 | monitoring-db | `sent_notification` | +7 columnas (lectura/prioridad/categoría/deep-link/evento) + índice parcial | `refinamiento-monitoring-notification-001` |
 | actors-db | `instructor_availability_exception` | +5 columnas (workflow + soporte + revisor) | `refinamiento-actors-exception-001` |
-| iam-db | seed `rbac` | +feature `SCH_VIEW_OWN` (LEARNER) y `MON_TRACK_OWN` (INSTRUCTOR) | `refinamiento-rbac-feature-001` |
+| ~~iam-db seed rbac~~ | **NO requerido** | el rbac de BD **ya tenía** `SCH_VIEW_OWN` y `MON_DASHBOARD_OWN`; el hueco era el OpenAPI | — |
+| docs `07-api` | contratos openapi | `x-required-feature-any: [ALL, OWN]` en 5 GET de scheduling + `/ficha-trackings` (cierra B2/B3) | rama `feat/refinamiento-rbac-own-*` |
 
 Decisiones de no-daño: "sesiones afectadas" por una excepción se **computan por query** (no tabla puente
 cross-servicio); defaults de columnas elegidos para no invalidar filas existentes; coherencia `resolved_*`
@@ -113,5 +114,5 @@ validada en app, no con CHECK.
 1. **Cerrar decisiones 💬** (al menos las del core: D-1/D-2/D-3 ya con default; faltan D-4…D-12).
 2. **Redactar changesets** de la §5 en rama hija de `develop` — requiere autorización expresa para escribir
    SQL y, aparte, para commitear/pushear (ver skill design-software-git-flow).
-3. **Refinar contratos** para B1 (audit REST) y cablear `SCH_VIEW_OWN`/`MON_TRACK_OWN` en `scheduling.yaml`/`monitoring`.
+3. **B2/B3 cerrados** en contrato (`x-required-feature-any` en scheduling/monitoring). Falta solo **B1** (audit-service sin API REST).
 4. Regenerar capturas de referencia de las pantallas tocadas cuando el diseño se estabilice.

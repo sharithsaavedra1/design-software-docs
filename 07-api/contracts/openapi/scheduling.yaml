@@ -9,7 +9,8 @@ info:
     (`scheduling_conflict`). Fuente de verdad del contrato. Alineado con el modelo de
     datos de scheduling-service y con 07-api/guidelines.md. La extensión
     `x-required-feature` declara el feature RBAC (módulo `MOD_SCHEDULING`) que exige
-    cada operación; el `scope_type` asociado en el JWT (GLOBAL / TRAINING_CENTER /
+    cada operación (o `x-required-feature-any: [A, B]` cuando la operación acepta
+    cualquiera de varios features, p. ej. `SCH_VIEW_ALL` o `SCH_VIEW_OWN`); el `scope_type` asociado en el JWT (GLOBAL / TRAINING_CENTER /
     OWN_SCHEDULE / OWN_FICHA_AS_LEARNER) acota el filtro de datos aplicado por el
     servicio, sin exponer features adicionales por scope.
 servers:
@@ -35,7 +36,7 @@ paths:
       operationId: listSchedules
       tags: [schedules]
       summary: Lista paginada de horarios.
-      x-required-feature: SCH_VIEW_ALL
+      x-required-feature-any: [SCH_VIEW_ALL, SCH_VIEW_OWN]
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -118,7 +119,7 @@ paths:
       operationId: getSchedule
       tags: [schedules]
       summary: Obtiene un horario por id.
-      x-required-feature: SCH_VIEW_ALL
+      x-required-feature-any: [SCH_VIEW_ALL, SCH_VIEW_OWN]
       responses:
         '200':
           description: Horario.
@@ -282,7 +283,7 @@ paths:
       operationId: listScheduleSessions
       tags: [sessions]
       summary: Lista paginada de sesiones de un horario.
-      x-required-feature: SCH_VIEW_ALL
+      x-required-feature-any: [SCH_VIEW_ALL, SCH_VIEW_OWN]
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -386,7 +387,7 @@ paths:
       operationId: listSessions
       tags: [sessions]
       summary: Lista paginada de sesiones de clase (todas las que el scope permita).
-      x-required-feature: SCH_VIEW_ALL
+      x-required-feature-any: [SCH_VIEW_ALL, SCH_VIEW_OWN]
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
@@ -447,7 +448,7 @@ paths:
       operationId: getSession
       tags: [sessions]
       summary: Obtiene una sesión de clase por id.
-      x-required-feature: SCH_VIEW_ALL
+      x-required-feature-any: [SCH_VIEW_ALL, SCH_VIEW_OWN]
       responses:
         '200':
           description: Sesión.

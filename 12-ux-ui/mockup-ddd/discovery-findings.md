@@ -19,8 +19,11 @@ aquí quedan como feedback para refinar contratos / HU / RBAC **más adelante** 
 > **Actualización (refinamiento con retros de aprendices).** El triage de las 22 retrospectivas contra
 > el estado real de los repos, más su materialización en el mockup y el spec de cambio de modelo aditivo,
 > viven ahora en **[refinamiento-alignment.md](refinamiento-alignment.md)**. Estado de los bloqueantes de
-> abajo: **B2** resuelto en diseño (feature/scope `SCH_VIEW_OWN`, materializado en `#/mi-horario`);
-> **B1** sigue vivo (audit-service sin API REST = contrato); **B3** pendiente (falta `MON_TRACK_OWN`).
+> abajo: **B2 y B3 RESUELTOS en contrato** — el rbac de BD ya tenía `SCH_VIEW_OWN` (LEARNER→OWN_FICHA_AS_LEARNER,
+> INSTRUCTOR→OWN_SCHEDULE) y `MON_DASHBOARD_OWN` (INSTRUCTOR→OWN_FICHAS); el hueco real estaba en el OpenAPI, que
+> exigía solo `SCH_VIEW_ALL`/`MON_DASHBOARD_FULL`. Se corrigió con `x-required-feature-any` en
+> `07-api/contracts/openapi/{scheduling,monitoring}.yaml` (5 GET de horarios/sesiones + `/ficha-trackings`).
+> **B1** sigue vivo (audit-service sin API REST).
 
 ## 🔴 Bloqueantes (para cuando se construya)
 
