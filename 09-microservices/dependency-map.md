@@ -41,6 +41,7 @@ graph TD
     DOC[document-service]
     MON[monitoring-service]
     AUD[audit-service]
+    NOT[notification-service]
 
     %% --- Dependencias síncronas (líneas sólidas) ---
     ACAD -->|sync| REF
@@ -66,6 +67,10 @@ graph TD
     SCH -.->|async| DOC
     DOC -.->|async| AUD
     MON -.->|async| AUD
+    MON -.->|async| NOT
+    SCH -.->|async| NOT
+    ACAD -.->|async| NOT
+    NOT -.->|async| AUD
 
     %% --- Autenticación (todos → iam) ---
     REF -.->|auth| IAM
@@ -112,9 +117,10 @@ reference-data-service       ⟶ async → audit-service
 academic-management-service  ⟶ async → audit-service, monitoring-service, actors-service
 training-environment-service ⟶ async → audit-service, scheduling-service  (availability.changed, maintenance.started, environment.created)
 actors-service               ⟶ async → audit-service, monitoring-service, scheduling-service  (instructor.assigned)
-scheduling-service           ⟶ async → audit-service, monitoring-service, actors-service, document-service  (schedule.published)
+scheduling-service           ⟶ async → audit-service, monitoring-service, actors-service, document-service, notification-service  (schedule.published)
 document-service             ⟶ async → audit-service
-monitoring-service           ⟶ async → audit-service
+monitoring-service           ⟶ async → audit-service, notification-service  (alert.triggered)
+notification-service         ⟶ async → audit-service  (notification.sent)
 ```
 
 > `audit-service` consume **todos** los topics por wildcard (`#`); `monitoring-service` consume
@@ -137,6 +143,7 @@ monitoring-service           ⟶ async → audit-service
 | `document-service` | 0 | ✅ |
 | `monitoring-service` | 0 (solo async) | ✅ |
 | `audit-service` | 0 (solo async) | ✅ |
+| `notification-service` | 0 (solo async) | ✅ |
 
 > `scheduling-service` es el **único** que supera el límite en el diseño base. La
 > [ADR-002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md) resuelve la

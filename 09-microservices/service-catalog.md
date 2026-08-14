@@ -13,5 +13,6 @@
 | 05 | `scheduling-service` | Motor de asignación de horarios | M8 | Jesús Ariel González Bonilla | `design-software-scheduling-db` | 🟡 |
 | 06 | `actors-service` | Instructores, aprendices y empresas | M7 | Jesús Ariel González Bonilla | `design-software-actors-db` | 🟡 |
 | 07 | `document-service` | Gestión documental y generación de PDFs | transversal | Jesús Ariel González Bonilla | `design-software-document-db` | 🟡 |
-| 08 | `monitoring-service` | KPIs, alertas y seguimiento integral | M9 | Jesús Ariel González Bonilla | `design-software-monitoring-db` | 🟡 |
+| 08 | `monitoring-service` | KPIs, alertas y seguimiento integral (detecta y publica eventos; la entrega de notificaciones se extrae a `notification-service` — ver [ADR-005](../05-architecture/decisions/records/ADR-005-microservices-topology-and-transversal-capabilities.md)) | M9 | Jesús Ariel González Bonilla | `design-software-monitoring-db` | 🟡 |
 | 09 | `audit-service` | Log de auditoría append-only | transversal | Jesús Ariel González Bonilla | `design-software-audit-db` | 🟡 |
+| 10 | `notification-service` | Entrega de notificaciones (email / in-app) — capacidad transversal consumida por cualquier dominio vía evento o API | transversal | Jesús Ariel González Bonilla | `design-software-notification-db` | 🔴 |
