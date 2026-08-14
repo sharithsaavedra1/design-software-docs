@@ -33,6 +33,20 @@ provistos por **varios micro-frontends**. Espeja el backend: 9 microservicios (d
 - **Un micro-frontend (MFE) por dominio**, dueño de las pantallas/componentes de SU dominio y que
   consume **su** `openapi.yaml`. Se montan dentro del shell según la ruta/rol.
 
+> **Topología de despliegue (ADR-005).** El patrón es **hosts + remotes vía Module Federation**:
+> - **Remotes** = los 9 MFE de dominio (responsive, deploy independiente). Slug **canónico** = el del
+>   servicio: `reference-data-mfe`, `academic-management-mfe`, `training-environment-mfe` (renombrados
+>   desde los cortos previos), más `iam/scheduling/actors/document/monitoring/audit`-mfe.
+> - **Hosts** (agregadores que embeben los remotes): `web-shell` (fase 1) y `mobile-shell` (fase 2).
+>   `shell-host` de este documento se materializa como estos hosts por experiencia.
+> - **BFF por experiencia**: `web-bff` + `mobile-bff` (no un BFF único). Camino:
+>   `cliente → gateway → BFF → servicios`.
+> - **Notificaciones** = chrome global del host (campana/panel/inbox), consumiendo `notification-service`;
+>   **no** hay `notification-mfe`.
+>
+> Las carpetas del mockup (`academic/`, `environment/`, `reference/`, …) conservan su nombre corto por
+> ser artefacto ya construido; el mapeo a los repos reales usa el slug canónico de arriba.
+
 ## Mapa dominio → micro-frontend → pantallas (dueño) → microservicio
 
 | Micro-frontend | Microservicio (backend) | Pantallas/componentes que posee | Flujos donde aparece |
@@ -40,13 +54,13 @@ provistos por **varios micro-frontends**. Espeja el backend: 9 microservicios (d
 | **shell-host** | — (usa iam para sesión) | App shell, nav por rol, notificaciones (contenedor), páginas de error/offline | todos |
 | **iam-mfe** | iam-service | Login, Recuperar/Nueva contraseña, Administración de **Usuarios/roles** | 01-auth, 05-administrador |
 | **scheduling-mfe** | scheduling-service | **Horarios (lista)**, **Crear/editar horario**, **Panel de conflictos**, vistas **Mi horario** (semana) | 02-coordinador, 03-instructor, 04-aprendiz |
-| **academic-mfe** | academic-management-service | **Fichas** (lista/consulta), programas/competencias | 02-coordinador |
-| **environment-mfe** | training-environment-service | **Disponibilidad de ambientes**, gestión de ambientes/reservas | 02-coordinador |
+| **academic-management-mfe** | academic-management-service | **Fichas** (lista/consulta), programas/competencias | 02-coordinador |
+| **training-environment-mfe** | training-environment-service | **Disponibilidad de ambientes**, gestión de ambientes/reservas | 02-coordinador |
 | **actors-mfe** | actors-service | Instructores/aprendices, **Mi disponibilidad** (instructor) | 02-coordinador, 03-instructor |
 | **document-mfe** | document-service | **Documentos**, **Plantillas de documento** | 06-backoffice |
 | **monitoring-mfe** | monitoring-service | **Panel de indicadores (KPIs)**, **Notificaciones**, **Seguimiento de ficha** | 05-administrador, 03-instructor, 04-aprendiz |
 | **audit-mfe** | audit-service | **Auditoría** (traza) | 06-backoffice |
-| **reference-mfe** | reference-data-service | **Parametrización / catálogos**, **Datos de referencia** (regionales/centros/sedes) | 05-administrador, 06-backoffice |
+| **reference-data-mfe** | reference-data-service | **Parametrización / catálogos**, **Datos de referencia** (regionales/centros/sedes) | 05-administrador, 06-backoffice |
 
 ## Parametrización (07 · director + soporte): pantalla nueva por MFE
 
@@ -55,10 +69,10 @@ exigen como prerequisito. Cada MFE afectado suma **una** pantalla de parametriza
 
 | Micro-frontend | Pantalla de parametrización que suma | Prerequisito que habilita |
 |---|---|---|
-| **reference-mfe** | **Hub de parametrización** (`/admin/parametrizacion`, montado por el shell) + **Geografía institucional** | punto de entrada; regionales/centros/sedes |
-| **academic-mfe** | **Currículo académico** | currículo → fichas |
+| **reference-data-mfe** | **Hub de parametrización** (`/admin/parametrizacion`, montado por el shell) + **Geografía institucional** | punto de entrada; regionales/centros/sedes |
+| **academic-management-mfe** | **Currículo académico** | currículo → fichas |
 | **scheduling-mfe** | **Jornadas / franjas horarias** | franjas → horarios |
-| **environment-mfe** | **Tipos de ambiente e inventario** | tipos de ambiente → ambientes |
+| **training-environment-mfe** | **Tipos de ambiente e inventario** | tipos de ambiente → ambientes |
 | **monitoring-mfe** | **Catálogos de monitoreo (KPI/alertas)** | catálogos → KPIs |
 | **actors-mfe** | **Estados de actores** | máquina de estados de actores |
 | **iam-mfe** | **RBAC — roles y permisos** | roles/permisos RBAC |
@@ -81,7 +95,7 @@ Ejemplo — **Dashboard del Coordinador** (una sola pantalla, varios MFE):
 ```
 shell-host (marco + nav + saludo)
 ├─ scheduling-mfe   → widget "Conflictos pendientes" + widget "Horarios en borrador"
-├─ academic-mfe     → KPI "Fichas activas"
+├─ academic-management-mfe     → KPI "Fichas activas"
 └─ (navegación)     → "Crear horario" abre una pantalla de scheduling-mfe
 ```
 La composición cross-dominio (juntar datos de varios MFE en una pantalla) se resuelve con:
