@@ -88,9 +88,24 @@ Ejemplo: `scheduling.class_session.created`
 
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
-| `monitoring.alert.triggered` | Alerta de KPI disparada | `audit-service` |
-| `monitoring.kpi.threshold_breached` | KPI superó umbral crítico | `audit-service` |
-| `monitoring.notification.sent` | Notificación enviada al usuario | `audit-service` |
+| `monitoring.alert.triggered` | Alerta de KPI disparada | `audit-service`, `notification-service` |
+| `monitoring.kpi.threshold_breached` | KPI superó umbral crítico | `audit-service`, `notification-service` |
+
+> La **entrega** de notificaciones se extrae a `notification-service`
+> ([ADR-005](../05-architecture/decisions/records/ADR-005-microservices-topology-and-transversal-capabilities.md)):
+> monitoring solo **detecta y publica**. El antiguo `monitoring.notification.sent` se reemplaza por
+> `notification.notification.sent` (publicado por notification-service).
+
+### notification-service
+
+Capacidad transversal: consume eventos de dominio que ameritan notificar (p. ej.
+`scheduling.schedule.published`, `monitoring.alert.triggered`, `academic.enrollment_ficha.status_changed`,
+`actors.productive_stage.started`) y entrega por email / in-app. También acepta solicitudes síncronas
+vía `POST /notifications`. Ningún dominio invoca su worker directamente — solo su contrato.
+
+| Evento | Descripción | Consumidores |
+|--------|-------------|-------------|
+| `notification.notification.sent` | Notificación entregada al usuario | `audit-service` |
 
 ### audit-service
 

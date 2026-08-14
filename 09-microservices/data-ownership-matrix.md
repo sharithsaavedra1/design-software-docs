@@ -73,5 +73,7 @@ Solo el servicio propietario puede mutar los datos; otros servicios los consumen
 | `TrackingSession` | `monitoring-service` | `monitoring_db` | M9 |
 | `GeneratedAlert` | `monitoring-service` | `monitoring_db` | M9 |
 | `ImprovementPlan` | `monitoring-service` | `monitoring_db` | M9 |
-| `SentNotification` | `monitoring-service` | `monitoring_db` | M9 |
 | `AuditRecord` | `audit-service` | `audit_db` | transversal |
+| `SentNotification` | `notification-service` | `notification_db` | transversal |
+| `NotificationTemplate` | `notification-service` | `notification_db` | transversal |
+| `NotificationPreference` | `notification-service` | `notification_db` | transversal |

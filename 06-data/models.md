@@ -513,6 +513,11 @@ Instancia de una clase: ficha + instructor + ambiente + franja.
 #### `SchedulingConflict`
 Conflicto detectado durante la validación. Se elimina al corregir o al descartar el borrador.
 
+> **Enforcement del invariante (ADR-005).** La exclusión mutua (mismo instructor o ambiente en franjas
+> solapadas) se garantiza con un **`EXCLUDE` constraint** transaccional en `scheduling_db` — scheduling
+> es dueño de todas las `ClassSession`. El `conflict-validator-worker` es **UX** (mostrar conflictos al
+> armar el borrador), no el mecanismo de enforcement; así se evita la ventana de carrera de validar async.
+
 | Atributo | Tipo |
 |----------|------|
 | `id` | UUID PK |
@@ -752,6 +757,19 @@ Registro de notificaciones enviadas a actores del sistema.
 | `status` | ENUM(`SENT`, `FAILED`, `PENDING`) | — |
 
 **Retención**: `SentNotification` → 1 año
+
+> **Nota (ADR-005):** la **entrega** de notificaciones se extrae a `notification-service`; monitoring
+> solo detecta y publica eventos (`alert.triggered`, `kpi.threshold_breached`). `SentNotification` pasa
+> al bounded context `notification-service` (abajo), en `notification_db`.
+
+---
+
+## Bounded Context: `notification-service`
+
+Capacidad transversal (ADR-005): entrega notificaciones a los actores por email / in-app. Consume
+eventos de dominio (`scheduling.schedule.published`, `monitoring.alert.triggered`, …) o solicitudes
+síncronas (`POST /notifications`). Ningún dominio invoca su worker directamente — solo su contrato.
+`SentNotification` (arriba) es su entidad; opcionalmente `NotificationTemplate` y `NotificationPreference`.
 
 ---
 
