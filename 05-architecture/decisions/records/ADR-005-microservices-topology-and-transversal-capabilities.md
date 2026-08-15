@@ -1,6 +1,6 @@
 # ADR-005: Topología de repos, micro-frontends y capacidades transversales
 
-**Estado:** PROPOSED
+**Estado:** ACCEPTED (2026-08-14)
 **Fecha:** 2026-08-14
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Backend, Frontend, DevOps

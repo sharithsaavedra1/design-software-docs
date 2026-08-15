@@ -1,6 +1,6 @@
 # ADR-008: Observabilidad — OpenTelemetry + Grafana (LGTM)
 
-**Estado:** PROPOSED
+**Estado:** ACCEPTED (2026-08-14)
 **Fecha:** 2026-08-14
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Backend, DevOps
