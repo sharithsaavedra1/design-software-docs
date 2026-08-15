@@ -1,6 +1,6 @@
 # ADR-006: Estrategia polyglot fit-driven y estructura hexagonal por stack
 
-**Estado:** PROPOSED
+**Estado:** ACCEPTED (2026-08-14)
 **Fecha:** 2026-08-14 (rev. 2)
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Backend, Frontend, Formación (aprendices SENA)
