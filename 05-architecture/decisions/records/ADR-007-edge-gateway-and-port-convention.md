@@ -1,6 +1,6 @@
 # ADR-007: Edge/gateway gestionado y convención de puertos
 
-**Estado:** PROPOSED
+**Estado:** ACCEPTED (2026-08-14)
 **Fecha:** 2026-08-14
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Backend, DevOps
