@@ -35,6 +35,8 @@ Cuenta de acceso al sistema. Cualquier persona que interactúa con la plataforma
 | `last_login_at` | TIMESTAMPTZ | Sí | — | Última autenticación exitosa |
 | `failed_attempts` | SMALLINT | No | — | Contador de intentos fallidos; se resetea en login exitoso |
 | `locked_until` | TIMESTAMPTZ | Sí | — | null = cuenta no bloqueada |
+| `must_change_password` | BOOLEAN | No | — | true = debe cambiar la contraseña en el próximo login (RN-IAM-05) |
+| `password_temporary_expires_at` | TIMESTAMPTZ | Sí | — | Expiración de la contraseña temporal (72 h); null = no es temporal |
 | `created_at` | TIMESTAMPTZ | No | — | |
 | `updated_at` | TIMESTAMPTZ | No | — | |
 
@@ -217,6 +219,23 @@ de sus propias fallas de autenticación (evitar bucle o exposición de credencia
 
 ---
 
+### `outbox`
+
+Bandeja transaccional de eventos de dominio (patrón Outbox). Cada acción que emite un evento (`iam.user.created`, `iam.user.deactivated`, `iam.role.assigned`, `iam.session.started`) inserta aquí **en la misma transacción**; un relay los publica luego en el topic `iam-events`.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK |
+| `event_id` | UUID | No | UNIQUE — idempotencia de publicación |
+| `event_type` | TEXT | No | ej: `iam.user.created` |
+| `payload` | JSONB | No | Envelope del evento (shared-contracts) |
+| `created_at` | TIMESTAMPTZ | No | |
+| `published_at` | TIMESTAMPTZ | Sí | null = pendiente de publicar |
+
+**Introducido por:** changeset `iam-outbox-table-001` (iam-db, prerequisito F3). **Regla:** append + update de `published_at`; el relay marca publicado (at-least-once).
+
+---
+
 ## Índices relevantes
 
 | Tabla | Campos indexados | Tipo | Motivo |
@@ -235,6 +254,7 @@ de sus propias fallas de autenticación (evitar bucle o exposición de credencia
 | `refresh_token` | `token_hash` | UNIQUE | Validación del refresh token |
 | `refresh_token` | `(user_id, is_revoked)` | B-Tree | Sesiones activas por usuario |
 | `audit_login` | `(email_attempted, attempted_at)` | B-Tree | Rate limiting y detección de ataques |
+| `outbox` | `created_at WHERE published_at IS NULL` | Partial | Eventos pendientes para el relay (`ix_outbox_unpublished`) |
 
 ---
 
