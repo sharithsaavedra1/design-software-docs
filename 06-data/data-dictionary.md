@@ -17,7 +17,7 @@ Definidas en [modeling-conventions.md](./modeling-conventions.md):
 
 | Servicio | Schema(s) previstos | Repo | Modelo de datos |
 |----------|--------------------|------|-----------------|
-| iam-service | `identity`, `rbac`, `session` | `design-software-iam-db` | [data-model](../09-microservices/services/01-iam-service/data-model.md) |
+| iam-service | `identity`, `identity_audit`, `rbac`, `rbac_catalog`, `session` | `design-software-iam-db` | [data-model](../09-microservices/services/01-iam-service/data-model.md) |
 | reference-data-service | `institutional_structure` | `design-software-reference-data-db` | [data-model](../09-microservices/services/02-reference-data-service/data-model.md) |
 | academic-management-service | `academic_management` | `design-software-academic-management-db` | [data-model](../09-microservices/services/03-academic-management-service/data-model.md) |
 | training-environment-service | `training_environment` | `design-software-training-environment-db` | [data-model](../09-microservices/services/04-training-environment-service/data-model.md) |
