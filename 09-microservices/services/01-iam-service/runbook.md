@@ -1,21 +1,44 @@
 # Runbook — iam-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-08-27
 > Puerto: 8001 | SLO: 99.9 % uptime | Criticidad: P0 (servicio de entrada — ningún otro servicio autentica sin él)
 
 ---
 
 ## Healthcheck
 
+> Actualizado en HU-IAM-011 (observabilidad, [ADR-008](../../../05-architecture/decisions/records/ADR-008-observability-opentelemetry.md)). Los paths anteriores (`/health/ready`, chequeo de Redis) quedan reemplazados por lo siguiente: el servicio no usa Redis (la revocación de tokens vive en BD, ver [decisions.md](./decisions.md)).
+
 | Endpoint | Método | Respuesta esperada | Cuándo falla |
 |----------|--------|--------------------|--------------|
-| `GET /health` | GET | `200 { "status": "ok" }` | Proceso caído o sin red |
-| `GET /health/ready` | GET | `200 { "status": "ready", "db": "ok", "redis": "ok" }` | BD o Redis no conectan |
+| `GET /health` | GET | `200` — liveness (el proceso vive y el contexto de Spring arrancó) | Proceso caído o sin red |
+| `GET /ready` | GET | `200` — readiness (BD, y broker AMQP *si está configurado*) | BD no conecta, o el broker configurado no conecta → `503` |
 
-**SLO**: `GET /health` debe responder en < 200 ms (p99). `GET /health/ready` en < 500 ms (p99).
+**SLO**: `GET /health` debe responder en < 200 ms (p99). `GET /ready` en < 500 ms (p99).
 
-`/health` responde aunque BD y Redis estén caídos — indica que el proceso vive.
-`/health/ready` devuelve `503` si la BD no conecta. Si solo Redis falla, devuelve `200` con `"redis": "degraded"` porque el servicio sigue autenticando (sin revocación de tokens).
+`/health` es el `LivenessState` de Spring Boot Actuator — responde `200` aunque la BD o el broker estén caídos; solo indica que el proceso vive.
+`/ready` es el `ReadinessState` compuesto por los indicadores `db` (Postgres, siempre incluido — sin BD el servicio no puede autenticar) y `broker` (RabbitMQ del outbox relay de HU-IAM-007, incluido **solo si `spring.rabbitmq.host` está configurado**; si el relay está intencionalmente apagado, `/ready` no depende de un broker inexistente). `503` si algún indicador incluido está `DOWN`.
+
+Implementación: Spring Boot Actuator health groups (`management.endpoint.health.group.liveness` / `.readiness`), expuestos en el puerto de la app — no bajo `/actuator` — vía `additional-path`.
+
+---
+
+## Observabilidad (OTel — HU-IAM-011)
+
+- **Traces**: OTel Java agent (auto-instrumentación, zero-code) — spans HTTP (Spring MVC) + spans de BD (JDBC/Hibernate), correlacionados por `trace_id`. Se activa vía `-javaagent` en el `Dockerfile` (imagen ya lo descarga en build); se configura 100 % por variables de entorno, sin secretos:
+
+  | Variable | Ejemplo | Descripción |
+  |----------|---------|-------------|
+  | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://otel-collector:4317` | Endpoint OTLP/gRPC del Collector del ambiente. |
+  | `OTEL_EXPORTER_OTLP_INSECURE` | `true` | Sin TLS dentro de la red interna del ambiente. |
+  | `OTEL_SERVICE_NAME` | `iam-service` | Fija `service.name` explícito (mismo patrón que `notification-api`/`notification-worker` en `docker-infra`), aunque el agent también lo infiere de `spring.application.name`. |
+  | `OTEL_RESOURCE_ATTRIBUTES` | `deployment.environment=develop` | Alinea `deployment.environment` por ambiente (ADR-008 §6). |
+
+  Ninguna es obligatoria para arrancar: sin `OTEL_EXPORTER_OTLP_ENDPOINT` el agent simplemente no exporta (no rompe el arranque).
+
+- **Logs**: JSON estructurado (logback + `logstash-logback-encoder`) por stdout. El agent OTel inyecta `trace_id`/`span_id` en el MDC cuando hay un span activo; el encoder JSON los embebe en cada línea, permitiendo saltar de una traza en Tempo a sus logs en Loki (panel único en Grafana, ADR-008).
+
+- **Métricas**: fuera de alcance de HU-IAM-011.
 
 ---
 
