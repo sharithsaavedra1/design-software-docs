@@ -120,6 +120,27 @@ Confirma el reset de contraseña con el token recibido por email.
 
 **Response 204.**
 
+### `GET /auth/.well-known/jwks.json`
+
+HU-IAM-010 E2/E3 — clave(s) pública(s) RSA para verificación local del `access_token` (RS256),
+formato JWKS estándar (RFC 7517). No requiere `Authorization`. Durante una rotación de clave
+responde con dos entradas (actual + saliente, cada una con su `kid`). Detalle completo —
+estructura del JWT, algoritmo de verificación por servicio, rotación — en
+[`authentication.md`](../../../../../07-api/authentication.md).
+
+> Este endpoint es intencionalmente **externo al OpenAPI de dominio** (`iam.yaml`): es un
+> endpoint de infraestructura de seguridad estándar (como `/actuator/health`), no un recurso
+> de negocio versionado por el contrato de `iam-api`.
+
+**Response 200:**
+```json
+{
+  "keys": [
+    { "kty": "RSA", "use": "sig", "alg": "RS256", "kid": "iam-rsa-1", "n": "...", "e": "AQAB" }
+  ]
+}
+```
+
 ---
 
 ## Gestión de usuarios

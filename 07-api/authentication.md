@@ -1,7 +1,8 @@
 # Estrategia de Autenticación y Autorización
 
-> Estado: 🟡 Borrador | Última actualización: 2026-06-17
-> Relacionado: [iam-service/rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md)
+> Estado: 🟢 Implementado (HU-IAM-010) | Última actualización: 2026-08-27
+> Relacionado: [iam-service/rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md),
+> [iam-service/decisions.md](../09-microservices/services/01-iam-service/decisions.md) (DEC-008)
 
 ## Resumen
 
@@ -73,6 +74,17 @@ Cliente                  API Gateway              iam-service
 **Por qué los features van pre-calculados en el JWT**: cada servicio verifica el token localmente
 en O(1) sin llamar a IAM. Trade-off: cambios de rol aplican al siguiente login o refresh.
 Mitigación: al revocar un rol crítico, se revoca también el refresh_token activo.
+
+**Cálculo de `features`** (HU-IAM-010 E1): no es la lista plana de features del rol — es el
+resultado de aplicar la política de HU-IAM-006 (`AuthorizationPolicy`) sobre el perfil de
+autorización del usuario: por cada feature, se toma el scope más amplio entre sus grants por
+rol; un override de bloqueo activo elimina la feature por completo (gana sobre cualquier rol);
+un override de permiso activo agrega una feature que ningún rol concede. Se recalcula en cada
+login y en cada refresh.
+
+**Claims adicionales no listados en la tabla** (uso interno de iam-service, no forman parte del
+contrato de autorización que consumen los servicios downstream): `sid` (session id, para que
+`/auth/logout` identifique la sesión a revocar), `email`, `name`.
 
 ---
 
