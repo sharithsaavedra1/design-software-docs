@@ -25,6 +25,19 @@ halts_registrados: ninguno
 
 ---
 
+## Endpoints operacionales (fuera de `/api/v1`, HU-IAM-011)
+
+No forman parte del contrato de negocio (no están en `iam.yaml`) — son un `@RestController` propio, expuesto en la raíz del servidor de la app (no bajo `/actuator`). Detalle operativo (SLO, semántica de cada chequeo) en [runbook.md](../../runbook.md#healthcheck).
+
+| Endpoint | Uso | `200` cuando | `503` cuando |
+|----------|-----|--------------|--------------|
+| `GET /health` | Liveness probe | El proceso vive | (nunca por dependencias externas; solo si el proceso no responde) |
+| `GET /ready` | Readiness probe | BD conecta, y broker AMQP conecta *si `spring.rabbitmq.host` está configurado* | BD no conecta, o el broker configurado no conecta |
+
+Respaldan la propagación de trazas de [ADR-008](../../../../../05-architecture/decisions/records/ADR-008-observability-opentelemetry.md); no requieren `Authorization`.
+
+---
+
 ## Autenticación
 
 ### `POST /auth/login`
