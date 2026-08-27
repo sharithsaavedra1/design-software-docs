@@ -353,16 +353,15 @@ offline tolerante (design-system §1.4) en ambas.
 
 ### 6.B — Notificación → Detalle → ir al horario
 
-1. **Panel de notificaciones** (`01-auth` · **#5** · `shell-host`+`monitoring-mfe`, overlay de la
+1. **Panel de notificaciones** (`01-auth` · **#5** · `shell-host`+`notification-service`, overlay de la
    campana, disponible en cualquier pantalla autenticada) **[composición]** → tap en una tarjeta
-   del top-5 → `GET /sent-notifications/{id}` → navega directo al detalle (mismo destino que el
+   del top-5 → `GET /notifications/{id}` → navega directo al detalle (mismo destino que el
    paso 2 de abajo).
    - *Alternativa:* **"Ver todas"** en el panel → navega a **Notificaciones**
-     (`04-aprendiz` · **#2** · `monitoring-mfe`).
-2. **Notificaciones** (**#2**) → lista paginada por cursor (`GET /sent-notifications?
-   recipient_id=&channel=IN_APP&cursor=&limit=`) → tap en una tarjeta → `GET
-   /sent-notifications/{id}` → navega a **Detalle de notificación** (`04-aprendiz` · **#4** ·
-   `monitoring-mfe`).
+   (`04-aprendiz` · **#2** · `shell-host`+`notification-service`, bloqueado hasta formalizar `GET /notifications`).
+2. **Notificaciones** (**#2**) → lista paginada por cursor (pendiente `GET /notifications`) → tap en
+   una tarjeta → `GET /notifications/{id}` → navega a **Detalle de notificación** (`04-aprendiz` ·
+   **#4** · `shell-host`+`notification-service`).
 3. **Detalle de notificación** (**#4**) → lee asunto, resumen completo, estado de entrega
    (`send_status`) → si `generated_alert_id` es `null` (notificación manual), botón **"Ir al
    horario"** visible → navega a **Mi horario** (`04-aprendiz` · **#1**) — **navegación
@@ -538,10 +537,10 @@ sub-secciones Documentos, Plantillas, Auditoría, Parametrización — ver encab
 Estas dos pantallas de `01-auth.md` no son destino final de ningún journey — son **marco
 transversal** disponible desde cualquier pantalla autenticada de los 8 journeys anteriores:
 
-- **Panel de notificaciones** (`01-auth` · **#5** · `shell-host`+`monitoring-mfe`) — overlay de
+- **Panel de notificaciones** (`01-auth` · **#5** · `shell-host`+`notification-service`) — overlay de
   la campana del top bar, en toda ruta autenticada. "Ver todas" navega a la pantalla de lista de
-  Notificaciones del rol (hoy documentada en `04-aprendiz` · **#2**; el mismo patrón se reutiliza
-  para Instructor/Administrador vía `monitoring-mfe` cuando se document en sus flujos).
+   Notificaciones del rol (hoy documentada en `04-aprendiz` · **#2**; el mismo patrón se reutiliza
+   para Instructor/Administrador vía `notification-service` cuando se documente en sus flujos).
 - **Estados globales** (`01-auth` · **#6** · `shell-host`) — se renderiza en lugar del contenido
   cuando cualquier endpoint de cualquier journey devuelve `403` (sin permiso) o `404` (no
   encontrado), o ante un error `500`/de red; la variante "Sesión expirada" es el destino del

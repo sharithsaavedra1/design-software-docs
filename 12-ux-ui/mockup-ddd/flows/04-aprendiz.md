@@ -3,9 +3,9 @@ agente: Jesús Ariel González Bonilla (PM + Arquitecto)
 capacidad: DDD de flujo UX (Aprendiz) + prompts Stitch, mobile-first
 fase: diseño (UX/UI)
 estado: draft
-dependencias_entrada: 07-api/contracts/openapi/scheduling.yaml, monitoring.yaml; 09-microservices/services/05-scheduling-service/data-model.md, 08-monitoring-service/data-model.md; 01-iam-service/rbac-design.md; 12-ux-ui/navigation-map.md, design-system.md; 04-requirements/functional.md, user-stories.md
+dependencias_entrada: 07-api/contracts/openapi/scheduling.yaml, notification.yaml; 09-microservices/services/05-scheduling-service/data-model.md, 10-notification-service/data-model.md; 01-iam-service/rbac-design.md; 12-ux-ui/navigation-map.md, design-system.md; 04-requirements/functional.md, user-stories.md
 consumidores_siguientes: Google Stitch; validación de diseño
-tldr: 4 pantallas de solo lectura para el Aprendiz (Mi horario semanal, Detalle de clase/sesión, Notificaciones, Detalle de notificación), derivadas de scheduling.yaml/monitoring.yaml, con prompts Stitch mobile-first. Mi horario → scheduling-mfe; Notificaciones → monitoring-mfe (mapa completo en micro-frontends.md).
+tldr: 4 pantallas de solo lectura para el Aprendiz (Mi horario semanal, Detalle de clase/sesión, Notificaciones, Detalle de notificación), derivadas de scheduling.yaml y notification.yaml, con prompts Stitch mobile-first. Mi horario → scheduling-mfe; Notificaciones → shell-host/notification-service (mapa completo en micro-frontends.md).
 decisiones_clave: nombre de competencia/instructor/ambiente se resuelve por id externo (competency_id→academic-management, instructor_id/environment_id→actors/training-environment; ver RF-SCH-07); "leído/no leído" NO existe en sent_notification (solo send_status de entrega) — no se inventa, se documenta el gap; Notificaciones (LISTA) lleva paginación REAL visible por cursor (Anterior/Página N/Siguiente + selector page_size vía `limit`, "Mostrando X–Y de N aprox." al no haber `total` en CursorPagination), compacta en mobile — misma convención que Auditoría en flows/06-backoffice.md; Mi horario es calendario semanal, sin paginador de lista; el tap en una tarjeta de "Mi horario" y en una tarjeta de "Notificaciones" ahora navega a sus pantallas de Detalle (antes reservado, ya cableado); "Ir al horario" en Detalle de notificación es navegación genérica a Pantalla 1 (no deep-link a la sesión — no existe FK sent_notification/generated_alert → schedule/class_session) y se muestra solo si `generated_alert_id` es null (notificación manual; el catálogo de `alert_type` es 100% de KPIs académicos, ninguno de horario) — ver GAP-3.
 halts_registrados: GAP-1 SCH_VIEW_OWN (scope OWN_FICHA_AS_LEARNER, rbac-design.md) no está cableado a ningún endpoint de scheduling.yaml (todos los GET usan SCH_VIEW_ALL); GAP-2 MON_NOTIFICATION_VIEW no figura en el catálogo/matriz de rbac-design.md (sin asignación explícita a LEARNER); GAP-3 ni sent_notification ni generated_alert (monitoring-service data-model.md) tienen FK a schedule/class_session (scheduling-service) — "Ir al horario" no puede ser un deep-link real a la sesión, solo navegación a la pantalla de horario
 -->
@@ -20,9 +20,9 @@ halts_registrados: GAP-1 SCH_VIEW_OWN (scope OWN_FICHA_AS_LEARNER, rbac-design.m
 **Rol:** `LEARNER` (Aprendiz) · **Navegación:** [navigation-map.md](../../navigation-map.md#aprendiz)
 — *Mi horario*, *Notificaciones* (las pantallas de **Detalle de clase/sesión** y **Detalle de
 notificación** son de profundización desde una tarjeta; no tienen entrada propia en la nav).
-**Servicios origen:** `scheduling-service` (horario) · `monitoring-service` (notificaciones).
+**Servicios origen:** `scheduling-service` (horario) · `notification-service` (notificaciones).
 **Micro-frontends dueños:** `scheduling-mfe` (Mi horario, Detalle de clase/sesión) ·
-`monitoring-mfe` (Notificaciones, Detalle de notificación) — ver
+`shell-host` con `notification-service` (Notificaciones, Detalle de notificación) — ver
 [micro-frontends.md](../micro-frontends.md).
 **Uso previsto:** consulta desde **móvil**, con conectividad variable (design-system §1.4)
 — toda pantalla es tolerante a conexión intermitente.
@@ -34,12 +34,9 @@ notificación** son de profundización desde una tarjeta; no tienen entrada prop
   `/schedules` y `/sessions` exigen `SCH_VIEW_ALL`. Se documentan los endpoints reales del
   contrato; se asume que el scope `OWN_FICHA_AS_LEARNER` se aplicará sobre `SCH_VIEW_ALL` (o
   que `scheduling.yaml` se corregirá para exponer `SCH_VIEW_OWN`) antes de construir la app.
-- **GAP-2:** `MON_NOTIFICATION_VIEW` (usado por `GET /sent-notifications` en `monitoring.yaml`)
-  no aparece en el catálogo de features ni en la matriz de roles de `rbac-design.md` (solo
-  `MON_NOTIFICATION_SEND` está catalogado). No hay confirmación formal de que `LEARNER` tenga
-  este feature; se asume acceso de solo lectura a sus propias notificaciones
-  (`recipient_id = jwt.sub`), consistente con que `navigation-map.md` lista "Notificaciones"
-  en el área Aprendiz.
+- **GAP-2:** `GET /notifications` aún no está formalizado en `notification.yaml` para la bandeja.
+  No se habilita la pantalla hasta aprobar la colección, paginación y autorización para
+  `LEARNER`.
 - **GAP-3:** ni `sent_notification` ni `generated_alert` (`08-monitoring-service/data-model.md`)
   tienen una FK/campo de referencia a `schedule` o `class_session` (`05-scheduling-service`).
   `sent_notification.generated_alert_id` solo enlaza a `generated_alert`, y el catálogo real de
@@ -179,17 +176,12 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
   Aprendiz para notificaciones en `04-requirements/user-stories.md`; la pantalla deriva de
   `navigation-map.md` §Aprendiz — "Notificaciones — avisos de cambios de horario" — y del
   contrato real de `monitoring.yaml`).
-- **MFE:** `monitoring-mfe` ([micro-frontends.md](../micro-frontends.md))
-- **Endpoint:** `GET /api/v1/sent-notifications?recipient_id={jwt.sub}&channel=IN_APP&cursor={cursor}&limit={limit}`
-  → paginación por **cursor** (colección append-only, retención 1 año, particionada por
-  `created_at`); respuesta trae `pagination: { next_cursor, limit, has_more }`
-  (`_shared.yaml#/components/schemas/CursorPagination` — **sin** `total` ni `prev_cursor`).
-  `x-required-feature: MON_NOTIFICATION_VIEW` (ver GAP-2). Filtro adicional
-  disponible: `status` (`send_status`: `PENDING`/`SENT`/`FAILED`), `from`/`to` (rango de
-  `created_at`), `generated_alert_id`. El parámetro `limit` es también el **`page_size`**
-  visible en la UI (10/20/50).
-- **Detalle (si se abre una notificación):** `GET /api/v1/sent-notifications/{id}` — ver
-  **Pantalla 4 — Detalle de notificación**.
+- **MFE:** `shell-host` con datos de `notification-service` ([micro-frontends.md](../micro-frontends.md)).
+- **Endpoint:** pendiente de `GET /notifications` en `notification.yaml`; no usar `/sent-notifications`
+  de Monitoring hasta aprobar la colección y su paginación por cursor.
+  La pantalla permanece bloqueada hasta que el contrato defina filtros y paginación.
+- **Detalle (si se abre una notificación):** `GET /api/v1/notifications/{id}` cuando exista la
+  colección; ver **Pantalla 4 — Detalle de notificación**.
 - **Campos reales (`SentNotification`, monitoring-service data-model.md):** `id`,
   `generated_alert_id` (nullable — null si la notificación es manual), `recipient_id`,
   `recipient_email`, `channel` (`EMAIL`/`IN_APP`), `subject`, `body_summary` (nullable —
@@ -240,11 +232,11 @@ conectividad móvil.
 
 | Control | Endpoint | Resultado |
 |---|---|---|
-| Siguiente › | `GET /sent-notifications?...&cursor={next_cursor}&limit={limit}` | reemplaza la lista por la siguiente página; guarda el cursor actual en el historial local |
+| Siguiente › | Pendiente: `GET /notifications?...&cursor={next_cursor}&limit={limit}` | bloqueado hasta aprobar el contrato de bandeja |
 | ‹ Anterior | — (cliente: cursor previo del historial local; el contrato no expone `prev_cursor`) | reemplaza la lista por la página anterior ya cargada |
-| Selector de tamaño de página (10/20/50) | `GET /sent-notifications?...&limit={limit}` (reinicia `cursor`) | recarga desde la primera página con el nuevo `limit` |
-| Pull-to-refresh | `GET /sent-notifications?...&cursor=` (primera página) | refresca la bandeja desde el inicio |
-| Tap en tarjeta | `GET /sent-notifications/{id}` | navega a **Pantalla 4 — Detalle de notificación** (asunto, resumen, estado, motivo de falla si aplica) |
+| Selector de tamaño de página (10/20/50) | Pendiente: `GET /notifications?...&limit={limit}` | bloqueado hasta aprobar el contrato de bandeja |
+| Pull-to-refresh | Pendiente: `GET /notifications?...&cursor=` | bloqueado hasta aprobar el contrato de bandeja |
+| Tap en tarjeta | `GET /notifications/{id}` | navega a **Pantalla 4 — Detalle de notificación** cuando exista una tarjeta |
 
 **Estados:** *loading* (skeleton de tarjetas) · *empty* ("No tienes notificaciones" con
 ilustración simple) · *error* (banner con icono + "No pudimos cargar tus notificaciones" y
@@ -402,9 +394,9 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 
 - **Ruta:** `/notificaciones/{id}` · **Rol:** Aprendiz · **HU:** pendiente (mismo gap que
   Pantalla 2 — no existe HU-## de Aprendiz para notificaciones).
-- **MFE:** `monitoring-mfe` ([micro-frontends.md](../micro-frontends.md))
-- **Endpoint:** `GET /api/v1/sent-notifications/{id}` (`operationId: getSentNotification`) →
-  `SentNotification` completo. `x-required-feature: MON_NOTIFICATION_VIEW` (ver GAP-2).
+- **MFE:** `shell-host` con datos de `notification-service` ([micro-frontends.md](../micro-frontends.md))
+- **Endpoint:** `GET /api/v1/notifications/{id}` (`operationId: getNotification`) →
+  `SentNotification` completo.
 - **Campos reales (`SentNotification`, monitoring-service data-model.md):** `id`,
   `generated_alert_id` (nullable), `recipient_id`, `recipient_email`, `channel`
   (`EMAIL`/`IN_APP`), `subject`, `body_summary` (nullable), `send_status`
@@ -458,7 +450,7 @@ manual, tenga un atajo a su horario.
 |---|---|---|
 | ‹ Volver | — (navegación) | regresa a Pantalla 2 (Notificaciones), misma página/cursor |
 | Ir al horario (si `generated_alert_id` es null) | — (navegación, no deep-link — ver GAP-3) | navega a Pantalla 1 (`/mi-horario`) |
-| Pull-to-refresh | Repite `GET /sent-notifications/{id}` | refresca el detalle |
+| Pull-to-refresh | Repite `GET /notifications/{id}` | refresca el detalle |
 
 **Estados:** *loading* (skeleton del bloque principal + cuerpo) · *error* (banner con icono +
 "No pudimos cargar la notificación" y botón "Reintentar") · *not-found* (404 — "Esta notificación

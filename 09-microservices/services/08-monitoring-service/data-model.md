@@ -203,6 +203,25 @@ Arco exclusivo: como máximo una poblada; valida la aplicación (`CHECK (affecte
 
 ---
 
+### `outbox`
+
+Tabla técnica para publicar de forma confiable los eventos producidos por Monitoring. Se inserta
+en la misma transacción que modifica `generated_alert`; el relay publica las filas pendientes y
+marca `published_at` únicamente después del `ack` del broker.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK. |
+| `event_id` | UUID | No | Identificador canónico del evento; único para deduplicación. |
+| `event_type` | VARCHAR(150) | No | `monitoring.alert.triggered` u otro evento de Monitoring. |
+| `payload` | JSONB | No | Envelope completo del evento de integración. |
+| `created_at` | TIMESTAMPTZ | No | Momento de inserción transaccional. |
+| `published_at` | TIMESTAMPTZ | Sí | Null mientras está pendiente. |
+
+Índice mínimo: (`published_at`, `created_at`) con filtro `published_at IS NULL` para el relay.
+
+---
+
 ### `improvement_plan`
 
 Plan de mejoramiento a nivel de ficha. Generado por coordinador o instructor a partir de
@@ -258,6 +277,7 @@ una alerta activa. Diferente del `actor_improvement_plan` en actors-service, que
 | `tracking_session` | `(ficha_tracking_id, session_date)` | B-Tree | Sesiones cronológicas por ficha |
 | `generated_alert` | `(ficha_tracking_id, is_resolved)` | B-Tree | Alertas activas por ficha |
 | `generated_alert` | `(alert_type_id, risk_level_id, generated_at)` | B-Tree | Reportes por tipo y severidad |
+| `outbox` | (`published_at`, `created_at`) WHERE `published_at IS NULL` | B-Tree | Eventos pendientes para el relay |
 
 ---
 

@@ -43,7 +43,7 @@ Detalle en [data-model.md](./data-model.md).
 | Componente | Tipo | Responsabilidad |
 |------------|------|-----------------|
 | [monitoring-api](./components/monitoring-api/README.md) | REST / FastAPI | Consulta y casos de uso HTTP del dominio de monitoreo. |
-| [alert-worker](./components/alert-worker/README.md) | Worker async | Evalúa eventos/umbrales y publica alertas. |
+| [alert-worker](./components/alert-worker/README.md) | Worker async | Evalúa eventos/umbrales, escribe el outbox y publica alertas mediante relay. |
 
 El antiguo `components/notification-worker/` se elimina de este bounded context. Su reemplazo vive en [`../10-notification-service/components/notification-worker/`](../10-notification-service/components/notification-worker/).
 
@@ -88,6 +88,7 @@ Consume eventos de Academic, Scheduling y Actors según [events.md](./events.md)
 - BD lógica: `monitoring_db`.
 - Motor: PostgreSQL 16.
 - Propiedad exclusiva de las entidades M9 anteriores.
+- `monitoring_db` contiene también el outbox técnico de sus eventos; no comparte outbox ni tablas con Notification.
 - No contiene tablas de entrega de notificaciones.
 
 ## Links

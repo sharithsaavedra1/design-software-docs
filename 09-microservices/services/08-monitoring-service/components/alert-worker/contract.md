@@ -46,7 +46,8 @@ tldr: Evalúa hechos/KPIs, persiste alertas y publica monitoring.alert.triggered
 
 - inserta/actualiza estado M9 según el caso de uso;
 - crea `generated_alert` de forma idempotente;
-- publica el evento canónico después de persistir correctamente;
+- inserta `monitoring.alert.triggered` en `monitoring.outbox` dentro de la misma transacción;
+- el relay publica el evento de forma asíncrona y marca la fila tras el `ack` del broker;
 - no llama a `notification-service` y no conoce canales de entrega.
 
 ## Idempotencia
@@ -55,4 +56,5 @@ La redelivery del mismo `event_id` no puede generar una segunda alerta equivalen
 
 ## Reintentos
 
-Fallo persistente → backoff → DLQ propia de Monitoring. La DLQ de Notification es independiente.
+Fallo persistente al consumir → backoff → DLQ propia de Monitoring. Fallo del broker al
+publicar desde `monitoring.outbox` → reintento del relay; la DLQ de Notification es independiente.

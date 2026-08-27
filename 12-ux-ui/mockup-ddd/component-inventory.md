@@ -69,7 +69,7 @@ halts_registrados: ninguno
 | MFE | Patrones/componentes de dominio |
 |---|---|
 | **scheduling-mfe** | `WeekCalendarGrid` (horario semanal), `ConflictCard` (crítico), `ScheduleEditor` (agregar/editar sesiones), `PublishFlow` (confirmar + avisar conflictos), `ConflictResolvePanel` |
-| **monitoring-mfe** | `KpiCard` (extiende el compartido) + `KpiChart` (línea + **línea de umbral**), `NotificationList/Item`, `TrackingSessionForm` |
+| **monitoring-mfe** | `KpiCard` (extiende el compartido) + `KpiChart` (línea + **línea de umbral**), `TrackingSessionForm` |
 | **document-mfe** | `DocumentList`, `VersionList`, `TemplateEditor` + `TemplatePreview`, `GenerateDocumentForm`, `SignedDownloadLink` (nunca muestra `storage_key`) |
 | **audit-mfe** | `AuditTrail` (lista cursor, solo lectura), `AuditRecordDetail` (visor de `payload` JSON) |
 | **iam-mfe** | `LoginCard`, `UserForm`, `RoleAssignmentModal`, `SessionsList` (revocar sesión) |

@@ -9,13 +9,15 @@
 
 ## Responsabilidad
 
-Evaluar KPIs/umbrales, persistir `kpi_tracking`/`generated_alert` y publicar `monitoring.alert.triggered` cuando corresponde.
+Evaluar KPIs/umbrales, persistir `kpi_tracking`/`generated_alert` y registrar
+`monitoring.alert.triggered` en el outbox transaccional cuando corresponde. El relay del
+componente publica después el evento al broker.
 
 **No entrega notificaciones.** `notification-service` es un consumidor externo del evento publicado.
 
 ## Estado de implementación
 
-`apps/alert_worker/main.py` existe como skeleton; AMQP, deduplicación y OTel están pendientes de completar.
+`apps/alert_worker/main.py` existe como skeleton; AMQP, outbox/relay, deduplicación y OTel están pendientes de completar.
 
 ## Persistencia
 

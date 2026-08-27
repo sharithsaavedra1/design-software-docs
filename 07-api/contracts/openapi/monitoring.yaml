@@ -4,8 +4,8 @@ info:
   version: 1.0.0
   description: >-
     Seguimiento de fichas en ejecución: KPIs medidos, alertas por umbral, sesiones de
-    seguimiento periódico, planes de mejoramiento a nivel de ficha y notificaciones
-    enviadas. Alineado con el modelo de datos de monitoring-service (`monitoring_db`)
+    seguimiento periódico y planes de mejoramiento a nivel de ficha. Alineado con el modelo
+    de datos de monitoring-service (`monitoring_db`)
     y con 07-api/guidelines.md. Fuente de verdad del contrato. La extensión
     `x-required-feature` declara el feature RBAC que exige cada operación (o
     `x-required-feature-any: [A, B]` cuando acepta cualquiera de varios, p. ej.
@@ -27,8 +27,6 @@ tags:
     description: Alertas generadas por umbral y su resolución.
   - name: improvement-plans
     description: Planes de mejoramiento a nivel de ficha.
-  - name: notifications
-    description: Notificaciones enviadas a actores del sistema.
   - name: reports
     description: Reportes propios del dominio de monitoreo.
 
@@ -725,103 +723,6 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
-  # ---------------------------------------------------------------- sent-notifications
-  /sent-notifications:
-    get:
-      operationId: listSentNotifications
-      tags: [notifications]
-      summary: Notificaciones enviadas (paginación por cursor; append-only con retención de 1 año).
-      x-required-feature: MON_NOTIFICATION_VIEW
-      parameters:
-        - $ref: '_shared.yaml#/components/parameters/cursor'
-        - $ref: '_shared.yaml#/components/parameters/limit'
-        - name: recipient_id
-          in: query
-          required: false
-          description: Referencia externa a user.id (iam-service).
-          schema: { type: string, format: uuid }
-        - name: generated_alert_id
-          in: query
-          required: false
-          schema: { type: string, format: uuid }
-        - name: channel
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [EMAIL, IN_APP]
-        - name: status
-          in: query
-          required: false
-          description: Filtra por send_status.
-          schema:
-            type: string
-            enum: [PENDING, SENT, FAILED]
-        - name: from
-          in: query
-          required: false
-          description: Inicio del rango de created_at (inclusive).
-          schema: { type: string, format: date-time }
-        - name: to
-          in: query
-          required: false
-          description: Fin del rango de created_at (exclusive).
-          schema: { type: string, format: date-time }
-      responses:
-        '200':
-          description: Página de notificaciones enviadas.
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [data, pagination]
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: '#/components/schemas/SentNotification' }
-                  pagination: { $ref: '_shared.yaml#/components/schemas/CursorPagination' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-    post:
-      operationId: createManualNotification
-      tags: [notifications]
-      summary: Envía una notificación manual (fuera del flujo automático de alertas).
-      x-required-feature: MON_NOTIFICATION_SEND
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/SentNotificationCreate' }
-      responses:
-        '202':
-          description: Notificación aceptada para envío (send_status inicial PENDING).
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SentNotification' }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-        '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
-
-  /sent-notifications/{id}:
-    parameters:
-      - $ref: '#/components/parameters/SentNotificationId'
-    get:
-      operationId: getSentNotification
-      tags: [notifications]
-      summary: Detalle de una notificación enviada.
-      x-required-feature: MON_NOTIFICATION_VIEW
-      responses:
-        '200':
-          description: Notificación.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SentNotification' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-
   # ---------------------------------------------------------------- reports (own domain)
   /reports/kpi-summary:
     get:
@@ -965,13 +866,6 @@ components:
       required: true
       description: UUID del plan de mejoramiento.
       schema: { type: string, format: uuid }
-    SentNotificationId:
-      name: id
-      in: path
-      required: true
-      description: UUID de la notificación enviada.
-      schema: { type: string, format: uuid }
-
   schemas:
     KpiType:
       type: object
@@ -1274,52 +1168,6 @@ components:
           type: string
           enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
         completion_notes: { type: string }
-
-    SentNotification:
-      type: object
-      required: [id, recipient_id, recipient_email, channel, subject, send_status, created_at]
-      properties:
-        id: { type: string, format: uuid }
-        generated_alert_id:
-          type: [string, 'null']
-          format: uuid
-          description: FK a generated_alert; null si la notificación fue manual.
-        recipient_id:
-          type: string
-          format: uuid
-          description: Referencia lógica a user.id en iam-service (sin FK física).
-        recipient_email:
-          type: string
-          format: email
-        channel:
-          type: string
-          enum: [EMAIL, IN_APP]
-        subject: { type: string, maxLength: 300 }
-        body_summary:
-          type: [string, 'null']
-          description: Resumen del cuerpo; el contenido completo no se persiste en el log.
-        send_status:
-          type: string
-          enum: [PENDING, SENT, FAILED]
-        failure_reason:
-          type: [string, 'null']
-          description: Solo presente si send_status = FAILED.
-        sent_at:
-          type: [string, 'null']
-          format: date-time
-        created_at: { type: string, format: date-time }
-
-    SentNotificationCreate:
-      type: object
-      required: [recipient_id, recipient_email, channel, subject]
-      properties:
-        recipient_id: { type: string, format: uuid }
-        recipient_email: { type: string, format: email }
-        channel:
-          type: string
-          enum: [EMAIL, IN_APP]
-        subject: { type: string, maxLength: 300 }
-        body_summary: { type: string }
 
     KpiSummaryReportEntry:
       type: object
