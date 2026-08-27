@@ -1,9 +1,9 @@
 # Reglas de frontera de servicio
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Reglas que preservan el desacople entre los 9 microservicios. Son **agnósticas de lenguaje**: aplican a cualquier backend.
+Reglas que preservan el desacople entre los 10 microservicios backend. Son **agnósticas de lenguaje**: aplican a cualquier backend.
 
 ## 1. Una base de datos por servicio
 Cada servicio es dueño exclusivo de su esquema. Hoy conviven como **un schema por módulo** en una sola instancia PostgreSQL; el estado objetivo separa a instancia/credencial por servicio. Ningún servicio accede al schema de otro.

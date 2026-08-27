@@ -1,6 +1,6 @@
 # Registro de Riesgos
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Proyecto
 
 Riesgos del proyecto **Horarios SENA**. Consolida riesgos técnicos, de alcance, de equipo, externos y de seguridad. Sigue el formato de [_template-risk-register.md](./_template-risk-register.md).
@@ -23,7 +23,7 @@ Riesgos del proyecto **Horarios SENA**. Consolida riesgos técnicos, de alcance,
 | R-004 | Técnico | `scheduling-service` supera el límite de 2 dependencias síncronas (depende de actors, training-environment y academic-management). | Media | Alto | Media | Implementar read models según [ADR-002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md); aprobar la ADR antes de construir el motor. | Arquitectura | Abierto |
 | R-005 | Externo | El broker de mensajes de [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md) sigue en estado `PROPOSED`; sin decisión firme, auditoría y monitoreo asíncronos no avanzan. | Media | Medio | Media | Cerrar y aprobar ADR-001; provisionar broker en entorno de desarrollo antes de la Fase E. | Arquitectura/DevOps | Abierto |
 | R-006 | Seguridad | Integridad de datos débil en `document-service` y `monitoring-service` (faltan CHECK e índices de FK) puede permitir estados inválidos y consultas costosas. | Media | Medio | Media | Reforzar esquema (TD-005/TD-006) y aplicar estados parametrizables de [ADR-004](../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md) antes de exponer API. | Equipo Datos | Abierto |
-| R-007 | Equipo | Concentración de conocimiento: una sola persona figura como owner de los 9 servicios; ausencia o rotación frena todo el proyecto (factor bus = 1). | Media | Alto | Media | Documentar decisiones (ADRs, runbooks), mantener este repo de docs como fuente de verdad, incorporar y formar equipo por dominio. | PM | Abierto |
+| R-007 | Equipo | Concentración de conocimiento: el ownership y conocimiento de los **10 microservicios backend** puede concentrarse en pocas personas; ausencia o rotación frena todo el proyecto (factor bus = 1). | Media | Alto | Media | Documentar decisiones (ADRs, runbooks), mantener este repo de docs como fuente de verdad, incorporar y formar equipo por dominio. | PM | Abierto |
 | R-008 | Técnico | Convención de ramas inconsistente entre repos rompe la trazabilidad `develop → qa → staging → main` y la promoción de cambios. | Media | Medio | Media | Homologar ramas protegidas y naming de [git-conventions.md](../00-governance/git-conventions.md); plantillas de PR comunes. Ver TD-007. | PM/Arquitecto | Abierto |
 | R-009 | Externo | Driver JDBC obsoleto frente a PostgreSQL 16 puede causar incompatibilidades en despliegue de migraciones. | Baja | Medio | Baja | Actualizar y fijar versión de driver soportada (TD-004); validar en CI. | Equipo Datos | Abierto |
 | R-010 | Alcance | Contratos de API aún no implementados: el diseño podría divergir del esquema de datos real al construir la capa app. | Media | Medio | Media | Mantener el contrato de implementación junto al servicio y validar contra el modelo de datos; publicar OpenAPI sólo al estabilizar (ver [07-api/README.md](../07-api/README.md)). | Arquitectura | Abierto |

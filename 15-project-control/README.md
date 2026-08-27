@@ -1,6 +1,6 @@
 # Control de Proyecto
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Proyecto
 
 ## Contenido
@@ -9,7 +9,7 @@ Agrupa backlog técnico, riesgos, dependencias y preguntas abiertas del proyecto
 
 ## Estado del proyecto
 
-Hoy sólo existe la **capa de datos** (repos `*-db` con Liquibase + PostgreSQL 16). La capa de aplicación (API / worker / workflow) está pendiente de construir; ver plan por fases en [technical-backlog.md](./technical-backlog.md).
+La plataforma tiene **10 microservicios backend** con madurez heterogénea. El backlog registra brechas de datos, aplicación, contratos e infraestructura por servicio; la separación de `notification-service` se controla en [notification-service-refactor.md](./notification-service-refactor.md).
 
 ## Archivos
 

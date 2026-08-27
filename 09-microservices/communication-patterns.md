@@ -1,20 +1,13 @@
 # Patrones de comunicación
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Define cómo se comunican los 9 microservicios entre sí: cuándo usar comunicación
+Define cómo se comunican los 10 microservicios backend entre sí: cuándo usar comunicación
 **síncrona** (petición/respuesta) y cuándo **asíncrona** (eventos), y qué mecanismos de
 resiliencia acompañan a cada estilo.
 
-> **Nota de alcance — diseño previsto, no implementado.** La capa de aplicación (componentes
-> `*-api`, `*-worker`, `*-workflow`) **aún no está construida** y **no se ha elegido lenguaje**.
-> Este documento describe patrones **agnósticos de tecnología**: cualquier backend que los
-> respete es válido. Lo único fijo es la infraestructura transversal ya decidida: **PostgreSQL 16**
-> por servicio, **broker AMQP** (RabbitMQ — ver [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md))
-> y **object storage S3-compatible** (ver [ADR-003](../05-architecture/decisions/records/ADR-003-object-storage.md)).
-> Donde se citan valores concretos (timeouts, reintentos) son **objetivos de diseño**, no
-> configuración ya desplegada.
+> **Nota de alcance:** los servicios usan stacks polyglot según ADR-006, pero estas reglas de comunicación son agnósticas de lenguaje. RabbitMQ/AMQP es el transporte asíncrono y los contratos públicos se gobiernan desde `shared-contracts`.
 
 ## Principio rector
 

@@ -89,7 +89,7 @@ Ejemplo: `scheduling.class_session.created`
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
 | `monitoring.alert.triggered` | Alerta de KPI disparada | `audit-service`, `notification-service` |
-| `monitoring.kpi.threshold_breached` | KPI superó umbral crítico | `audit-service`, `notification-service` |
+| `monitoring.kpi.threshold_breached` | KPI superó umbral crítico | `audit-service` (Notification no lo consume en v1; recibe `monitoring.alert.triggered`) |
 
 > La **entrega** de notificaciones se extrae a `notification-service`
 > ([ADR-005](../05-architecture/decisions/records/ADR-005-microservices-topology-and-transversal-capabilities.md)):
@@ -98,10 +98,7 @@ Ejemplo: `scheduling.class_session.created`
 
 ### notification-service
 
-Capacidad transversal: consume eventos de dominio que ameritan notificar (p. ej.
-`scheduling.schedule.published`, `monitoring.alert.triggered`, `academic.enrollment_ficha.status_changed`,
-`actors.productive_stage.started`) y entrega por email / in-app. También acepta solicitudes síncronas
-vía `POST /notifications`. Ningún dominio invoca su worker directamente — solo su contrato.
+Capacidad transversal: consume eventos de dominio que ameritan notificar y entrega por email / in-app. La implementación actual soporta `scheduling.schedule.published` y `monitoring.alert.triggered`; nuevos tipos se agregan de forma explícita y contract-first. También acepta solicitudes síncronas vía `POST /notifications`. Ningún dominio invoca su worker directamente.
 
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
@@ -127,8 +124,7 @@ parte del inventario cross-servicio de arriba. Se documentan aquí para trazabil
 
 ## Normalización pendiente
 
-- **`monitoring.alert.generated` (usado en alert-worker/notification-worker) ≡ `monitoring.alert.triggered`**
-  (nombre canónico de este catálogo). Unificar los contratos de worker al nombre canónico.
+- `monitoring.alert.triggered` es el nombre canónico y ya debe usarse en los contratos de Monitoring y Notification. `monitoring.alert.generated` queda retirado.
 - Decidir si `academic.ficha.opened/closed` se renombran a `enrollment_ficha.*` (ver nota arriba).
 
 ## Nota de migración

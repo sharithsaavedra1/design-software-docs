@@ -1,33 +1,29 @@
 # alert-worker
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
-> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
-
-> **Diseño previsto — no implementado.** Agnóstico de lenguaje.
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Stack: Python
 
 ## Tipo de componente
-`-worker` — consumidor de eventos.
+
+`-worker` — consumidor/evaluador asíncrono del bounded context M9.
 
 ## Responsabilidad
-Evaluar KPIs/umbrales ante eventos de dominio y **generar alertas** (`generated_alert`) cuando se cruzan los límites definidos.
 
-## Tecnologías
-| Capa | Tecnología |
-|------|-----------|
-| Runtime | Agnóstico — cualquier backend (a definir) |
-| Framework | A definir |
-| Persistencia | PostgreSQL 16 · schema `monitoring` |
-| Transporte | Broker AMQP (RabbitMQ, ADR-001) |
+Evaluar KPIs/umbrales, persistir `kpi_tracking`/`generated_alert` y registrar
+`monitoring.alert.triggered` en el outbox transaccional cuando corresponde. El relay del
+componente publica después el evento al broker.
 
-## Variables de entorno (genéricas)
-| Variable | Descripción |
-|----------|-------------|
-| `DB_URL` | Conexión a PostgreSQL |
-| `BROKER_URL` | Conexión al broker |
-| `CONSUMER_GROUP` | Grupo del consumidor |
+**No entrega notificaciones.** `notification-service` es un consumidor externo del evento publicado.
 
-## Idempotencia
-Deduplica por `event_id`; no genera alertas duplicadas para el mismo hecho+umbral. DLQ ante fallo persistente.
+## Estado de implementación
+
+`apps/alert_worker/main.py` existe como skeleton; AMQP, outbox/relay, deduplicación y OTel están pendientes de completar.
+
+## Persistencia
+
+PostgreSQL 16 · `monitoring_db`.
 
 ## Contrato
-Ver [contract.md](./contract.md) · [data-model.md](../../data-model.md)
+
+- [contract.md](./contract.md)
+- [events.md](../../events.md)

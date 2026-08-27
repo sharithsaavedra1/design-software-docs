@@ -1,9 +1,9 @@
 # Backlog Técnico
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Deuda técnica conocida y pendientes de construcción del proyecto **Horarios SENA**. El sistema hoy sólo tiene la **capa de datos** (repos `*-db` con Liquibase + PostgreSQL 16); la capa de aplicación (API / worker / workflow) aún no se construye. Este backlog concentra tanto la deuda ya detectada en los repos de datos como el trabajo estructural pendiente.
+Deuda técnica conocida y pendientes de construcción del proyecto **Horarios SENA**. La plataforma combina repositorios de datos y aplicaciones con madurez desigual; este backlog registra trabajo estructural pendiente sin asumir un único estado para todos los servicios.
 
 Ver contexto en [service-catalog.md](../09-microservices/service-catalog.md), [migration-strategy.md](../06-data/migration-strategy.md) y [dependency-map.md](../09-microservices/dependency-map.md).
 
@@ -24,9 +24,12 @@ Ver contexto en [service-catalog.md](../09-microservices/service-catalog.md), [m
 | TD-005 | **Falta de índices en llaves foráneas**: las FK declaradas no tienen su índice de apoyo, en contra de la regla "un índice por cada FK" de [migration-strategy.md](../06-data/migration-strategy.md). Degrada joins y borrados en cascada. | Medio | P1 | `document-service`, `monitoring-service` | 🔴 |
 | TD-006 | **`document-service` sin restricciones ni índices**: el esquema de `document` carece de `CHECK` de dominio (estados/tipos), de índices de consulta y de índices de FK. Reforzar antes de exponer la API y alinear con [ADR-003](../05-architecture/decisions/records/ADR-003-object-storage.md) y [ADR-004](../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md). | Medio | P1 | `document-service` | 🔴 |
 | TD-007 | **Convención de ramas inconsistente entre repos**: no todos los repos `-db` siguen el flujo `develop → qa → staging → main` ni el naming `hu-<n>-dev` de [git-conventions.md](../00-governance/git-conventions.md). Homologar ramas protegidas y plantillas de PR. | Medio | P2 | Todos los `*-db` | 🔴 |
-| TD-008 | **Capa de aplicación no construida**: no existe aún ningún componente API / worker / workflow. Es la mayor pieza pendiente; condiciona la validación real de contratos, RBAC y eventos. Se aborda por fases (ver abajo). | Alto | P1 | Todos los servicios | 🔴 |
+| TD-008 | **Madurez desigual de aplicaciones**: varios servicios siguen como skeleton/diseño parcial mientras otros ya poseen API/worker. Completar casos de uso y gates por servicio. | Alto | P1 | Varios servicios | 🟡 |
 | TD-009 | **CHECK de estados aún no parametrizados de forma uniforme**: [ADR-004](../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md) define estados parametrizables + auditoría estándar, pero no todos los servicios lo aplican todavía. Cerrar la brecha transversal. | Medio | P2 | `document`, `monitoring`, otros | 🔴 |
-| TD-010 | **Broker de mensajes no provisionado**: la comunicación asíncrona de [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md) (auditoría, monitoreo) no puede probarse porque el broker aún no está desplegado ni la ADR aprobada (estado `PROPOSED`). | Medio | P2 | `audit`, `monitoring` (consumidores) | 🔴 |
+| TD-010 | **Validación del broker y contratos asíncronos pendiente por ambiente**: RabbitMQ es requerido por Audit, Monitoring y Notification; completar configuración, DLQ, retry y pruebas de contrato en CI. | Medio | P1 | `audit`, `monitoring`, `notification`, productores de eventos | 🟡 |
+
+| TD-011 | **Completar separación contractual Monitoring → Notification**: retirar del `shared-contracts` canónico cualquier operación `/sent-notifications` o evento `monitoring.notification.sent`; mantener `notification.yaml` y `notification.notification.sent` como ownership de Notification. | Alto | P0 | `shared-contracts`, `monitoring`, `notification` | 🔴 |
+| TD-012 | **Bandeja de notificaciones sin contrato de colección**: UX requiere `GET /notifications`, pero el OpenAPI vigente solo define creación y consulta por ID. Diseñar contrato paginado/cursor bajo Notification antes de implementar la campana global. | Medio | P1 | `notification`, `shell-host`, `shared-contracts` | 🔴 |
 
 ## Trabajo estructural pendiente (capa de aplicación)
 
@@ -38,7 +41,7 @@ Desglose de TD-008 en fases relativas. No se comprometen fechas hasta cerrar los
 | Fase B — Núcleo de identidad | Construir `iam-service` (API): login, JWT RS256, RBAC por feature+scope (ver [authentication.md](../07-api/authentication.md)). | Fase A |
 | Fase C — Catálogos y dominio base | `reference-data-service`, `academic-management-service`, `training-environment-service`, `actors-service`. | Fase B |
 | Fase D — Motor de horarios | `scheduling-service` + read models de [ADR-002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md). | Fase C |
-| Fase E — Transversales | `document-service` (object storage, ADR-003), `audit-service` y `monitoring-service` sobre el broker (ADR-001). | Fase B–D |
+| Fase E — Transversales | `document-service`, `audit-service`, `monitoring-service` y `notification-service`; validar separación por eventos según ADR-005. | Fase B–D |
 
 ## Criterio de ingreso al backlog
 

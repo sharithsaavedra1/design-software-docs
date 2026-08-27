@@ -1,6 +1,6 @@
 # Matriz de propiedad de datos
 
-> Estado: 🟡 Revisión | Última actualización: 2026-06-17
+> Estado: 🟡 Revisión | Última actualización: 2026-08-26
 > Naming: nombres de entidades en inglés (HALT-DB-NAMING)
 
 Define qué microservicio es el único propietario (escritor) de cada entidad de dominio.
@@ -76,4 +76,4 @@ Solo el servicio propietario puede mutar los datos; otros servicios los consumen
 | `AuditRecord` | `audit-service` | `audit_db` | transversal |
 | `SentNotification` | `notification-service` | `notification_db` | transversal |
 | `NotificationTemplate` | `notification-service` | `notification_db` | transversal |
-| `NotificationPreference` | `notification-service` | `notification_db` | transversal |
+| `OutboxEvent` | `notification-service` | `notification_db` | transversal |
