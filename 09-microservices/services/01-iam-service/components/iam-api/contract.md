@@ -12,7 +12,7 @@ halts_registrados: ninguno
 
 # Contrato — iam-api
 
-> Estado: 🟢 Aceptado | Última actualización: 2026-08-06
+> Estado: 🟢 Aceptado | Última actualización: 2026-08-27
 
 > **Fuente de verdad (normativa):** el spec OpenAPI 3.1 en
 > [`07-api/contracts/openapi/iam.yaml`](../../../../../07-api/contracts/openapi/iam.yaml).
@@ -292,7 +292,7 @@ Revoca un override.
 Auditoría de intentos de login sobre la tabla `audit_login`. **Solo lectura**, paginación por
 **cursor** (colección grande/continua, guidelines §6).
 
-- **Feature requerido:** `IDENTITY_AUDIT_VIEW`.
+- **Feature requerido:** `AUDIT_LOG_VIEW`.
 - **Filtros:** `user_id`, `email`, `outcome`, `from`, `to`.
 - **Inventario:** Usuarios: seguridad/administración · Frecuencia: on-demand · Formato: JSON · Fuente: `identity_audit.audit_login`.
 
