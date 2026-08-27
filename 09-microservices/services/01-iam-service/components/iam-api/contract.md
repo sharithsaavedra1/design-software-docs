@@ -27,7 +27,7 @@ halts_registrados: ninguno
 
 ## Endpoints operacionales (fuera de `/api/v1`, HU-IAM-011)
 
-No forman parte del contrato de negocio (no están en `iam.yaml`) — son probes de Spring Boot Actuator expuestos en la raíz del servidor de la app, no bajo `/actuator`. Detalle operativo (SLO, semántica de cada indicador) en [runbook.md](../../runbook.md#healthcheck).
+No forman parte del contrato de negocio (no están en `iam.yaml`) — son un `@RestController` propio, expuesto en la raíz del servidor de la app (no bajo `/actuator`). Detalle operativo (SLO, semántica de cada chequeo) en [runbook.md](../../runbook.md#healthcheck).
 
 | Endpoint | Uso | `200` cuando | `503` cuando |
 |----------|-----|--------------|--------------|

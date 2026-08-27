@@ -11,15 +11,15 @@
 
 | Endpoint | Método | Respuesta esperada | Cuándo falla |
 |----------|--------|--------------------|--------------|
-| `GET /health` | GET | `200` — liveness (el proceso vive y el contexto de Spring arrancó) | Proceso caído o sin red |
-| `GET /ready` | GET | `200` — readiness (BD, y broker AMQP *si está configurado*) | BD no conecta, o el broker configurado no conecta → `503` |
+| `GET /health` | GET | `200 { "status": "UP" }` — liveness (el proceso vive) | Proceso caído o sin red |
+| `GET /ready` | GET | `200 { "status": "READY", "db": "ok"[, "broker": "ok"] }` | BD no conecta, o el broker configurado no conecta → `503 { "status": "NOT_READY", "db": "ok"\|"down"[, "broker": "down"] }` |
 
 **SLO**: `GET /health` debe responder en < 200 ms (p99). `GET /ready` en < 500 ms (p99).
 
-`/health` es el `LivenessState` de Spring Boot Actuator — responde `200` aunque la BD o el broker estén caídos; solo indica que el proceso vive.
-`/ready` es el `ReadinessState` compuesto por los indicadores `db` (Postgres, siempre incluido — sin BD el servicio no puede autenticar) y `broker` (RabbitMQ del outbox relay de HU-IAM-007, incluido **solo si `spring.rabbitmq.host` está configurado**; si el relay está intencionalmente apagado, `/ready` no depende de un broker inexistente). `503` si algún indicador incluido está `DOWN`.
+`/health` responde `200` aunque la BD o el broker estén caídos — solo indica que el proceso vive (no depende de ninguna dependencia externa).
+`/ready` ejecuta `SELECT 1` contra Postgres (siempre — sin BD el servicio no puede autenticar) y, **solo si `spring.rabbitmq.host` está configurado**, comprueba también el broker del outbox relay de HU-IAM-007 (si el relay está intencionalmente apagado, `/ready` no depende de un broker inexistente y el campo `broker` no aparece en la respuesta). `503` si algún chequeo incluido falla.
 
-Implementación: Spring Boot Actuator health groups (`management.endpoint.health.group.liveness` / `.readiness`), expuestos en el puerto de la app — no bajo `/actuator` — vía `additional-path`.
+Implementación: `HealthController` (`co.sena.iam.adapter.in.rest`), no vía `/actuator/health` — el registro condicional del chequeo de broker (`BrokerHealthConfiguration` → `BrokerReadinessProbe`, gateado por `spring.rabbitmq.host`) vive en `iam-api`.
 
 ---
 
