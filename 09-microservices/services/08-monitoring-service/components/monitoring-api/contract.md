@@ -4,15 +4,15 @@ capacidad: contrato de API (OpenAPI 3.1)
 fase: diseño (api-first)
 estado: accepted
 dependencias_entrada: 09-microservices/services/08-monitoring-service/data-model.md, 07-api/guidelines.md, 07-api/contracts/openapi/_shared.yaml
-consumidores_siguientes: backend monitoring-api, alert-worker, notification-worker, frontend, pruebas de contrato
-tldr: Seguimiento de fichas (KPIs, alertas, sesiones, planes de mejoramiento, notificaciones) con catálogos configurables y reportes propios (kpi-summary, indicators). kpi_tracking y generated_alert son solo lectura por REST (se producen por alert-worker). La fuente de verdad es monitoring.yaml.
-decisiones_clave: OpenAPI publicable en 07-api/contracts/openapi/monitoring.yaml; paginación por cursor en kpi-trackings/generated-alerts/sent-notifications (colecciones de crecimiento continuo); reportes descentralizados — solo dominio propio de monitoring-service
+consumidores_siguientes: backend monitoring-api, alert-worker, frontend, pruebas de contrato
+tldr: Seguimiento de fichas (KPIs, alertas, sesiones y planes de mejoramiento) con catálogos configurables y reportes propios. La entrega de notificaciones pertenece a notification-service. La fuente de verdad es monitoring.yaml.
+decisiones_clave: OpenAPI publicable en 07-api/contracts/openapi/monitoring.yaml; paginación por cursor en kpi-trackings/generated-alerts; reportes descentralizados — solo dominio propio de monitoring-service
 halts_registrados: ninguno
 -->
 
 # Contrato — monitoring-api
 
-> Estado: 🟢 Aceptado | Última actualización: 2026-08-06
+> Estado: 🟢 Aceptado | Última actualización: 2026-08-26
 
 > **Fuente de verdad (normativa):** el spec OpenAPI 3.1 en
 > [`07-api/contracts/openapi/monitoring.yaml`](../../../../../07-api/contracts/openapi/monitoring.yaml).
@@ -124,33 +124,13 @@ retorna `409`.
   separada en el catálogo RBAC actual; se reutiliza `MANAGE` también para lectura).
 - **Filtros de lista:** `ficha_tracking_id`, `learner_id`, `instructor_id`, `status`.
 
-## Notificaciones — `sent_notification`
+## Límite con notification-service
 
-### `GET /sent-notifications` · `GET /sent-notifications/{id}`
-
-Notificaciones enviadas a actores del sistema (append-only, retención 1 año,
-particionada por `created_at`). Paginación por **cursor**.
-
-- **Feature requerido:** `MON_NOTIFICATION_VIEW`.
-- **Filtros:** `recipient_id`, `generated_alert_id`, `channel`, `status`
-  (`send_status`), `from`, `to` (rango de `created_at`).
-
-### `POST /sent-notifications`
-
-Envía una notificación manual (fuera del flujo automático disparado por alertas). Responde
-`202` con `send_status = PENDING`; el envío efectivo lo procesa el
-[`notification-worker`](../notification-worker/contract.md).
-
-- **Feature requerido:** `MON_NOTIFICATION_SEND`.
-
-> **Nota:** la creación de `kpi_tracking` y `generated_alert` **no** se expone por REST.
-> Ambas se producen a partir de eventos de dominio en el
-> [`alert-worker`](../alert-worker/contract.md); esta API es de consulta sobre esos
-> registros más la gestión de sesiones, planes y notificaciones.
+`monitoring-api` no expone `/sent-notifications` ni persiste `sent_notification`. La entrega y consulta de notificaciones pertenece a [`notification-service`](../../../10-notification-service/README.md). Monitoring publica `monitoring.alert.triggered`; Notification decide y registra la entrega.
 
 ---
 
-## Reportes (dominio propio)
+# Reportes (dominio propio)
 
 Reportes **descentralizados** (guidelines §11): `monitoring-api` sólo publica
 indicadores calculados sobre **sus propias tablas** (`kpi_tracking`, `ficha_tracking`,
@@ -212,6 +192,6 @@ Aplica el **envelope estándar de la plataforma** ([guidelines §7](../../../../
 - Modelo de datos: [data-model.md](../../data-model.md)
 - Eventos del servicio: [events.md](../../events.md)
 - Contrato alert-worker: [alert-worker/contract.md](../alert-worker/contract.md)
-- Contrato notification-worker: [notification-worker/contract.md](../notification-worker/contract.md)
+- Servicio de notificaciones: [notification-service](../../../10-notification-service/README.md)
 - ADR-001 (broker): [ADR-001](../../../../../05-architecture/decisions/records/ADR-001-message-broker.md)
 - ADR-004 (estados y auditoría): [ADR-004](../../../../../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md)

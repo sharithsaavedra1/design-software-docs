@@ -46,5 +46,5 @@
 ## Referencias
 
 - [Open Questions](./open-questions.md)
-- [Architecture](../05-architecture/architecture.md)
-- [PRD](../03-product/prd.md)
+- [Architecture](../05-architecture/overview.md)
+- [PRD](../03-product/_template-prd.md)

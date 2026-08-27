@@ -44,6 +44,7 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 | `MOD_ACTORS` | Instructores y Aprendices | `actors-service` |
 | `MOD_DOCUMENTS` | Documentos | `document-service` |
 | `MOD_MONITORING` | Seguimiento y KPIs | `monitoring-service` |
+| `MOD_NOTIFICATIONS` | Notificaciones | `notification-service` |
 | `MOD_AUDIT` | Auditoría | `audit-service` |
 | `MOD_DASHBOARD` | Panel Principal | cross-cutting |
 
@@ -147,7 +148,15 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 | `MON_ALERT_VIEW` | Ver alertas generadas | READ |
 | `MON_ALERT_RESOLVE` | Marcar alertas como resueltas | WRITE |
 | `MON_IMPROVEMENT_PLAN_MANAGE` | Crear y editar planes de mejoramiento | WRITE |
-| `MON_NOTIFICATION_SEND` | Enviar notificaciones manuales | WRITE |
+
+### MOD_NOTIFICATIONS
+
+| Código de feature | Descripción | Nivel de acción |
+|------------------|-------------|----------------|
+| `NOTIF_VIEW_OWN` | Ver las notificaciones propias | READ |
+| `NOTIF_VIEW_ALL` | Consultar notificaciones dentro del scope autorizado | READ |
+| `NOTIF_SEND` | Solicitar una notificación manual | WRITE |
+| `NOTIF_TEMPLATE_MANAGE` | Gestionar plantillas de notificación | WRITE |
 
 ### MOD_AUDIT
 
@@ -230,7 +239,7 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `SCH_CONFLICT_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `SCH_CONFLICT_RESOLVE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 
-### MOD_ACTORS y MOD_MONITORING
+### MOD_ACTORS, MOD_MONITORING y MOD_NOTIFICATIONS
 
 | Feature | SYSTEM_ADMIN | CENTER_DIRECTOR | COORDINATOR | INSTRUCTOR | LEARNER | ADMIN_STAFF |
 |---------|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -248,6 +257,10 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `MON_ALERT_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
 | `MON_ALERT_RESOLVE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `MON_IMPROVEMENT_PLAN_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
+| `NOTIF_VIEW_OWN` | ✅ GLOBAL | ✅ OWN_PROFILE | ✅ OWN_PROFILE | ✅ OWN_PROFILE | ✅ OWN_PROFILE | ✅ OWN_PROFILE |
+| `NOTIF_VIEW_ALL` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
+| `NOTIF_SEND` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
+| `NOTIF_TEMPLATE_MANAGE` | ✅ GLOBAL | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `AUDIT_LOG_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ | ❌ |
 
 ---

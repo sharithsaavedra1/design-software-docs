@@ -1,88 +1,101 @@
 # monitoring-service — Seguimiento, KPIs y alertas
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
-> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Autor: Equipo de Arquitectura | Stack: Python 3.11+ / FastAPI
 
-> **Diseño previsto — no implementado.** Este documento describe el diseño acordado
-> del servicio. La capa de aplicación aún no se construye ni se ha elegido su lenguaje;
-> los contratos se especifican a nivel de protocolo (REST, eventos, esquema de BD).
+> **Límite vigente:** desde [ADR-005](../../../05-architecture/decisions/records/ADR-005-microservices-topology-and-transversal-capabilities.md), `monitoring-service` **no entrega notificaciones**. Su responsabilidad termina al detectar/persistir el estado de seguimiento y publicar eventos como `monitoring.alert.triggered`. La entrega pertenece exclusivamente a [`notification-service`](../10-notification-service/).
 
 ## Responsabilidad
 
-Consolida el seguimiento integral del proceso formativo: mide KPIs de las fichas en
-ejecución, evalúa umbrales y genera alertas automáticas, gestiona sesiones de seguimiento
-y planes de mejoramiento, y despacha notificaciones a los actores correspondientes.
-Se activa principalmente por **eventos** de otros servicios; **no** llama síncronamente a
-los servicios de dominio.
+Consolida el seguimiento del proceso formativo M9:
 
-## Bounded context
+- registrar y consultar KPIs;
+- evaluar umbrales y condiciones de riesgo;
+- mantener `ficha_tracking` y sesiones de seguimiento;
+- generar y resolver `generated_alert`;
+- gestionar planes de mejoramiento de ficha;
+- publicar eventos de monitoreo para consumidores desacoplados.
 
-Entidades propias del servicio. Ningún otro servicio escribe directamente en estas tablas.
-Detalle completo en [data-model.md](./data-model.md).
-
-| Entidad | Descripción |
-|---------|-------------|
-| `kpi_type` | Catálogo configurable de tipos de KPI medibles (ATTENDANCE, CURRICULUM_PROGRESS, DROPOUT_RISK, PRODUCTIVE_STAGE_PROGRESS) |
-| `alert_type` | Catálogo configurable de tipos de alerta con umbral por defecto |
-| `risk_level` | Catálogo de niveles de severidad (INFO → LOW → MEDIUM → HIGH → CRITICAL) |
-| `kpi_status` | Catálogo de estados de KPI (ON_TRACK / AT_RISK / CRITICAL) |
-| `ficha_tracking` | Estado de seguimiento consolidado de una ficha en ejecución |
-| `kpi_tracking` | Medición puntual de un KPI para una ficha (serie temporal) |
-| `tracking_session` | Sesión de seguimiento periódico registrada por instructor o coordinador |
-| `generated_alert` | Alerta disparada cuando un KPI supera un umbral o se detecta una condición crítica |
-| `improvement_plan` | Plan de mejoramiento a nivel de ficha generado a partir de una alerta |
-| `sent_notification` | Registro append-only de notificaciones despachadas a los actores |
+**No** contiene SMTP, canales `EMAIL/IN_APP`, templates de notificación, `sent_notification`, reintentos de entrega ni un `notification-worker`.
 
 ## Módulo de origen
 
-M9 — Seguimiento y Analítica
+M9 — Seguimiento y Analítica.
+
+## Entidades propias
+
+Detalle en [data-model.md](./data-model.md).
+
+| Entidad | Descripción |
+|---------|-------------|
+| `kpi_type` | Catálogo de tipos de KPI. |
+| `alert_type` | Catálogo de alertas y umbrales. |
+| `risk_level` | Severidad de riesgo. |
+| `kpi_status` | Estado de KPI. |
+| `ficha_tracking` | Seguimiento consolidado de ficha. |
+| `kpi_tracking` | Serie temporal de mediciones. |
+| `tracking_session` | Sesiones de seguimiento. |
+| `generated_alert` | Alertas generadas por condiciones/umbrales. |
+| `improvement_plan` | Plan de mejoramiento de ficha. |
+
+## Componentes desplegables
+
+| Componente | Tipo | Responsabilidad |
+|------------|------|-----------------|
+| [monitoring-api](./components/monitoring-api/README.md) | REST / FastAPI | Consulta y casos de uso HTTP del dominio de monitoreo. |
+| [alert-worker](./components/alert-worker/README.md) | Worker async | Evalúa eventos/umbrales y publica alertas. |
+
+El antiguo `components/notification-worker/` se elimina de este bounded context. Su reemplazo vive en [`../10-notification-service/components/notification-worker/`](../10-notification-service/components/notification-worker/).
+
+## Implementación actual
+
+El repo `design-software-monitoring-service` contiene una base hexagonal en Python/FastAPI:
+
+```text
+apps/api/main.py
+apps/alert_worker/main.py
+src/monitoring/domain/
+src/monitoring/application/
+src/monitoring/adapter/
+```
+
+La API actual implementa un skeleton (`GET /health`, `POST /kpis`); el contrato completo descrito en `monitoring.yaml` representa el objetivo de producto y debe implementarse incrementalmente.
 
 ## Dependencias
 
 | Servicio | Tipo | Motivo |
 |----------|------|--------|
-| `iam-service` | auth | Validación del JWT en cada request de `monitoring-api` |
-| `academic-management-service` | async | Consume `academic.ficha.opened` / `academic.ficha.closed` |
-| `scheduling-service` | async | Consume `scheduling.schedule.published`, `scheduling.class_session.cancelled` |
-| `actors-service` | async | Consume `actors.company_visit.completed` y afines |
-
-> Las dependencias de dominio son **asíncronas** (bus de eventos AMQP, ADR-001). La única
-> dependencia síncrona es `iam-service` para autenticación en la API de consulta.
-
-## Componentes desplegables
-
-| Componente | Sufijo | Descripción |
-|------------|--------|-------------|
-| [`monitoring-api`](./components/monitoring-api/README.md) | `-api` | REST de consulta sobre KPIs, alertas, seguimiento de fichas y planes de mejora |
-| [`alert-worker`](./components/alert-worker/README.md) | `-worker` | Consume eventos de dominio, evalúa umbrales y genera `generated_alert` |
-| [`notification-worker`](./components/notification-worker/README.md) | `-worker` | Consume alertas y despacha notificaciones salientes (EMAIL / IN_APP) |
-
-## Base de datos
-
-- Nombre lógico: `monitoring_db`
-- Motor: **PostgreSQL 16**
-- Esquema: ver [data-model.md](./data-model.md) — vigente 🟢 Estable
-- Notas de modelado: `kpi_tracking` y `sent_notification` se particionan por RANGE mensual
-  (serie temporal y retención); `active_alert_count` en `ficha_tracking` es un contador
-  desnormalizado mantenido por triggers.
+| `iam-service` | auth | JWT/RBAC para API. |
+| `academic-management-service` | async | Ciclo de vida de fichas. |
+| `scheduling-service` | async | Publicación/cancelación de sesiones. |
+| `actors-service` | async | Hechos de actores relevantes a KPIs. |
+| `notification-service` | **consumidor async**, no dependencia de disponibilidad | Consume `monitoring.alert.triggered`; Monitoring no lo invoca ni conoce su canal de entrega. |
+| `audit-service` | consumidor async | Audita eventos publicados. |
 
 ## Eventos
 
-Ver [events.md](./events.md).
+Publica en `monitoring-events`:
 
-- **Publica** (topic `monitoring-events`): `monitoring.alert.triggered`,
-  `monitoring.kpi.threshold_breached`, `monitoring.notification.sent`.
-- **Consume**: `academic.ficha.opened`, `academic.ficha.closed`,
-  `scheduling.schedule.published`, `scheduling.class_session.cancelled`,
-  `actors.company_visit.completed`.
+- `monitoring.alert.triggered`
+- `monitoring.kpi.threshold_breached`
+
+Consume eventos de Academic, Scheduling y Actors según [events.md](./events.md).
+
+> `monitoring.notification.sent` está **retirado**. El evento vigente de entrega es `notification.notification.sent`, publicado por `notification-service`.
+
+## Persistencia
+
+- BD lógica: `monitoring_db`.
+- Motor: PostgreSQL 16.
+- Propiedad exclusiva de las entidades M9 anteriores.
+- No contiene tablas de entrega de notificaciones.
 
 ## Links
 
-- Repo: (pendiente)
-- Data model: [data-model.md](./data-model.md)
-- Eventos: [events.md](./events.md)
-- Runbook: [runbook.md](./runbook.md)
-- Decisiones internas: [decisions.md](./decisions.md)
-- Catálogo global de eventos: [event-catalog.md](../../event-catalog.md)
-- ADR-001 (broker de mensajes): [ADR-001](../../../05-architecture/decisions/records/ADR-001-message-broker.md)
-- ADR-004 (estados y auditoría): [ADR-004](../../../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md)
+- Repo aplicación: `design-software-monitoring-service`
+- [Modelo de datos](./data-model.md)
+- [Eventos](./events.md)
+- [Runbook](./runbook.md)
+- [Decisiones internas](./decisions.md)
+- [Contrato OpenAPI](../../../07-api/contracts/openapi/monitoring.yaml)
+- [notification-service](../10-notification-service/README.md)

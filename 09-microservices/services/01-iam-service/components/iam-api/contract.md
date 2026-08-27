@@ -92,7 +92,7 @@ Información del usuario autenticado con todos sus features calculados.
   "actor_id": "uuid-del-instructor",
   "roles": [{ "name": "INSTRUCTOR", "training_center_id": "uuid" }],
   "features": ["SCH_VIEW_OWN:OWN_SCHEDULE", "ACT_INSTRUCTOR_VIEW:OWN_PROFILE", "..."],
-  "modules": ["MOD_SCHEDULING", "MOD_ACTORS", "MOD_MONITORING"]
+  "modules": ["MOD_SCHEDULING", "MOD_ACTORS", "MOD_MONITORING", "MOD_NOTIFICATIONS"]
 }
 ```
 

@@ -1,16 +1,12 @@
 # Mapa de dependencias
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-Muestra las dependencias entre los 9 microservicios. Las dependencias **síncronas** representan
+Muestra las dependencias entre los 10 microservicios backend. Las dependencias **síncronas** representan
 acoplamiento fuerte (de disponibilidad); las **asíncronas** (eventos) son débilmente acopladas.
 
-> **Nota de alcance — diseño previsto, no implementado.** Las capas de aplicación aún no están
-> construidas y no se ha elegido lenguaje. Las dependencias descritas son el **contrato de
-> integración previsto**, agnóstico de tecnología. Lo fijo es el transporte: REST sobre HTTP para
-> lo síncrono y broker AMQP (RabbitMQ, [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md))
-> para lo asíncrono.
+> **Nota de alcance:** la madurez de implementación varía por servicio. Las dependencias descritas son el contrato de integración vigente. REST/HTTP se usa para lo síncrono y RabbitMQ/AMQP para lo asíncrono.
 
 ## Leyenda
 
@@ -25,8 +21,7 @@ acoplamiento fuerte (de disponibilidad); las **asíncronas** (eventos) son débi
 - **Servicio núcleo**: `scheduling-service` depende (en tiempo de construcción de horario) de
   `training-environment-service` y `actors-service` para disponibilidad, y de
   `academic-management-service` para validar la ficha.
-- **Servicios transversales**: `document-service` y `audit-service` atraviesan todo el sistema
-  (generación documental bajo demanda; auditoría por fan-out de eventos).
+- **Servicios transversales**: `document-service`, `audit-service` y `notification-service` atraviesan el sistema. Notification recibe solicitudes/eventos mediante contrato público y nunca se implementa como worker interno de Monitoring.
 
 ## Diagrama
 
@@ -80,6 +75,7 @@ graph TD
     SCH -.->|auth| IAM
     DOC -.->|auth| IAM
     MON -.->|auth| IAM
+    NOT -.->|auth| IAM
 ```
 
 > Las flechas sólidas (`-->`) son dependencias **síncronas** de negocio; las punteadas (`-.->`)
