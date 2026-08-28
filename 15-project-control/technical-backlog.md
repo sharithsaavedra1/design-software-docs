@@ -1,6 +1,6 @@
 # Backlog Técnico
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 Deuda técnica conocida y pendientes de construcción del proyecto **Horarios SENA**. La plataforma combina repositorios de datos y aplicaciones con madurez desigual; este backlog registra trabajo estructural pendiente sin asumir un único estado para todos los servicios.
@@ -35,13 +35,15 @@ Ver contexto en [service-catalog.md](../09-microservices/service-catalog.md), [m
 
 Desglose de TD-008 en fases relativas. No se comprometen fechas hasta cerrar los bloqueantes P0.
 
-| Fase | Alcance | Depende de |
-|------|---------|------------|
-| Fase A — Fundaciones de datos | Cerrar TD-001…TD-006; base de datos reproducible y segura por servicio. | — |
-| Fase B — Núcleo de identidad | Construir `iam-service` (API): login, JWT RS256, RBAC por feature+scope (ver [authentication.md](../07-api/authentication.md)). | Fase A |
-| Fase C — Catálogos y dominio base | `reference-data-service`, `academic-management-service`, `training-environment-service`, `actors-service`. | Fase B |
-| Fase D — Motor de horarios | `scheduling-service` + read models de [ADR-002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md). | Fase C |
-| Fase E — Transversales | `document-service`, `audit-service`, `monitoring-service` y `notification-service`; validar separación por eventos según ADR-005. | Fase B–D |
+> **Progreso: 2/10 microservicios con capa de aplicación completa en `develop`** — `iam-service` (12/12 HU Done·Dev) y `notification-service` (8/8 HU Done·Dev). El broker RabbitMQ ya está provisionado y validado E2E en `develop` (ver R-005 resuelto en [risks.md](./risks.md)). Los 8 servicios restantes siguen sólo en capa `-db`. Estado vivo por HU en el board (GitHub Project #3).
+
+| Fase | Alcance | Depende de | Estado |
+|------|---------|------------|--------|
+| Fase A — Fundaciones de datos | Cerrar TD-001…TD-006; base de datos reproducible y segura por servicio. | — | 🟡 En curso |
+| Fase B — Núcleo de identidad | Construir `iam-service` (API): login, JWT RS256, RBAC por feature+scope (ver [authentication.md](../07-api/authentication.md)). | Fase A | ✅ Done·Dev — en promoción a qa/staging/main |
+| Fase C — Catálogos y dominio base | `reference-data-service`, `academic-management-service`, `training-environment-service`, `actors-service`. | Fase B | ⬜ Pendiente (sólo capa `-db`) |
+| Fase D — Motor de horarios | `scheduling-service` + read models de [ADR-002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md). | Fase C | ⬜ Pendiente (sólo capa `-db`) |
+| Fase E — Transversales | `document-service`, `audit-service`, `monitoring-service` y `notification-service`; validar separación por eventos según ADR-005. | Fase B–D | 🟡 Parcial — `notification-service` ✅ Done·Dev; `document`/`audit`/`monitoring` sólo capa `-db` |
 
 ## Criterio de ingreso al backlog
 

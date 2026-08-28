@@ -1,6 +1,6 @@
 # Eventos de Dominio — SENA Gestión de Horarios
 
-> Estado: 🟡 Borrador | Última actualización: 2026-06-17
+> Estado: 🟡 Borrador | Última actualización: 2026-08-28
 > Naming: nombres de eventos en inglés (HALT-DB-NAMING — los eventos son contratos de integración)
 > Relacionado: [event-catalog.md](../09-microservices/event-catalog.md) · [domain-map.md](./domain-map.md)
 
@@ -26,6 +26,9 @@ Ejemplo: `scheduling.schedule.published`
 | `iam.user.created` | Creación de usuario | Una persona obtuvo acceso al sistema | actors-service crea el perfil de actor asociado |
 | `iam.user.deactivated` | Desactivación de cuenta | Una persona perdió el acceso | Se revocan tokens; actors marca el actor inactivo |
 | `iam.role.assigned` | Asignación de rol | Cambió el nivel de acceso de un usuario | El próximo login refleja los nuevos features |
+| `iam.session.started` | Login exitoso | Un usuario abrió una sesión (se emitió un token) | audit registra el inicio de sesión; monitoring/notification pueden reaccionar |
+
+> Los 4 eventos de iam-service se emiten vía **Outbox** (`identity.outbox`) → relay (`OutboxRelayScheduler.poll`) → topic `iam-events`. La emisión es consistente con la transacción de BD (no hay doble escritura).
 
 ### reference-data-service (Datos de referencia)
 
@@ -88,6 +91,14 @@ Ejemplo: `scheduling.schedule.published`
 
 > No publica eventos. Solo consume todos los topics y persiste de forma inmutable.
 
+### notification-service (Notificaciones — TRANSVERSAL)
+
+Microservicio transversal (Go) extraído de monitoring (ADR-005). Es un **consumidor** de eventos de dominio de otros contextos (p. ej. `monitoring.alert.triggered`, `scheduling.schedule.published`, `iam.*`) y publica su propio evento cuando entrega una notificación. Consume con **idempotencia por `event_id`** y **DLQ** ante fallos; las notificaciones ya no viven en monitoring.
+
+| Evento | Disparado por | Significado de negocio | Cambio de estado |
+|--------|---------------|------------------------|------------------|
+| `notification.notification.sent` | Entrega de una notificación a un actor | Un actor fue informado por un canal (correo, etc.) | audit registra el envío; monitoring puede cerrar el ciclo de la alerta |
+
 ---
 
 ## Flujo de eventos del caso de uso central — Publicar horario
@@ -108,11 +119,14 @@ scheduling.schedule.published ──────┬─────────�
                           monitoring.alert.triggered
                                      │
                                      ▼
-                          notification-worker → SentNotification
+                          notification-service (consume con
+                          idempotencia por event_id + DLQ)
                                      │
                                      ▼
-                          monitoring.notification.sent → audit
+                          notification.notification.sent → audit
 ```
+
+> Nota: las notificaciones fueron extraídas de monitoring a **notification-service** (ADR-005). El evento `monitoring.notification.sent` listado arriba corresponde al modelo previo; el envío efectivo lo publica hoy `notification.notification.sent` desde notification-service.
 
 ---
 
@@ -124,4 +138,4 @@ scheduling.schedule.published ──────┬─────────�
 | Idempotencia | Garantizada | `event_id` único por evento; consumers deduplicar |
 | Orden | Por partición (ej. por ficha) | Routing key con `ficha_id` |
 | Fallo de consumer | Reintentos + DLQ | 3 reintentos con backoff; luego `<topic>.dlq` |
-| Durabilidad de eventos críticos | Persistente | Outbox pattern en scheduling-service |
+| Durabilidad de eventos críticos | Persistente | Outbox pattern implementado en iam-service (`identity.outbox` → `iam-events`, vía `OutboxRelayScheduler.poll`) y notification-service. scheduling-service aún no existe. |

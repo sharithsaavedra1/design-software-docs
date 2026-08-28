@@ -1,6 +1,6 @@
 # CI/CD
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
 Pipeline de integración y entrega para el sistema de Gestión de Horarios SENA. Describe los controles automatizados sobre los cambios y cómo se promueven entre ambientes. Complementa a [00-governance/git-conventions.md](../00-governance/git-conventions.md), a [environments.md](./environments.md) y a [06-data/migration-strategy.md](../06-data/migration-strategy.md).
@@ -11,12 +11,13 @@ Pipeline de integración y entrega para el sistema de Gestión de Horarios SENA.
 
 ## Alcance
 
-El repositorio actual es principalmente **documental + capa de datos** (repos `*-db` con changelogs Liquibase). Por eso el CI se centra hoy en:
+Los controles cubren tres capas que **ya existen**:
 
 1. Validar que la **documentación** siga las convenciones (git-conventions, documentation-rules).
 2. Validar que los **changelogs Liquibase** sean correctos y aplicables antes de promover.
+3. Construir y probar la **capa de aplicación**: en `develop` ya corren microservicios con suites de pruebas — `iam-service` con **162 tests** (incluidos ITs contra Postgres) y `notification-service` con pruebas **E2E**.
 
-El CI de la **capa de aplicación** (build, tests unitarios, imágenes de contenedor) se definirá cuando esa capa exista.
+> **El gap no es la falta de tests, es la falta de CI.** La capa de aplicación ya existe y tiene pruebas, pero **ninguna corre automáticamente en un pipeline**: build, tests unitarios/ITs, imágenes de contenedor y el gate de contratos (Pact) se ejecutan hoy **a mano en local**. Automatizarlos es la deuda priorizada de esta página (ver [Pendientes](#pendientes-de-automatización-priorizados)).
 
 ---
 
@@ -30,7 +31,9 @@ El CI de la **capa de aplicación** (build, tests unitarios, imágenes de conten
 | **PR checks** | Revisión obligatoria antes de merge a rama protegida; sin commits directos a `develop`/`qa`/`staging`/`main` | 🟡 Reglas de rama vigentes; enforcement automático pendiente |
 | **Seeds idempotentes** | Que los `02_dml` usen `ON CONFLICT DO NOTHING`/`MERGE` y que los datos de prueba estén aislados por `context`/`labels` | 🟡 Regla definida; verificación pendiente |
 | **Secret scanning** | Que no se versionen credenciales reales en `.env.*` ni en el diff | 🔴 **Pendiente — riesgo real** (ver [security-threat-model.md](../05-architecture/security-threat-model.md) §Secretos) |
-| **Build / tests de aplicación** | Compilación y pruebas de los servicios | 🔴 No aplica aún (capa app inexistente) |
+| **Contract testing (Pact)** | Gate de compatibilidad de contratos entre consumidor y proveedor sobre `shared-contracts` (OpenAPI/eventos) | 🟡 Gate definido y ejecutable (skill de contratos); **corre a mano, no en CI** |
+| **Build / tests de aplicación** | Compilación y pruebas de los servicios (`iam`: 162 tests incl. ITs Postgres; `notification`: E2E) | 🟡 **Las pruebas existen y pasan en local; no corren en CI** (deuda — sin guardián automático) |
+| **`@SpringBootTest` de contexto completo** | Que cada servicio Java arranque el contexto Spring completo en el pipeline (no solo `@WebMvcTest` por controller) | 🔴 Pendiente — **regla obligatoria** (ver nota abajo) |
 
 ---
 
@@ -72,13 +75,22 @@ La promoción sigue **`develop → qa → staging → main`** ([git-conventions.
 
 ## Pendientes de automatización (priorizados)
 
+> **Riesgo ya materializado — no hipotético.** La ausencia de CI de aplicación **ya dejó pasar bugs**: el incidente de *ambiguous mapping* (dos `@RestController` sobre la misma interfaz OpenAPI que rompen el arranque de Spring) solo lo caza un `@SpringBootTest` de contexto completo corriendo en el pipeline — un `@WebMvcTest` de un controller aislado no lo detecta. Además hay **3 ITs flaky en `develop`** sin guardián automático que los vigile. Las pruebas existen; lo que falta es que **corran solas en cada PR**.
+
 | # | Acción | Prioridad |
 |---|--------|-----------|
 | 1 | Secret scanning en cada PR y sacar `.env.*` del control de versiones | **Crítica** |
-| 2 | Job de CI que corra `liquibase validate` + `update` + `rollback` contra una BD efímera por PR | Alta |
-| 3 | Linter de Conventional Commits como check obligatorio | Alta |
-| 4 | Enforcement automático de ramas protegidas (no merge sin checks en verde) | Media |
-| 5 | Definir el pipeline de la capa de aplicación cuando exista | Media |
+| 2 | **Pipeline de aplicación**: build + tests unitarios + ITs de `iam` (162, con Postgres) y E2E de `notification` en cada PR — cerrar el gap que dejó pasar *ambiguous mapping* | **Crítica** |
+| 3 | **`@SpringBootTest` de contexto completo obligatorio por servicio Java** como check bloqueante (garantiza que el contexto Spring arranca; guardián directo contra *ambiguous mapping*) | **Crítica** |
+| 4 | Gate de contratos (Pact) como check obligatorio en CI, no manual | Alta |
+| 5 | Estabilizar y vigilar los **3 ITs flaky** de `develop` (quarantine + fix, no ignore) | Alta |
+| 6 | Job de CI que corra `liquibase validate` + `update` + `rollback` contra una BD efímera por PR | Alta |
+| 7 | Linter de Conventional Commits como check obligatorio | Alta |
+| 8 | Enforcement automático de ramas protegidas (no merge sin checks en verde) | Media |
+
+### Regla: `@SpringBootTest` de contexto completo obligatorio por servicio Java
+
+Cada servicio Java debe incluir al menos un **`@SpringBootTest` que levante el contexto Spring completo** (full-boot) y correr en CI como check bloqueante. Es el único tipo de prueba que caza fallos de arranque como el *ambiguous mapping* (mapeos ambiguos, beans duplicados, wiring cross-módulo roto); un `@WebMvcTest` acotado a un controller no los ve. Sin este guardián en el pipeline, un servicio puede mergear "verde" y no arrancar.
 
 ## Referencias
 

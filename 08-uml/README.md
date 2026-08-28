@@ -1,11 +1,11 @@
 # UML
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 Repositorio de diagramas UML y arquitectura visual del proyecto **Horarios SENA**. Todo diagrama debe tener **fuente editable** (texto versionable) y **exportación revisable** (SVG).
 
-> ⚠️ El sistema está en fase de datos: la mayoría de los diagramas de comportamiento (secuencia, componentes de la capa app) están **previstos** pero aún no dibujados, porque describen componentes que no se han construido. Los diagramas ER por servicio pueden derivarse ya del esquema real de cada repo `*-db`.
+> ⚠️ El comportamiento **ya no es solo previsto**: dos servicios tienen capa de aplicación construida y probada en `develop` — `iam-service` (Java) y `notification-service` (Go) — así que sus flujos de comportamiento **son diagramables hoy con base en lo construido**. Ya se dibujaron los tres diagramas de secuencia de flujos vivos (login+JWT, outbox→relay→iam-events, consumo/DLQ de notification). Los diagramas de comportamiento de los servicios que aún viven solo en capa de datos siguen **previstos**. Los diagramas ER por servicio pueden derivarse ya del esquema real de cada repo `*-db` (el de `iam` es directamente derivable).
 
 ## Convenciones
 
@@ -29,19 +29,20 @@ Repositorio de diagramas UML y arquitectura visual del proyecto **Horarios SENA*
 | Despliegue | `*-deployment.wsd` | PlantUML |
 | Entidad-Relación (por servicio) | `*-er.wsd` | PlantUML / Mermaid |
 
-## Índice de diagramas previstos
+## Índice de diagramas
 
-Estado: 🔴 No creado · 🟡 En curso · 🟢 Listo.
+Estado: 🔴 No creado · 🟡 En curso / derivable ahora · 🟢 Listo.
 
 | Diagrama | Tipo | Alcance | Fuente prevista | Estado |
 |----------|------|---------|-----------------|--------|
 | Contexto del sistema | Contexto | Horarios SENA y actores externos (SENA, IdP futuro) | `system-context.wsd` | 🔴 |
 | Panorama de microservicios | Componentes | Los 9 servicios y sus dependencias (deriva de [dependency-map.md](../09-microservices/dependency-map.md)) | `platform-component.wsd` | 🔴 |
-| Autenticación (login + JWT) | Secuencia | Flujo de [authentication.md](../07-api/authentication.md) | `auth-login-sequence.wsd` | 🔴 |
+| Autenticación (login + JWT) | Secuencia | Flujo de [authentication.md](../07-api/authentication.md) en `iam-service` (construido) | [`diagrams/source/login-jwt.md`](./diagrams/source/login-jwt.md) | 🟢 |
 | Creación de horario | Secuencia | scheduling ↔ actors / training-environment / academic-management | `scheduling-create-sequence.wsd` | 🔴 |
-| Propagación de eventos | Secuencia | Publicación async hacia audit / monitoring (ver [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md)) | `events-async-sequence.wsd` | 🔴 |
+| Propagación de eventos (outbox → relay) | Secuencia | `iam-service`: `OutboxRelayScheduler` publica de `identity.outbox` a `iam-events` (ver [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md)) | [`diagrams/source/outbox-relay-events.md`](./diagrams/source/outbox-relay-events.md) | 🟢 |
+| Consumo de notificación (retry/DLQ) | Secuencia | `notification-service`: consume evento AMQP → idempotencia → entrega → SENT / retry → DLQ | [`diagrams/source/notification-consume.md`](./diagrams/source/notification-consume.md) | 🟢 |
 | Estados parametrizables | Estado | Ciclo de vida de estados según [ADR-004](../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md) | `status-lifecycle-state.wsd` | 🔴 |
-| ER — iam-service | Entidad-Relación | Esquema `identity`/`rbac`/`session` | `iam-er.wsd` | 🔴 |
+| ER — iam-service | Entidad-Relación | Esquema `identity`/`rbac`/`session` (derivable ya del esquema real construido) | `iam-er.wsd` | 🟡 derivable ahora |
 | ER — reference-data-service | Entidad-Relación | Catálogos y estructura institucional | `reference-data-er.wsd` | 🔴 |
 | ER — academic-management-service | Entidad-Relación | Programas y fichas | `academic-management-er.wsd` | 🔴 |
 | ER — training-environment-service | Entidad-Relación | Ambientes, inventario, disponibilidad | `training-environment-er.wsd` | 🔴 |
@@ -51,12 +52,12 @@ Estado: 🔴 No creado · 🟡 En curso · 🟢 Listo.
 | ER — monitoring-service | Entidad-Relación | KPIs, alertas, seguimiento | `monitoring-er.wsd` | 🔴 |
 | ER — audit-service | Entidad-Relación | Log append-only | `audit-er.wsd` | 🔴 |
 
-> Prioridad de dibujo: primero los **ER por servicio** (derivables del esquema actual) y el **contexto/componentes**; los diagramas de secuencia se completan a medida que se construye cada componente de aplicación.
+> Prioridad de dibujo: **ya construidos** los tres diagramas de secuencia de flujos vivos de `iam` y `notification` (login+JWT, outbox→relay, consumo/DLQ). Sigue pendiente: el **ER de `iam`** (derivable ya del esquema real), el resto de **ER por servicio**, el **contexto/componentes**, y los diagramas de secuencia de los servicios que aún no tienen capa de aplicación.
 
 ## Archivos
 
 | Archivo | Descripción | Estado |
 |---------|-------------|--------|
 | [diagram-index.md](./diagram-index.md) | Índice registrado de fuentes y exportaciones | 🟡 |
-| [diagrams/source/](./diagrams/source/) | Fuentes editables de diagramas | 🔴 |
+| [diagrams/source/](./diagrams/source/) | Fuentes editables de diagramas | 🟡 (3 secuencias en Mermaid) |
 | [diagrams/exports/](./diagrams/exports/) | Exportaciones SVG o PNG | 🔴 |

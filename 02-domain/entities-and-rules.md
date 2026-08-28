@@ -1,6 +1,6 @@
 # Entidades y Reglas de Negocio — Dominio SENA Gestión de Horarios
 
-> Estado: 🟡 Borrador | Última actualización: 2026-06-17
+> Estado: 🟡 Borrador | Última actualización: 2026-08-28
 > Fuente: análisis de equipos M1-M9 · estructura pública SENA (Acuerdo 00003/2012, Decreto 249/2004, Circular 1-2014)
 
 ## Propósito
@@ -33,6 +33,21 @@ No puede existir un instructor sin usuario, ni un usuario instructor sin perfil 
 ### RN-IAM-05: Contraseña temporal
 Al crear un usuario nuevo, el sistema genera una contraseña temporal que el usuario
 debe cambiar en su primer login. Contraseñas temporales expiran en 72 horas.
+
+### RN-IAM-06: Autorización por feature y scope
+La autorización se resuelve con un **feature-check**: cada operación exige un feature atómico
+(no `resource+action`). El alcance de datos se determina por el **scope** del rol
+(`GLOBAL`, `TRAINING_CENTER`, `OWN_*`), combinado con el centro asignado del usuario
+(`training_center_id`; ver RN-IAM-03). El catálogo RBAC (roles, features, módulos) admite
+**overrides** por usuario que conceden o revocan features puntuales sobre lo que otorga el rol.
+La verificación de estos permisos es **local** en cada servicio: el JWT RS256 se valida contra
+las claves públicas de JWKS, sin llamada síncrona a iam-service.
+
+> **Entidad de integración — `outbox`**: iam-service persiste sus eventos de dominio en una
+> tabla `outbox` (schema `identity`) dentro de la misma transacción que muta el estado, y un
+> relay (`OutboxRelayScheduler.poll`) los publica al topic `iam-events`. Es el mecanismo que
+> garantiza consistencia entre el cambio de estado y la emisión del evento (Outbox pattern);
+> no es una entidad de negocio sino de integración.
 
 ---
 
