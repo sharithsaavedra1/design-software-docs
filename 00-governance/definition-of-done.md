@@ -20,3 +20,15 @@ Toda **HU o cambio que modifique el schema de una base de datos** (nueva tabla, 
 - [ ] El diccionario de datos (`06-data/data-dictionary.md`).
 
 ...referenciando el **changeset** que introdujo el cambio (tabla/columna/índice: nombre, tipo, propósito). Sin este sync, el docs SSOT deja de reflejar la BD real y se pierde trazabilidad. Aplica a todos los servicios; el revisor central lo verifica antes de mergear.
+
+## Sync de docs por HU y por cierre de épica (regla endurecida 2026-08-28)
+
+Toda **HU** y todo **cierre de épica/micro** **NO está done** hasta que actualice, en la **misma entrega**,
+las carpetas de docs que le correspondan según la [matriz de docs-touchpoints](./docs-touchpoints-matrix.md):
+
+- [ ] **Por cada HU (mínimo):** `04-requirements` (trazabilidad + user-story con estado), `09-microservices/<svc>`, `06-data` si toca schema, `07-api` si toca contrato, el board (Project #3) y el hu-log.
+- [ ] **Al cerrar el micro (barrido completo):** además `01-context`, `02-domain`, `03-product`, `05-architecture`, `08-uml`, `10-devops`, `11-quality`, `15-project-control` (y `12-ux-ui` si hay UI).
+
+Precedente: en los 2 primeros micros el docs derivó por falta de este sync (7 carpetas congeladas pese a 20 HU).
+El revisor central verifica los touchpoints antes de dar la HU/épica por cerrada. Orden de mantenimiento:
+**docs SSOT primero → backlog/board → repos de código** (gobernanza de punta a punta).

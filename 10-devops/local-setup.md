@@ -1,6 +1,6 @@
 # Setup local
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
 Cómo levantar la base de datos del proyecto y aplicar las migraciones de cada módulo en local. Complementa a [migration-strategy.md](../06-data/migration-strategy.md).
@@ -80,15 +80,18 @@ que clone el monorepo de repos tal como está documentado.
 ### Levantar iam-service local (HU-IAM-012)
 
 ```bash
-# 1. Levanta postgres + iam-api + rabbitmq (perfil iam trae el broker solo)
-docker compose --env-file .env.develop --profile iam up -d
+# 1. Levanta postgres + iam-api + rabbitmq (perfil iam trae el broker solo).
+#    Usar --build siempre en servicios de aplicación para no correr una imagen stale.
+docker compose --env-file .env.develop --profile iam up -d --build
 
 # 2. Aplicar el schema de iam (si no está aplicado)
 docker compose --env-file .env.develop --profile tooling run --rm liquibase-iam update
 
 # 3. Con trazas E2E cross-servicio (Tempo/Grafana, ADR-008) — agregar observability:
-docker compose --env-file .env.develop --profile iam --profile observability up -d
+docker compose --env-file .env.develop --profile iam --profile observability up -d --build
 ```
+
+> **Gotcha — contenedor stale:** levantá los servicios de aplicación con `up -d --build` y, **antes de reportar un bug de deploy** (un 404, un endpoint que "no existe"), **verificá el SHA de la imagen** que corre contra el que acabás de construir (`docker compose images` / `docker inspect`). Un contenedor viejo sin reconstruir ya dio falsos 404 que parecían bugs de código.
 
 - **Acceso**: solo por el edge — `GET http://localhost:${EDGE_PORT:-18080}/iam/health` (ADR-007; el `-api` no
   se expone al host). El resto del contrato vive bajo `/iam/api/v1/...` (p. ej.
@@ -101,6 +104,46 @@ docker compose --env-file .env.develop --profile iam --profile observability up 
   Tempo, buscar por `trace_id` (se ve en las cabeceras de respuesta / logs JSON del `iam-api`, ADR-008). Un
   login + operación autorizada debe mostrarse como **una sola traza** con spans HTTP (edge → iam-api) + DB
   (Postgres) + AMQP (publicación a `iam-events` cuando corresponde, p. ej. `iam.session.started`).
+
+### Levantar notification-service local (perfil `notification`)
+
+Simétrico a `iam`. El perfil `notification` levanta `notification-api` + `notification-worker` (Go) + `rabbitmq` + `mailhog` + `traefik` (edge).
+
+```bash
+# 1. Levanta postgres + notification-api + notification-worker + rabbitmq + mailhog + traefik.
+#    --build para no correr imágenes stale (mismo gotcha que iam).
+docker compose --env-file .env.develop --profile notification up -d --build
+
+# 2. Aplicar el schema si aplica (perfil tooling)
+docker compose --env-file .env.develop --profile tooling run --rm liquibase-<modulo> update
+
+# 3. Con trazas E2E (Tempo/Grafana, ADR-008):
+docker compose --env-file .env.develop --profile notification --profile observability up -d --build
+```
+
+- **RabbitMQ — reset dirigido del volumen:** el broker se aprovisiona desde `definitions.json`, que **debe incluir `users` y `permissions`**; si falta un usuario/permiso o cambió el aprovisionamiento, **reseteá el volumen de RabbitMQ** (no el de Postgres) para que reaplique las definitions:
+
+  ```bash
+  docker compose --env-file .env.develop rm -sfv rabbitmq   # borra solo el contenedor+volumen de rabbitmq
+  docker compose --env-file .env.develop --profile notification up -d --build
+  ```
+
+  > **No uses `down -v`** para esto: borraría también el volumen de Postgres y perderías el schema/seed. Reseteá **solo** `rabbitmq`.
+- **MailHog:** captura el correo saliente del worker para inspección local (no envía a destinatarios reales).
+- **Acceso:** igual que iam, solo por el edge Traefik; los `-api` no se exponen al host.
+
+---
+
+## Gotchas de observabilidad / deploy
+
+- **OTel — el puerto depende del stack, no lo copies entre servicios.** El endpoint OTLP correcto **difiere por runtime**:
+  - **`iam` (agent Java):** `:4318` con **http/protobuf**.
+  - **`notification` (SDK Go):** `:4317` con **gRPC**.
+
+  **No copies la config OTLP de `notification` a un micro Java.** Apuntar el `iam` (Java) a `:4317` produjo `Connection reset` → **0 trazas** en Tempo, sin error visible en el arranque. Si un servicio no emite trazas, revisá primero puerto + protocolo contra su runtime.
+- **Bug del socket de Docker Desktop / WSL rompe el edge Traefik en local.** El bind-mount del socket de Docker en Docker Desktop sobre WSL no siempre expone un socket real, y el provider Docker de Traefik queda sin descubrir servicios → el edge no enruta. **Workaround:** usar el **provider `file`** de Traefik (configuración estática de rutas) en lugar del provider Docker, o correr en un entorno con socket de Docker real. **Estado: `E2-edge` no validado localmente** por este bug — el enrutado por edge se ha verificado por otras vías, no por el descubrimiento automático vía socket.
+
+---
 
 ### Puertos expuestos al host por ambiente (ADR-007)
 

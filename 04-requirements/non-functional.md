@@ -1,8 +1,10 @@
 # Requisitos No Funcionales (NFR)
 
-> Estado: 🟡 Borrador | Última actualización: 2026-06-17
+> Estado: 🟡 Borrador | Última actualización: 2026-08-28
 > Fuente: [problem-framing.md](../03-product/problem-framing.md) · [overview.md](../05-architecture/overview.md)
 > Cada NFR es verificable y tiene una métrica objetivo.
+
+> **Evidencia en `dev`.** Varios NFR ya están **ejercidos y verificados en el ambiente `dev`** por los servicios construidos (`iam-service`, `notification-service`). Se marcan abajo con **✅ Evidencia dev** y la observación concreta. El resto siguen como objetivo de diseño. Los ambientes `qa`/`staging`/`main` aún no tienen estos servicios promovidos.
 
 ## 1. Rendimiento
 
@@ -37,13 +39,14 @@
 
 | ID | Requisito | Verificación |
 |----|-----------|--------------|
-| NFR-SEC-01 | Autenticación en todos los endpoints (excepto login y reset) | Revisión de contratos; pruebas de acceso sin token → 401 |
-| NFR-SEC-02 | Autorización por feature + scope | Pruebas de acceso cruzado entre centros → 403 SCOPE_VIOLATION |
+| NFR-SEC-01 | Autenticación en todos los endpoints (excepto login y reset) | Revisión de contratos; pruebas de acceso sin token → 401 · **✅ Evidencia dev**: `iam` responde 401 a peticiones sin token |
+| NFR-SEC-02 | Autorización por feature + scope | Pruebas de acceso cruzado entre centros → 403 SCOPE_VIOLATION · **✅ Evidencia dev**: `iam` deniega por scope/centro (403) |
 | NFR-SEC-03 | Cifrado en tránsito | TLS 1.2+ en todos los canales |
 | NFR-SEC-04 | Cifrado en reposo de PII y credenciales | AES-256 a nivel de BD |
 | NFR-SEC-05 | Sin PII en logs | Auditoría de logs; solo IDs |
 | NFR-SEC-06 | Cumplimiento Ley 1581/2012 (Habeas Data) | Ver [security-threat-model.md](../05-architecture/security-threat-model.md) |
-| NFR-SEC-07 | Protección contra fuerza bruta | Bloqueo de cuenta + rate limiting |
+| NFR-SEC-07 | Protección contra fuerza bruta | Bloqueo de cuenta + rate limiting · **✅ Evidencia dev**: lockout 5/10 intentos verificado en `iam` |
+| NFR-SEC-08 | JWT verificable localmente y rotación de llaves | Clave pública publicada vía JWKS (`/.well-known/jwks.json`); rotación de llaves de firma (DEC-008) · **✅ Evidencia dev**: JWKS servido y rotación operativa en `iam` |
 
 ## 5. Mantenibilidad
 
@@ -51,7 +54,7 @@
 |----|-----------|------------------|
 | NFR-MAINT-01 | Cobertura de pruebas en servicios CORE | ≥ 80 % (scheduling, monitoring) |
 | NFR-MAINT-02 | Cobertura de pruebas en servicios SUPPORTING/GENERIC | ≥ 60 % |
-| NFR-MAINT-03 | Separación de capas (hexagonal) | Dominio sin imports de infraestructura (checklist de PR) |
+| NFR-MAINT-03 | Separación de capas (hexagonal) | Dominio sin imports de infraestructura (checklist de PR) · **✅ Evidencia dev**: `iam` con **162 tests** verdes en CI |
 | NFR-MAINT-04 | Documentación de cada servicio | README + data-model + contract + decisions |
 | NFR-MAINT-05 | Naming técnico en inglés | HALT-DB-NAMING; sin términos de dominio en español en código/contratos |
 
@@ -62,8 +65,10 @@
 | NFR-OBS-01 | Correlation ID en cada request | `X-Request-ID` propagado entre servicios |
 | NFR-OBS-02 | Logs estructurados JSON | Campos: timestamp, level, service, request_id, event |
 | NFR-OBS-03 | Métricas RED por endpoint | Rate, Errors, Duration |
-| NFR-OBS-04 | Trazas distribuidas | OpenTelemetry → Jaeger/Tempo |
+| NFR-OBS-04 | Trazas distribuidas | OpenTelemetry → Jaeger/Tempo · **✅ Evidencia dev**: trazas de `iam` visibles en Tempo |
 | NFR-OBS-05 | Auditoría de acciones de negocio | audit-service consume todos los eventos |
+| NFR-OBS-06 | Exportación OTLP por stack | Cada stack exporta a su colector según su runtime: **Java** (`iam`) por **OTLP/HTTP en `:4318`** (`http/protobuf`); **Go** (`notification`) por **OTLP/gRPC en `:4317`** · **✅ Evidencia dev** |
+| NFR-OBS-07 | Sondas de salud diferenciadas | Split **`/health`** (liveness) vs **`/ready`** (readiness con dependencias: BD + broker); un servicio no queda `ready` hasta que sus dependencias respondan · **✅ Evidencia dev** en `iam` |
 
 ## 7. Usabilidad
 
@@ -88,7 +93,7 @@
 |----|-----------|------------------|
 | NFR-REC-01 | RPO (Recovery Point Objective) | ≤ 1 h (backups incrementales) |
 | NFR-REC-02 | RTO (Recovery Time Objective) | ≤ 4 h por servicio |
-| NFR-REC-03 | Entrega de eventos garantizada | At-least-once + DLQ + Outbox (scheduling) |
+| NFR-REC-03 | Entrega de eventos garantizada | At-least-once + DLQ + Outbox (scheduling) · **✅ Evidencia dev**: outbox en `iam` (→ `iam-events`); DLQ + idempotencia por `event_id` probados en `notification` |
 | NFR-REC-04 | Inmutabilidad de auditoría | audit_record solo INSERT; retención 7 años |
 
 ---
@@ -99,7 +104,7 @@
 |-----|----------------------------------------|
 | NFR-PERF-01/02 | Read models locales en scheduling (ADR-002) + índices optimizados |
 | NFR-AVAIL-04 | Read models desacoplan scheduling de actors/environment (ADR-002) |
-| NFR-SCALE-03 | JWT stateless (sin sesión en servidor) |
+| NFR-SCALE-03 / NFR-SEC-08 | JWT stateless verificable localmente + JWKS y rotación de llaves (DEC-008) |
 | NFR-SEC-02 | RBAC por feature+scope (rbac-design.md) |
 | NFR-REC-03 | Broker con DLQ (ADR-001) + Outbox pattern |
 | NFR-PORT-01 | Adaptador de storage compatible S3 (ADR-003) |

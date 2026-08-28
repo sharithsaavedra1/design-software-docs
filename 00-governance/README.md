@@ -18,3 +18,4 @@ Reglas comunes para que todos los equipos documenten con el mismo criterio, sin 
 | [agile-conventions.md](./agile-conventions.md) | Naming de épicas, iteraciones, HUs, estatus e integración con tracker | 🟡 |
 | [definition-of-ready.md](./definition-of-ready.md) | Criterios para saber si un documento puede pasar a revisión | 🟡 |
 | [definition-of-done.md](./definition-of-done.md) | Criterios para cerrar un documento como estable | 🟡 |
+| [docs-touchpoints-matrix.md](./docs-touchpoints-matrix.md) | Qué carpeta de docs es obligatorio actualizar en cada HU y cierre de épica (guardarraíl docs-first) | 🟢 |

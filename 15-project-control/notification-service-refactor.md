@@ -1,6 +1,6 @@
 # Refactor arquitectónico — Monitoring y Notification
 
-> Estado: 🟡 En ejecución | Última actualización: 2026-08-26
+> Estado: 🟢 En cierre (casi completo) | Última actualización: 2026-08-28
 > Owner: Arquitectura / Backend / Datos / DevOps
 > Decisión: [ADR-005](../05-architecture/decisions/records/ADR-005-microservices-topology-and-transversal-capabilities.md)
 
@@ -99,13 +99,20 @@ Este endpoint **no debe implementarse bajo Monitoring**. Debe aprobarse primero 
 
 ## Criterios de cierre
 
-- [ ] No existe `notification-worker` bajo Monitoring.
-- [ ] Monitoring no expone `/sent-notifications`.
-- [ ] Monitoring no persiste `sent_notification`.
-- [ ] `monitoring.alert.triggered` es consumible por Notification mediante contrato versionado.
-- [ ] Notification posee API, worker, BD, retry/DLQ y Outbox propios.
-- [ ] `notification.notification.sent` es publicado por Notification.
-- [ ] IAM usa features `NOTIF_*`, no `MON_NOTIFICATION_*`.
-- [ ] C4/dependency map muestran ambos servicios por separado.
-- [ ] Runbooks y observabilidad asignan fallos de entrega a Notification.
-- [ ] Contract tests bloquean una reintroducción del ownership de Notification en Monitoring.
+`notification-service` está **construido y operando en `develop`** (8/8 HU Done·Dev): API + worker + BD + Outbox + retry/DLQ, consumiendo del broker RabbitMQ (validado E2E) y publicando `notification.notification.sent`. La mayoría de los criterios ya se cumplen; quedan abiertos sólo los ítems de saneamiento contractual (**TD-011**) y la bandeja de colección (**TD-012**).
+
+- [x] No existe `notification-worker` bajo Monitoring.
+- [ ] Monitoring no expone `/sent-notifications` — **pendiente en el `shared-contracts` canónico (TD-011)**; ya retirado en la documentación de Monitoring.
+- [x] Monitoring no persiste `sent_notification`.
+- [x] `monitoring.alert.triggered` es consumible por Notification mediante contrato versionado.
+- [x] Notification posee API, worker, BD, retry/DLQ y Outbox propios. *(Done·Dev)*
+- [x] `notification.notification.sent` es publicado por Notification. *(validado E2E en dev)*
+- [x] IAM usa features `NOTIF_*`, no `MON_NOTIFICATION_*`.
+- [x] C4/dependency map muestran ambos servicios por separado. *(ver [dependencies.md](./dependencies.md))*
+- [x] Runbooks y observabilidad asignan fallos de entrega a Notification. *(OTel/Tempo operativo)*
+- [ ] Contract tests bloquean una reintroducción del ownership de Notification en Monitoring — **pendiente (TD-011)**.
+
+### Pendientes de cierre
+
+- **TD-011** — completar la separación contractual en `shared-contracts`: retirar toda operación `/sent-notifications` y el evento `monitoring.notification.sent` del contrato canónico; dejar `notification.yaml` y `notification.notification.sent` como ownership exclusivo de Notification, y añadir contract tests que impidan la regresión.
+- **TD-012** — formalizar la **bandeja global** `GET /notifications` (paginación por cursor) bajo Notification, aprobada primero en `shared-contracts` (ver sección *Gap conocido* arriba).

@@ -1,6 +1,6 @@
 # Dominio
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
 Índice de la sección de dominio del sistema de Gestión de Horarios SENA. Describe el modelo del negocio: los bounded contexts, las entidades y sus invariantes, las reglas de negocio y los eventos de dominio.
