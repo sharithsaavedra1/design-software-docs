@@ -26,7 +26,7 @@ Columna **Estado** = estado agregado de la épica a nivel de fase (resumen; el d
 | **EPC-07** | Motor de horarios: construcción y conflictos | 2 | `scheduling-service` | Must | ⬜ Sólo capa `-db` |
 | **EPC-08** | Publicación y consulta de horarios | 2 | `scheduling-service` | Must | ⬜ Sólo capa `-db` |
 | **EPC-09** | Seguimiento, KPIs y alertas | 3 | `monitoring-service` | Should | ⬜ Sólo capa `-db` |
-| **EPC-09b** | Notificaciones transversales (entrega email/IN_APP) | 3 (transversal) | `notification-service` | Should | ✅ Done·Dev (8/8 HU) |
+| **EPC-09b** | Notificaciones transversales (entrega email/IN_APP) | 3 (transversal) | `notification-service` | Should | 🟡 En progreso (0/8 HU cerradas — board real; código mergeado por el PM, sin revisión ni cierre de HU) |
 | **EPC-10** | Documentos (PDFs) | 3 | `document-service` | Should | ⬜ Sólo capa `-db` |
 | **EPC-11** | Planes de mejoramiento | 3 | `monitoring`/`actors` | Should | ⬜ Sólo capa `-db` |
 | **EPC-12** | Extensiones (SOFIA Plus, IA, offline, 2FA) | 4 | varios | Won't-now | ⬜ Post-MVP |
@@ -37,7 +37,7 @@ Columna **Estado** = estado agregado de la épica a nivel de fase (resumen; el d
 
 ## Detalle por historia de usuario → board
 
-El desglose feature-por-HU (identificadores, criterios de aceptación, estado y ambiente) vive en el **board (GitHub Project #3)**, que es la SSOT viva del avance. Las HU allí usan los identificadores reales por servicio — p. ej. `HU-IAM-001..012` (identidad, épica cerrada) y `HU-NOTIF-001..008` (notificaciones, épica cerrada). Para la definición estable de requisitos ver [04-requirements/user-stories.md](../04-requirements/user-stories.md) y [functional.md](../04-requirements/functional.md); para el estado, consultar el board.
+El desglose feature-por-HU (identificadores, criterios de aceptación, estado y ambiente) vive en el **board (GitHub Project #3)**, que es la SSOT viva del avance. Las HU allí usan los identificadores reales por servicio — p. ej. `HU-IAM-001..012` (identidad, épica cerrada, 12/12 Done) y `HU-NOTIF-001..008` (notificaciones, **en progreso** — mergeado por el PM, 0/8 HU cerradas realmente en el board). Para la definición estable de requisitos ver [04-requirements/user-stories.md](../04-requirements/user-stories.md) y [functional.md](../04-requirements/functional.md); para el estado, consultar siempre el board directamente (no asumir por lo dicho aquí).
 
 > Nota: versiones previas de este documento incluían un desglose HU propio con numeración `HU-NN` que **no coincidía** con los identificadores del board; se retiró para evitar divergencia. El board manda.
 
