@@ -7,56 +7,86 @@ Este documento define cómo nombrar, estructurar y referenciar los artefactos á
 
 ## Jerarquía de artefactos
 
+El proyecto maneja **dos capas de artefactos** que conviven y se mapean entre sí:
+
+**Capa de producto** (planeación — vive en este repo de docs):
+
 ```
-Épica       EPC-NNN
-  └── Feature   FEA-NNN
-       └── Historia de usuario   HU-<PROJECT_KEY>-NNN
-            └── Criterio de aceptación   AC-NNN
-                 └── Caso de prueba   TC-NNN
+Épica de producto   EPC-NN
+  └── Feature          FEA-NNN
+       └── Historia     HU-NN            (id de planeación del backlog)
 ```
+
+**Capa de ejecución** (construcción — vive en el board GitHub Project #3, por microservicio):
+
+```
+Épica de ejecución   EP-<MICRO>-NN       (un microservicio puede tener N épicas)
+  └── Historia         HU-<MICRO>-NNN     (numeración continua por microservicio)
+       └── Criterio de aceptación   AC-NNN
+            └── Caso de prueba        TC-NNN
+```
+
+Regla puente: cada `EP-<MICRO>-NN` **realiza** una o más `EPC-NN`, y cada `HU-<MICRO>-NNN`
+traza a su requisito funcional (`RF-*`) y, cuando aplique, a su historia de planeación
+(`HU-NN`). El mapeo canónico vive en [`04-requirements/traceability-matrix.md`](../04-requirements/traceability-matrix.md).
 
 ## Naming
 
-### Project Key
+### Project Key — ⚫ Deprecado
 
-Formato: `PRJ-<DOMINIO>-<PRODUCTO>`
+El formato `PRJ-<DOMINIO>-<PRODUCTO>` y el prefijo largo de HU `HU-PRJ-SENA-HORARIOS-NNN`
+**quedan deprecados** y no se usan. Se reemplazan por los IDs por microservicio de la capa
+de ejecución (`HU-<MICRO>-NNN`). No se elimina esta nota para preservar el histórico de la
+decisión.
 
-- Identifica unívocamente el proyecto en todo el ecosistema.
-- Usado como prefijo en los IDs de HU.
-- Ejemplo: `PRJ-SENA-HORARIOS`, `PRJ-SENA-NOMINA`
+### Épicas de producto
 
-### Épicas
+Formato: `EPC-NN: Título descriptivo`
 
-Formato: `EPC-NNN: Título descriptivo`
-
-- `NNN`: número secuencial con tres dígitos (`EPC-001`, `EPC-002`…)
+- `NN`: número secuencial (`EPC-01`, `EPC-02`…). Numeración continua en todo el proyecto.
 - El título describe el objetivo de negocio, no la solución técnica.
-- Numeración continua en todo el proyecto.
+- Viven en la capa de producto ([`03-product/product-backlog.md`](../03-product/product-backlog.md)).
 
 | Ejemplo válido | Ejemplo inválido |
 |----------------|-----------------|
-| `EPC-001: Gestión de disponibilidad de instructores` | `EPIC-001: Módulo horarios` |
-| `EPC-002: Notificaciones de cambios de horario` | `EPC-2: Backend notificaciones` |
+| `EPC-01: Identidad y control de acceso` | `EPIC-1: Módulo login` |
+| `EPC-09: Seguimiento, KPIs y alertas` | `EPC-9: Backend monitoreo` |
+
+### Épicas de ejecución
+
+Formato: `EP-<MICRO>-NN: Título`
+
+- `<MICRO>`: microservicio en mayúsculas sin sufijo (`IAM`, `NOTIF`, `SCHEDULING`…).
+- `NN`: secuencial **por microservicio** (`EP-IAM-01`, `EP-IAM-02`…).
+- **Un microservicio puede tener varias épicas de ejecución.** Cada una realiza una o más
+  `EPC-NN` (ver mapeo en la matriz de trazabilidad).
+- Viven en el board GitHub Project #3.
+
+| Ejemplo válido | Ejemplo inválido |
+|----------------|-----------------|
+| `EP-IAM-01: iam-service (identidad, autenticación y autorización)` | `EP-IAM` (sin número) |
+| `EP-NOTIF-01: notification-service (entrega transversal)` | `EPC-IAM-01` (mezcla capas) |
 
 ### Features
 
 Formato: `FEA-NNN: Título`
 
-- Agrupan HUs dentro de una épica.
+- Agrupan HUs dentro de una épica de producto.
 - `NNN`: número secuencial global del proyecto.
 
 ### Historias de usuario
 
-Formato: `HU-<PROJECT_KEY>-NNN: Título`
+Las HU tienen **dos identificadores según la capa**:
 
-- `<PROJECT_KEY>`: clave del proyecto (ej: `PRJ-SENA-HORARIOS`)
-- `NNN`: número secuencial con tres dígitos, continuo en todo el proyecto.
-- El título sigue la forma: `[verbo infinitivo] [objeto] [contexto opcional]`
+- **Planeación (producto):** `HU-NN` — id del backlog en [`04-requirements/user-stories.md`](../04-requirements/user-stories.md).
+- **Ejecución (construcción):** `HU-<MICRO>-NNN` — **id canónico de trabajo**, numeración
+  continua por microservicio, en el board Project #3.
+- El título sigue la forma: `[verbo infinitivo] [objeto] [contexto opcional]`.
 
 | Ejemplo válido | Ejemplo inválido |
 |----------------|-----------------|
-| `HU-PRJ-SENA-HORARIOS-001: Consultar disponibilidad de horario` | `HU-001: Horario` |
-| `HU-PRJ-SENA-HORARIOS-042: Exportar reporte de asignaciones` | `HU-42: Feature exportar` |
+| `HU-IAM-001: Login, bloqueo por intentos y auditoría` | `HU-PRJ-SENA-HORARIOS-001` (deprecado) |
+| `HU-NOTIF-004: Resiliencia — reintentos, DLQ e idempotencia` | `HU-4: Feature reintentos` |
 
 ### Criterios de aceptación
 
@@ -103,19 +133,16 @@ Una HU no puede pasar a `Hecho` sin cumplir el [Definition of Done](./definition
 
 Usar la plantilla en [`04-requirements/_template-hu.md`](../04-requirements/_template-hu.md).
 
-## Integración con tracker externo
+## Integración con el tracker
 
-Este repositorio no duplica el contenido del tracker. En su lugar, cada documento que referencie una HU debe incluir el enlace directo al ítem en la herramienta activa del proyecto.
+El tracker del proyecto es **GitHub Project #3** (org `code-sena`):
+<https://github.com/orgs/code-sena/projects/3>. Este repositorio no duplica el contenido
+del board; cada documento que referencie una HU incluye el enlace directo a su issue.
 
-| Herramienta | Formato de enlace |
-|-------------|------------------|
-| Jira | `[HU-PRJ-XXX-NNN](https://<dominio>.atlassian.net/browse/<clave>)` |
-| Trello | `[HU-PRJ-XXX-NNN](https://trello.com/c/<id>)` |
-| GitHub Projects | `[HU-PRJ-XXX-NNN](https://github.com/<org>/<repo>/issues/<numero>)` |
-| Azure DevOps | `[HU-PRJ-XXX-NNN](https://dev.azure.com/<org>/<proyecto>/_workitems/edit/<id>)` |
-| Otra herramienta | Usar enlace directo al ítem con el formato `[HU-PRJ-XXX-NNN](<URL>)` |
-
-Reemplazar `PRJ-XXX` con el project key real. Mientras no se defina el tracker, usar `[HU-PRJ-XXX-NNN](<pendiente>)` como placeholder.
+| Artefacto | Formato de enlace |
+|-----------|------------------|
+| Épica de ejecución | `[EP-<MICRO>-NN](https://github.com/orgs/code-sena/projects/3)` o al issue de la épica |
+| Historia de usuario | `[HU-<MICRO>-NNN](https://github.com/code-sena/<repo>/issues/<numero>)` |
 
 ## Trazabilidad
 
@@ -123,7 +150,8 @@ Cada HU debe poder rastrearse hacia:
 
 | Desde | Hacia |
 |-------|-------|
-| HU | Épica (`EPC-NNN`) que la contiene |
+| HU (`HU-<MICRO>-NNN`) | Épica de ejecución (`EP-<MICRO>-NN`) que la contiene |
+| HU | Épica de producto (`EPC-NN`) que realiza |
 | HU | Feature (`FEA-NNN`) a la que pertenece |
 | HU | Sprint en que se planificó |
 | HU | Requisito funcional en `04-requirements/functional.md` |
