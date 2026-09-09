@@ -1,19 +1,24 @@
 # DevOps
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
 Índice de la sección de DevOps del sistema de Gestión de Horarios SENA. Cubre cómo se levanta el entorno local, cómo se validan y promueven los cambios, y qué ambientes existen.
 
 ## Estado real
 
-Hoy DevOps opera sobre la **capa de datos**: una base de datos **PostgreSQL 16** en **Docker** y **runners de Liquibase por módulo** que aplican las migraciones de cada repo `*-db`. No hay pipeline de aplicación (APIs/workers) porque esa capa aún no existe. Las páginas marcan lo implementado frente a lo previsto.
+El estado difiere **por ambiente**:
+
+- **`develop`** ya corre **capa de aplicación**, no solo datos: hay **perfiles de aplicación en docker-compose** que levantan dos microservicios por perfil sobre la BD compartida — `iam-api` (Java/Spring) y `notification` (api + worker, Go) — apuntando a **PostgreSQL 16** `design-software-develop` (`:15432`). El **edge Traefik** enruta `/iam/*` con `StripPrefix` (ADR-007) y hay un **stack de observabilidad vivo**: OTel Collector → Tempo/Grafana para trazas E2E cross-servicio (ADR-008). El bring-up local de estos perfiles vive en [local-setup.md](./local-setup.md); la observabilidad es HU-IAM-011 y el deploy local E2E con trazas en Tempo es HU-IAM-012.
+- **`qa` / `staging` / `main`** siguen materializando **solo la capa de datos** (PostgreSQL 16 + runners de Liquibase por módulo que aplican los changelogs de cada repo `*-db`). Los perfiles de aplicación **no** están promovidos a estos ambientes todavía.
+
+Las páginas marcan lo implementado frente a lo previsto, distinguiendo por ambiente.
 
 ## Archivos
 
 | Archivo | Descripción | Estado |
 |---------|-------------|--------|
-| [local-setup.md](./local-setup.md) | Levantar Postgres en contenedor y aplicar los changelogs de cada módulo en local | 🟡 |
+| [local-setup.md](./local-setup.md) | Levantar Postgres, aplicar changelogs por módulo y hacer bring-up de los perfiles de aplicación (`iam`, `notification`) + observabilidad en local | 🟡 |
 | [ci-cd.md](./ci-cd.md) | Pipeline previsto: validación de changelogs, PR checks, Conventional Commits y promoción por ramas (implementado vs pendiente) | 🟡 |
 | [environments.md](./environments.md) | Los 4 ambientes (`develop`/`qa`/`staging`/`main`), variables por `.env.<ambiente>` y advertencia de secretos | 🟡 |
 

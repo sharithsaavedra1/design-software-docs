@@ -12,7 +12,7 @@ halts_registrados: ninguno
 
 # Contrato — iam-api
 
-> Estado: 🟢 Aceptado | Última actualización: 2026-08-06
+> Estado: 🟢 Aceptado | Última actualización: 2026-08-27
 
 > **Fuente de verdad (normativa):** el spec OpenAPI 3.1 en
 > [`07-api/contracts/openapi/iam.yaml`](../../../../../07-api/contracts/openapi/iam.yaml).
@@ -22,6 +22,19 @@ halts_registrados: ninguno
 ## Base URL
 
 `/api/v1`
+
+---
+
+## Endpoints operacionales (fuera de `/api/v1`, HU-IAM-011)
+
+No forman parte del contrato de negocio (no están en `iam.yaml`) — son un `@RestController` propio, expuesto en la raíz del servidor de la app (no bajo `/actuator`). Detalle operativo (SLO, semántica de cada chequeo) en [runbook.md](../../runbook.md#healthcheck).
+
+| Endpoint | Uso | `200` cuando | `503` cuando |
+|----------|-----|--------------|--------------|
+| `GET /health` | Liveness probe | El proceso vive | (nunca por dependencias externas; solo si el proceso no responde) |
+| `GET /ready` | Readiness probe | BD conecta, y broker AMQP conecta *si `spring.rabbitmq.host` está configurado* | BD no conecta, o el broker configurado no conecta |
+
+Respaldan la propagación de trazas de [ADR-008](../../../../../05-architecture/decisions/records/ADR-008-observability-opentelemetry.md); no requieren `Authorization`.
 
 ---
 
@@ -92,7 +105,7 @@ Información del usuario autenticado con todos sus features calculados.
   "actor_id": "uuid-del-instructor",
   "roles": [{ "name": "INSTRUCTOR", "training_center_id": "uuid" }],
   "features": ["SCH_VIEW_OWN:OWN_SCHEDULE", "ACT_INSTRUCTOR_VIEW:OWN_PROFILE", "..."],
-  "modules": ["MOD_SCHEDULING", "MOD_ACTORS", "MOD_MONITORING"]
+  "modules": ["MOD_SCHEDULING", "MOD_ACTORS", "MOD_MONITORING", "MOD_NOTIFICATIONS"]
 }
 ```
 
@@ -119,6 +132,27 @@ Confirma el reset de contraseña con el token recibido por email.
 ```
 
 **Response 204.**
+
+### `GET /auth/.well-known/jwks.json`
+
+HU-IAM-010 E2/E3 — clave(s) pública(s) RSA para verificación local del `access_token` (RS256),
+formato JWKS estándar (RFC 7517). No requiere `Authorization`. Durante una rotación de clave
+responde con dos entradas (actual + saliente, cada una con su `kid`). Detalle completo —
+estructura del JWT, algoritmo de verificación por servicio, rotación — en
+[`authentication.md`](../../../../../07-api/authentication.md).
+
+> Este endpoint es intencionalmente **externo al OpenAPI de dominio** (`iam.yaml`): es un
+> endpoint de infraestructura de seguridad estándar (como `/actuator/health`), no un recurso
+> de negocio versionado por el contrato de `iam-api`.
+
+**Response 200:**
+```json
+{
+  "keys": [
+    { "kty": "RSA", "use": "sig", "alg": "RS256", "kid": "iam-rsa-1", "n": "...", "e": "AQAB" }
+  ]
+}
+```
 
 ---
 
@@ -292,7 +326,7 @@ Revoca un override.
 Auditoría de intentos de login sobre la tabla `audit_login`. **Solo lectura**, paginación por
 **cursor** (colección grande/continua, guidelines §6).
 
-- **Feature requerido:** `IDENTITY_AUDIT_VIEW`.
+- **Feature requerido:** `AUDIT_LOG_VIEW`.
 - **Filtros:** `user_id`, `email`, `outcome`, `from`, `to`.
 - **Inventario:** Usuarios: seguridad/administración · Frecuencia: on-demand · Formato: JSON · Fuente: `identity_audit.audit_login`.
 

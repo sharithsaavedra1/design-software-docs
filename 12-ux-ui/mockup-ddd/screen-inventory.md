@@ -26,7 +26,7 @@ halts_registrados: ninguno
 | 2 | Recuperar contraseña | anónimo | iam-mfe | ✅ |
 | 3 | Nueva contraseña (reset) | anónimo | iam-mfe | ✅ |
 | 4 | App Shell (marco por rol) | todos | shell-host | ✅ |
-| 5 | Panel de notificaciones (campana) | todos | shell-host + monitoring-mfe | ✅ |
+| 5 | Panel de notificaciones (campana) | todos | shell-host + notification-service | 🟡 Bloqueado: falta GET /notifications |
 | 6 | Estados globales (403/404/500/sesión) | todos | shell-host | ✅ |
 
 ### 02-coordinador (núcleo)
@@ -59,9 +59,9 @@ halts_registrados: ninguno
 | # | Pantalla | Tipo | MFE | Estado |
 |---|---|---|---|:--:|
 | 1 | Mi horario (semana) | calendario | scheduling-mfe | ✅ |
-| 2 | Notificaciones | lista | monitoring-mfe | ✅ |
+| 2 | Notificaciones | lista | shell-host + notification-service | 🟡 Bloqueado: falta GET /notifications |
 | 3 | Detalle de clase/sesión | detalle | scheduling-mfe | ✅ |
-| 4 | Detalle de notificación | detalle | monitoring-mfe | ✅ |
+| 4 | Detalle de notificación | detalle | shell-host + notification-service | ✅ |
 
 ### 05-administrador
 | # | Pantalla | Tipo | MFE | Estado |
@@ -115,7 +115,7 @@ halts_registrados: ninguno
 | **environment-mfe** | 3 | Disponibilidad (ambientes), Detalle de ambiente, Param: Tipos de ambiente e inventario |
 | **actors-mfe** | 4 | Disponibilidad (instructores), Mi disponibilidad, Crear excepción, Param: Estados de actores |
 | **document-mfe** | 5 | Documentos, Plantillas, Detalle+versiones, Generar, Editor plantilla |
-| **monitoring-mfe** | 7 | KPIs, Drill-down, Seguimiento, Registrar seguimiento, Notificaciones, Detalle notificación, Param: Catálogos de monitoreo |
+| **monitoring-mfe** | 5 | KPIs, Drill-down, Seguimiento, Registrar seguimiento, Param: Catálogos de monitoreo |
 | **audit-mfe** | 2 | Auditoría, Detalle de auditoría |
 | **reference-mfe** | 6 | Datos de referencia, Editar catálogo, Parametrización, CRUD catálogos, Param: Hub de parametrización, Param: Geografía institucional |
 

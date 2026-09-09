@@ -1,11 +1,13 @@
 # Calidad
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Calidad
 
 ## Contexto
 
-Esta sección define cómo se asegura la calidad del sistema **Horarios SENA**. El proyecto se construye por capas: hoy solo existe la **capa de datos** de los 9 microservicios (repos `*-db` con Liquibase + PostgreSQL 16), mientras que las capas de aplicación (API / worker / workflow en Go) aún no se han construido. Por eso la estrategia de calidad distingue explícitamente **lo que se prueba hoy** (migraciones, DDL, seeds, restauración de BD) de **lo que se probará cuando exista la capa de aplicación** (unitarias, contrato, integración, e2e).
+Esta sección define cómo se asegura la calidad del sistema **Horarios SENA**. La construcción avanza por capas y hoy conviven **dos estados** distintos: dos microservicios ya tienen **capa de aplicación construida y probada en `develop`** — `iam-service` (Java / Spring, 12/12 HU) y `notification-service` (Go, 8/8 HU) — mientras que el resto de servicios aún viven solo en su **capa de datos** (repos `*-db` con Liquibase + PostgreSQL 16). El stack es **políglota Java + Go** por decisión de arquitectura ([ADR-006](../05-architecture/decisions/records/ADR-006-polyglot-stack-strategy.md): polyglot fit-driven), no un único lenguaje.
+
+Por eso la estrategia de calidad ya distingue **tres frentes activos**: (1) la **capa de datos** de todos los servicios (migraciones, DDL, seeds, restauración de BD); (2) la **capa de aplicación viva** de `iam` y `notification` (unitarias, contrato/Pact, integración y E2E reales); y (3) lo que aún se probará cuando el resto de servicios construyan su capa de aplicación. La evidencia de lo construido vive en las páginas de servicio: [iam-service](../09-microservices/services/01-iam-service/README.md) ([decisiones](../09-microservices/services/01-iam-service/decisions.md)) y [notification-service](../09-microservices/services/10-notification-service/README.md) ([decisiones](../09-microservices/services/10-notification-service/decisions.md)).
 
 Las prácticas aquí descritas se apoyan en la gobernanza ya definida: la [Definition of Done](../00-governance/definition-of-done.md), la [Definition of Ready](../00-governance/definition-of-ready.md), las [convenciones de Git](../00-governance/git-conventions.md) (git flow `develop → qa → staging → main` y Conventional Commits) y la [estrategia de migraciones](../06-data/migration-strategy.md).
 
@@ -29,5 +31,6 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 
 ## Puntos abiertos
 
-- Selección de librerías de prueba de la capa Go (framework de test, mocks, contenedores efímeros): pendiente hasta que se inicie la construcción de la capa de aplicación.
+- **No hay CI todavía**: las suites de `iam` (~162 tests) y `notification` (unit + E2E) se ejecutan a mano; hay 3 tests de integración *flaky* en `develop` sin pipeline que los estabilice. Deuda nombrada: HU-NOTIF-009 (docs#78) para CI + gate Pact automatizado; se enlaza con [TD-010](../15-project-control/technical-backlog.md) y [ci-cd.md](../10-devops/ci-cd.md).
 - Umbral de cobertura exacto y su gate automatizado en CI: pendiente de cerrar junto con [ci-cd.md](../10-devops/ci-cd.md).
+- Selección del set de prueba para los servicios que **aún no** tienen capa de aplicación: se decidirá por stack (Java o Go, según ADR-006) al iniciar su construcción.

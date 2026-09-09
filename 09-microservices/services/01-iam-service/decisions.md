@@ -16,6 +16,7 @@
 | DEC-005 | Campo actor_id polimorfico sin FK entre servicios | 🟢 Estable |
 | DEC-006 | Tabla audit_login local sin publicacion al audit-service | 🟢 Estable |
 | DEC-007 | Separacion de first_name y last_name en lugar de full_name | 🟢 Estable |
+| DEC-008 | Distribucion de clave publica via JWKS, sin secreto compartido | 🟢 Estable |
 
 ---
 
@@ -150,3 +151,59 @@
 - La capa de presentacion construye el nombre completo concatenando ambos campos segun el formato requerido por el contexto.
 - Nombres de una sola palabra o nombres culturalmente distintos pueden requerir manejo especial en `last_name`; se acepta como caso borde menor en el contexto del sistema.
 - El ordenamiento en consultas SQL puede usar `ORDER BY last_name, first_name` directamente sin logica adicional de aplicacion.
+
+---
+
+### DEC-008: Distribucion de clave publica via JWKS, sin secreto compartido
+
+**Decision:** La clave publica RSA usada para verificar localmente los access token (RS256) se
+distribuye a traves de un endpoint JWKS estandar (`GET /api/v1/auth/.well-known/jwks.json`,
+RFC 7517), publicado por el propio iam-service y sin autenticacion. La rotacion se soporta
+publicando dos entradas simultaneas (clave actual + clave saliente, cada una con su `kid`
+propio) durante la ventana de transicion, en vez de gestionar un secreto compartido fuera de
+banda.
+
+**Contexto:** DEC-001 establece que el edge y los servicios downstream verifican el JWT
+localmente sin llamar a IAM en cada peticion (ver [authentication.md](../../../07-api/authentication.md)).
+Eso requiere que la clave publica de verificacion llegue a cada verificador (Traefik en el
+edge, ADR-007, y cada `-api` de dominio) de forma que (a) no dependa de coordinacion manual de
+despliegue entre servicios y (b) permita rotar la clave de firma sin downtime ni caida masiva
+de tokens validos.
+
+**Alternativas consideradas:**
+- **Secreto compartido gestionado por configuracion (la misma clave publica como variable de
+  entorno en cada servicio consumidor):** Funciona, pero cada rotacion exige actualizar y
+  redesplegar N servicios en el orden correcto (o coordinar una ventana de doble clave a mano
+  vía config), y el secreto vive duplicado en tantos lugares como consumidores. Descartado
+  como mecanismo primario porque reintroduce el problema de coordinacion entre despliegues
+  independientes que DEC-001 buscaba evitar; es aceptable solo como *fallback* cuando un
+  consumidor no puede resolver HTTP hacia iam en tiempo de arranque (ver Consecuencias).
+- **mTLS entre iam y cada consumidor para servir la clave punto a punto:** Anade una PKI
+  operativa completa (certificados por servicio, rotacion de los certificados mismos) para un
+  problema que JWKS ya resuelve como estandar sin infraestructura adicional. Sobre-ingenieria
+  para el tamano actual del sistema.
+- **JWKS estandar, sin autenticacion, con soporte de `kid` para rotacion (decision adoptada):**
+  Cada verificador simplemente hace `GET` al endpoint (con cache local por TTL) y resuelve la
+  clave por `kid` del header del token. Es el mecanismo que las librerias JWT de todos los
+  stacks del sistema (ADR-006, polyglot) ya soportan de fabrica, sin codigo custom de
+  distribucion de secretos.
+
+**Consecuencias:**
+- El endpoint JWKS es publico (sin `Authorization`): un verificador no puede depender de un
+  token valido para obtener la clave con la que validarlo. No expone informacion sensible: solo
+  la mitad publica de la clave de firma.
+- La rotacion es: generar el par nuevo, desplegar iam-service con `IAM_JWT_PRIVATE_KEY`/`IAM_JWT_KEY_ID`
+  nuevos y `IAM_JWT_PREVIOUS_PUBLIC_KEY`/`IAM_JWT_PREVIOUS_KEY_ID` apuntando al par saliente;
+  ambas claves quedan publicadas en JWKS durante la ventana de transicion. Pasado el TTL del
+  access token (15 min) desde el corte, se retira la clave saliente de la configuracion. No
+  requiere redespliegue de los servicios consumidores.
+- Cadencia de rotacion: trimestral (ver tabla de configuracion de seguridad en
+  [authentication.md](../../../07-api/authentication.md)), o inmediata ante sospecha de
+  compromiso de la clave privada.
+- Cada verificador debe cachear el JWKS (por `kid`) en vez de resolverlo en cada request, para
+  no convertir el endpoint en un punto de fallo sincrono equivalente a llamar a IAM por
+  peticion — el mismo problema que DEC-001 evita para la verificacion del token en si.
+- Si un consumidor no puede alcanzar el endpoint HTTP de iam en su entorno (p. ej. una rotacion
+  de infraestructura donde el descubrimiento de servicios aun no esta disponible), el secreto
+  compartido por configuracion sigue disponible como mecanismo de respaldo manual, gestionado
+  por config (no hardcodeado), documentado pero no es el camino primario.

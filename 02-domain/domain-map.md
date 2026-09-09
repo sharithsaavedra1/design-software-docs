@@ -1,6 +1,6 @@
 # Mapa de Dominio — SENA Gestión de Horarios
 
-> Estado: 🟡 Borrador | Última actualización: 2026-06-17
+> Estado: 🟡 Borrador | Última actualización: 2026-08-28
 > Fuente: análisis M1-M9 · DDD Strategic Design
 > Relacionado: [entities-and-rules.md](./entities-and-rules.md) · [pattern-guide.md](../05-architecture/pattern-guide.md)
 
@@ -25,6 +25,7 @@ En DDD, no todos los subdominios tienen el mismo valor estratégico. Esta clasif
 | Datos de referencia | GENERIC | reference-data-service | Catálogos y jerarquía; CRUD estándar |
 | Documentos | GENERIC | document-service | Generación de PDFs; patrón conocido |
 | Auditoría | GENERIC | audit-service | Log append-only; patrón estándar |
+| Notificaciones | GENERIC (transversal) | notification-service | Micro transversal extraído de monitoring (ADR-005); consume eventos y entrega notificaciones con idempotencia + DLQ |
 
 **Implicación**: el mayor esfuerzo de diseño y pruebas debe concentrarse en `scheduling-service` y `monitoring-service` (CORE). Los contextos GENERIC pueden usar implementaciones más directas.
 
@@ -40,9 +41,9 @@ Notación de patrones de relación DDD:
 ```
                         ┌──────────────────────┐
                         │     iam-service       │
-                        │  (OHS - emite JWT)    │  U
+                        │ (OHS - emite JWT RS256)│  U
                         └───────────┬───────────┘
-                                    │ JWT (Published Language)
+                                    │ JWT RS256 (PL) — verificado local vía JWKS
               ┌─────────────────────┼─────────────────────┐
               │ todos los servicios consumen identidad     │ D
               ▼                                            ▼
@@ -73,6 +74,13 @@ Notación de patrones de relación DDD:
          │  document-service    │      │   audit-service      │
          │  (D - consume events)│      │ (D - consume TODO)   │
          └──────────────────────┘      └──────────────────────┘
+
+         ┌────────────────────────────────────────────────────┐
+         │           notification-service (TRANSVERSAL)        │
+         │  (D - consume monitoring.*/scheduling.*/iam.* con   │
+         │   idempotencia por event_id + DLQ; publica          │
+         │   notification.notification.sent)                   │
+         └────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -81,7 +89,8 @@ Notación de patrones de relación DDD:
 
 | Upstream (U) | Downstream (D) | Patrón | Mecanismo | Descripción |
 |--------------|----------------|--------|-----------|-------------|
-| iam-service | Todos | OHS + Published Language | JWT firmado | iam publica identidad y features en un formato estándar (JWT) que todos consumen |
+| iam-service | Todos | OHS + Published Language | JWT RS256 verificado vía JWKS | iam publica identidad y features como JWT firmado con RS256; edge y servicios **verifican localmente** con las claves públicas de JWKS (`/.well-known/jwks.json`), sin llamada síncrona a iam. La rotación de clave se gestiona por JWKS (DEC-008) |
+| monitoring/scheduling/iam (emisores) | notification-service | Customer-Supplier (consumer transversal) | Eventos → notificación | notification-service consume eventos de dominio (alertas, publicaciones, identidad) y entrega notificaciones con idempotencia por `event_id` + DLQ; publica `notification.notification.sent` |
 | reference-data-service | academic, actors, environment | Conformist | API REST + caché | Los consumidores aceptan el modelo de catálogos tal cual; no lo traducen |
 | academic-management-service | scheduling-service | Customer-Supplier | API REST (sync puntual) | scheduling valida fichas/competencias contra academic al crear borrador |
 | academic-management-service | actors-service | Customer-Supplier | Evento `academic.competency.updated` | actors actualiza sus referencias de competencia |

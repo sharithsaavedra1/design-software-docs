@@ -58,7 +58,7 @@ provistos por **varios micro-frontends**. Espeja el backend: 9 microservicios (d
 | **training-environment-mfe** | training-environment-service | **Disponibilidad de ambientes**, gestión de ambientes/reservas | 02-coordinador |
 | **actors-mfe** | actors-service | Instructores/aprendices, **Mi disponibilidad** (instructor) | 02-coordinador, 03-instructor |
 | **document-mfe** | document-service | **Documentos**, **Plantillas de documento** | 06-backoffice |
-| **monitoring-mfe** | monitoring-service | **Panel de indicadores (KPIs)**, **Notificaciones**, **Seguimiento de ficha** | 05-administrador, 03-instructor, 04-aprendiz |
+| **monitoring-mfe** | monitoring-service | **Panel de indicadores (KPIs)**, **Seguimiento de ficha** | 05-administrador, 03-instructor, 04-aprendiz |
 | **audit-mfe** | audit-service | **Auditoría** (traza) | 06-backoffice |
 | **reference-data-mfe** | reference-data-service | **Parametrización / catálogos**, **Datos de referencia** (regionales/centros/sedes) | 05-administrador, 06-backoffice |
 

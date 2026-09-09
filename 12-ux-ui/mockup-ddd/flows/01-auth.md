@@ -180,21 +180,18 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
   toda ruta autenticada, montado por el App Shell — Pantalla 4). **Ver todas** navega a la
   pantalla de lista **Notificaciones** del rol (p. ej. `/notificaciones` para Aprendiz, ver
   [flows/04-aprendiz.md — Pantalla 2](../flows/04-aprendiz.md); equivalente en Instructor/Administrador
-  vía `monitoring-mfe`).
+  vía `shell-host` con capacidades de `notification-service`; el listado completo permanece bloqueado
+  hasta que exista el contrato de `GET /notifications`).
 - **Rol:** cualquier usuario autenticado · **HU:** pendiente (deriva de `navigation-map.md`, el
   ícono de notificaciones del top bar ya descrito en Pantalla 4).
-- **Endpoint:** `GET /api/v1/sent-notifications?recipient_id={jwt.sub}&channel=IN_APP&limit=5`
-  (`07-api/contracts/openapi/monitoring.yaml`) → primera página por **cursor** (widget = **top N**,
-  sin paginación — ver anti-patrón #3 de [README.md](../README.md)), `x-required-feature:
-  MON_NOTIFICATION_VIEW` (mismo gap documentado en `flows/04-aprendiz.md` GAP-2: el feature no
-  figura aún en la matriz de `rbac-design.md`).
+- **Endpoint:** pendiente de `GET /notifications` en `notification.yaml`; no usar `/sent-notifications`
+  de Monitoring. El widget no se implementa hasta formalizar la colección de bandeja y su paginación.
 - **Modelo:** `SentNotification { id, generated_alert_id, recipient_id, recipient_email, channel,
   subject, body_summary, send_status, failure_reason, sent_at, created_at }`
   (`monitoring-service data-model.md`). **Nota de precisión:** no existe campo leído/no leído —
   solo `send_status` (`PENDING`/`SENT`/`FAILED`), igual que en la pantalla de lista.
-- **MFE:** `shell-host` (contenedor: icono + badge + overlay en el top bar) que **monta el widget**
-  de `monitoring-mfe` (dueño de los datos/tarjetas de notificación) — ver
-  [micro-frontends.md](../micro-frontends.md).
+- **MFE:** `shell-host` (contenedor: icono + badge + overlay en el top bar); los datos pertenecen a
+  `notification-service`, no a `monitoring-mfe`.
 
 **Propósito:** dar acceso rápido, desde cualquier pantalla, a los avisos más recientes del usuario
 (cambios de horario, alertas) sin abandonar el contexto actual, con salida a la bandeja completa.
@@ -209,9 +206,9 @@ Notificaciones. Cierra al hacer clic fuera o con `Esc` (navegable por teclado).
 **Acciones:**
 | Control | Endpoint | Resultado |
 |---|---|---|
-| Icono de notificaciones | `GET /sent-notifications?...&limit=5` | abre/cierra el dropdown; recarga el top 5 |
+| Icono de notificaciones | Pendiente: `GET /notifications?...&limit=5` | no habilitar el dropdown hasta aprobar el contrato |
 | Ver todas | — (navegación) | cierra el dropdown → navega a la pantalla de lista Notificaciones (monitoring, pagina por cursor) |
-| Clic en una tarjeta del dropdown | `GET /sent-notifications/{id}` | navega al detalle de esa notificación (misma pantalla de detalle que la lista completa) |
+| Clic en una tarjeta del dropdown | Pendiente: `GET /notifications/{id}` | navegará al detalle cuando exista la colección de bandeja |
 
 **Estados:** *loading* (skeleton de 5 filas dentro del overlay) · *empty* ("No tienes
 notificaciones nuevas" dentro del overlay, sin lista) · *error* (texto inline + icono "No pudimos
