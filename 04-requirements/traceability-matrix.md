@@ -1,15 +1,17 @@
 # Matriz de Trazabilidad
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 > Fuente: [functional.md](./functional.md) · [user-stories.md](./user-stories.md) · [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md)
+
+> **Dos esquemas de IDs.** Las historias `HU-01..HU-23` de las matrices originales son los IDs **de planeación** del backlog. La construcción real se ejecuta con IDs propios por épica: **`HU-IAM-001..012`** (épica **EP-IAM**, issue docs#79; issues docs#80–#91) y **`HU-NOTIF-001..008`** (épica **EP-NOTIF**). La sección [Matriz de ejecución real](#matriz-de-ejecución-real-construido) mapea estos IDs reales a sus RF, servicio y estado. El estado vivo por historia vive en **GitHub Project #3**; este `.md` es la SSOT de la trazabilidad HU↔RF.
 
 ## Propósito
 
 Relaciona cada **requisito funcional (RF-*)** con la **historia de usuario (HU-*)** que lo motiva, el **servicio/módulo** dueño, la **regla de negocio (RN-*)** que lo gobierna y la **decisión de arquitectura (ADR)** aplicable. Permite verificar cobertura: que ningún RF quede sin historia ni sin dueño, y que cada decisión de arquitectura respalde requisitos reales.
 
-Leyenda de servicios: `iam`, `reference-data`, `academic-management`, `training-environment`, `scheduling` (**CORE**), `actors`, `document`, `monitoring` (**CORE**), `audit`.
+Leyenda de servicios: `iam`, `reference-data`, `academic-management`, `training-environment`, `scheduling` (**CORE**), `actors`, `document`, `monitoring` (**CORE**), `notification`, `audit`.
 
 ---
 
@@ -54,6 +56,69 @@ Leyenda de servicios: `iam`, `reference-data`, `academic-management`, `training-
 | RF-AUD-01 | (transversal, todas) | `audit-service` | RN-CROSS-01 | ADR-001 | EPC-02 |
 | RF-AUD-02 | (transversal) | `audit-service` / broker | RN-CROSS-01 | ADR-001 | EPC-02 |
 | RF-AUD-03 | (transversal) | todos | RN-CROSS-01..05 | ADR-004 | EPC-02 |
+
+> Las historias `HU-16/17/18` mapeadas arriba a `RF-IAM-*` son IDs **de planeación**; la implementación real de `iam` se ejecutó con `HU-IAM-001..012` (ver siguiente sección). `HU-16/17/18` quedan como referencia histórica del backlog.
+
+---
+
+## Matriz de ejecución real (construido)
+
+Historias efectivamente construidas y verificadas en el ambiente **`dev`**. Estado por historia en **GitHub Project #3** (aquí se fija la trazabilidad HU real ↔ RF). Ningún servicio de estas épicas está promovido a `qa`/`staging`/`main` todavía.
+
+### EP-IAM — `iam-service` (épica issue docs#79) · 12/12 Done·Dev
+
+| HU real | RF | Capacidad construida | Servicio | Issue | Estado |
+|---------|----|----------------------|----------|-------|--------|
+| HU-IAM-001 | RF-IAM-01, RF-IAM-05 | Login + lockout 5/10 + `audit_login` + `GET /auth/me` | `iam-service` | docs#80 | ✅ Done·Dev |
+| HU-IAM-002 | RF-IAM-06 | Refresh / logout / listar y revocar sesiones (access 15 m / refresh 7 d) | `iam-service` | docs#81 | ✅ Done·Dev |
+| HU-IAM-003 | RF-IAM-02 | Contraseña temporal 72 h + reset | `iam-service` | docs#82 | ✅ Done·Dev |
+| HU-IAM-004 | RF-IAM-03 | Catálogo RBAC (módulos / features / roles) | `iam-service` | docs#83 | ✅ Done·Dev |
+| HU-IAM-005 | RF-IAM-03 | Gestión de usuarios + asignación de roles (scope / centro) | `iam-service` | docs#84 | ✅ Done·Dev |
+| HU-IAM-006 | RF-IAM-03 | Autorización por feature + scope / centro | `iam-service` | docs#85 | ✅ Done·Dev |
+| HU-IAM-007 | RF-IAM-07 | Eventos de dominio vía outbox → `iam-events` | `iam-service` | docs#86 | ✅ Done·Dev |
+| HU-IAM-008 | RF-IAM-04 | Provisión usuario ↔ actor: emite `iam.user.created` con `actor_type`/`actor_id` (invariante); **saga E3 diferida** a `actors-service` | `iam-service` | docs#87 | ⚠️ Parcial·Dev (lado iam Done) |
+| HU-IAM-009 | RF-IAM-08 | Reporte `GET /reports/login-audit` (paginación por cursor) | `iam-service` | docs#88 | ✅ Done·Dev |
+| HU-IAM-010 | RF-IAM-09 | JWT claims + JWKS `/.well-known/jwks.json` + rotación (DEC-008) | `iam-service` | docs#89 | ✅ Done·Dev |
+| HU-IAM-011 | NFR-OBS-04/06/07 | Observabilidad OTel + health (`/health`, `/ready`) | `iam-service` | docs#90 | ✅ Done·Dev |
+| HU-IAM-012 | (E2E integración local) | Servicio levantado localmente y probado E2E | `iam-service` | docs#91 | ✅ Done·Dev |
+
+### EP-NOTIF — `notification-service` (extraído de `monitoring`, ADR-005) · 8/8 Done·Dev
+
+| HU real | RF | Capacidad construida | Servicio | Estado |
+|---------|----|----------------------|----------|--------|
+| HU-NOTIF-001 | RF-NOTIF-01 | Envío por API asíncrono → `202 Accepted` | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-002 | RF-NOTIF-02 | Entrega dirigida por evento (consumo del broker) | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-003 | RF-NOTIF-03 | Canales `EMAIL` / `IN_APP` | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-004 | RF-NOTIF-04 | Resiliencia: retry + DLQ + idempotencia por `event_id` | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-005 | RF-NOTIF-05 | Plantillas de notificación | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-006 | RF-NOTIF-06 | Consulta `GET` de notificaciones | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-007 | RF-NOTIF-07 | Observabilidad (OTel, `/health`, `/ready`) | `notification-service` | ✅ Done·Dev |
+| HU-NOTIF-008 | RF-NOTIF-07 | Publica `notification.notification.sent` al entregar | `notification-service` | ✅ Done·Dev |
+
+### Cobertura inversa (ejecución real): HU real → RF
+
+| Historia real | RF que la implementan | Servicio |
+|---------------|-----------------------|----------|
+| HU-IAM-001 | RF-IAM-01, RF-IAM-05 | `iam-service` |
+| HU-IAM-002 | RF-IAM-06 | `iam-service` |
+| HU-IAM-003 | RF-IAM-02 | `iam-service` |
+| HU-IAM-004 | RF-IAM-03 | `iam-service` |
+| HU-IAM-005 | RF-IAM-03 | `iam-service` |
+| HU-IAM-006 | RF-IAM-03 | `iam-service` |
+| HU-IAM-007 | RF-IAM-07 | `iam-service` |
+| HU-IAM-008 | RF-IAM-04 | `iam-service` |
+| HU-IAM-009 | RF-IAM-08 | `iam-service` |
+| HU-IAM-010 | RF-IAM-09 | `iam-service` |
+| HU-IAM-011 | NFR-OBS-04/06/07 | `iam-service` |
+| HU-IAM-012 | (E2E, sin RF único) | `iam-service` |
+| HU-NOTIF-001 | RF-NOTIF-01 | `notification-service` |
+| HU-NOTIF-002 | RF-NOTIF-02 | `notification-service` |
+| HU-NOTIF-003 | RF-NOTIF-03 | `notification-service` |
+| HU-NOTIF-004 | RF-NOTIF-04 | `notification-service` |
+| HU-NOTIF-005 | RF-NOTIF-05 | `notification-service` |
+| HU-NOTIF-006 | RF-NOTIF-06 | `notification-service` |
+| HU-NOTIF-007 | RF-NOTIF-07 | `notification-service` |
+| HU-NOTIF-008 | RF-NOTIF-07 | `notification-service` |
 
 ---
 

@@ -102,7 +102,7 @@ Coordinador
                             │
                             ├─▶ [monitoring-service] consume → actualiza estado seguimiento ficha
                             ├─▶ [audit-service] consume → registra evento de auditoría
-                            └─▶ [notification-worker en monitoring-service] → notifica a instructor/aprendiz
+                            └─▶ [notification-service / notification-worker] → notifica a instructor/aprendiz
 ```
 
 ### Flujo 2 — Consultar horario (instructor)

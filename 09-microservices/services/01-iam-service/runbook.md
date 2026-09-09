@@ -1,36 +1,97 @@
 # Runbook — iam-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
-> Puerto: 8001 | SLO: 99.9 % uptime | Criticidad: P0 (servicio de entrada — ningún otro servicio autentica sin él)
+> Estado: 🟢 Estable | Última actualización: 2026-08-28 (HU-IAM-012)
+> Puerto: `8080` interno (contenedor), **no expuesto al host** — se accede vía edge Traefik en `/iam/*` (ADR-007) | SLO: 99.9 % uptime | Criticidad: P0 (servicio de entrada — ningún otro servicio autentica sin él)
+
+> Esta versión reemplaza el borrador previo (2026-06-20), que documentaba un diseño no
+> implementado (`JWT_SECRET` HMAC + Redis para revocación). La implementación real
+> (HU-IAM-001..011) usa **RS256 + JWKS** y **no tiene Redis**; ver
+> [decisions.md](./decisions.md) DEC-001/DEC-008 y [authentication.md](../../../07-api/authentication.md).
 
 ---
 
 ## Healthcheck
 
-| Endpoint | Método | Respuesta esperada | Cuándo falla |
-|----------|--------|--------------------|--------------|
-| `GET /health` | GET | `200 { "status": "ok" }` | Proceso caído o sin red |
-| `GET /health/ready` | GET | `200 { "status": "ready", "db": "ok", "redis": "ok" }` | BD o Redis no conectan |
+> Actualizado en HU-IAM-011 (implementación) y HU-IAM-012 (acceso vía edge). El servicio expone
+> un `HealthController` propio (`co.sena.iam.adapter.in.rest`) — **no** Spring Boot Actuator: la
+> app también tiene `management.endpoints.web.exposure.include: health,info` habilitado, pero
+> `/health` y `/ready` a continuación son el contrato real que opera el healthcheck de
+> orquestación, no `/actuator/health`.
 
-**SLO**: `GET /health` debe responder en < 200 ms (p99). `GET /health/ready` en < 500 ms (p99).
+| Endpoint (interno, en el contenedor) | Vía edge (`docker-infra`, perfil `iam` + Traefik, ADR-007) | Respuesta esperada | Cuándo falla |
+|---|---|---|---|
+| `GET /health` | `GET http://localhost:${EDGE_PORT}/iam/health` | `200 { "status": "UP" }` — liveness (el proceso vive) | Proceso caído o sin red |
+| `GET /ready` | `GET http://localhost:${EDGE_PORT}/iam/ready` | `200 { "status": "READY", "db": "ok"[, "broker": "ok"] }` | BD no conecta, o el broker configurado no conecta → `503 { "status": "NOT_READY", "db": "ok"\|"down"[, "broker": "down"] }` |
 
-`/health` responde aunque BD y Redis estén caídos — indica que el proceso vive.
-`/health/ready` devuelve `503` si la BD no conecta. Si solo Redis falla, devuelve `200` con `"redis": "degraded"` porque el servicio sigue autenticando (sin revocación de tokens).
+**SLO**: `GET /health` debe responder en < 200 ms (p99). `GET /ready` en < 500 ms (p99).
+
+`/health` responde `200` aunque la BD o el broker estén caídos — solo indica que el proceso vive (no depende de
+ninguna dependencia externa). `/ready` ejecuta `SELECT 1` contra Postgres (siempre — sin BD el servicio no
+puede autenticar) y, **solo si `spring.rabbitmq.host` está configurado**, comprueba también el broker del
+outbox relay de HU-IAM-007 (`BrokerHealthConfiguration` → `BrokerReadinessProbe`, gateado igual que el relay;
+si está intencionalmente apagado, `/ready` no depende de un broker inexistente y el campo `broker` no aparece
+en la respuesta). `503` si algún chequeo incluido falla.
+
+Ni `/health` ni `/ready` están en el contrato de negocio (`contracts/openapi/iam.yaml`, que vive bajo
+`/api/v1/*`): son endpoints de infraestructura en la raíz de la app. Por eso en el edge **no hace falta
+ninguna regla especial**: el router `/iam` con `StripPrefix` que enruta el resto del contrato
+(`/iam/api/v1/auth/login` → `/api/v1/auth/login`) ya deja `/iam/health` → `/health` y `/iam/ready` → `/ready`
+correctamente — sin `ReplacePath` ni un router de mayor prioridad.
+
+Un broker caído pone `/ready` en `503` (con `"broker": "down"`) pero **no bloquea el login**: el outbox relay
+(HU-IAM-007) solo publica a `iam-events` cuando el broker está disponible; si no lo está, los eventos se
+quedan **acumulados sin pérdida** en `identity.outbox` hasta que el broker vuelve (patrón Outbox, ver
+[ADR-001](../../../05-architecture/decisions/records/ADR-001-message-broker.md)).
+
+---
+
+## Observabilidad (OTel — HU-IAM-011)
+
+- **Traces**: OTel Java agent (auto-instrumentación, zero-code) — spans HTTP (Spring MVC) + spans de BD (JDBC/Hibernate), correlacionados por `trace_id`. Se activa vía `-javaagent` en el `Dockerfile` (imagen ya lo descarga en build); se configura 100 % por variables de entorno, sin secretos:
+
+  | Variable | Ejemplo | Descripción |
+  |----------|---------|-------------|
+  | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://otel-collector:4318` | Endpoint OTLP del Collector del ambiente. |
+  | `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | El agent Java exporta OTLP por `http/protobuf` (puerto `4318`), no gRPC (`4317`) — usar gRPC en `4317` da `Connection reset`. Verificado en docker-infra (HU-IAM-012 fix). |
+  | `OTEL_SERVICE_NAME` | `iam-api` | Fija `service.name` explícito (mismo patrón que `notification-api`/`notification-worker` en `docker-infra`), aunque el agent también lo infiere de `spring.application.name`. |
+  | `OTEL_RESOURCE_ATTRIBUTES` | `deployment.environment=develop` | Alinea `deployment.environment` por ambiente (ADR-008 §6). |
+
+  Ninguna es obligatoria para arrancar: sin `OTEL_EXPORTER_OTLP_ENDPOINT` el agent simplemente no exporta (no rompe el arranque).
+
+- **Logs**: JSON estructurado (logback + `logstash-logback-encoder`) por stdout. El agent OTel inyecta `trace_id`/`span_id` en el MDC cuando hay un span activo; el encoder JSON los embebe en cada línea, permitiendo saltar de una traza en Tempo a sus logs en Loki (panel único en Grafana, ADR-008).
+
+- **Métricas**: fuera de alcance de HU-IAM-011.
 
 ---
 
 ## Variables de entorno requeridas
 
-| Variable | Tipo | Ejemplo | Descripción |
-|----------|------|---------|-------------|
-| `JWT_SECRET` | string | `s3cr3t-256-bits` | Clave HMAC-SHA256 para firma de tokens. Mínimo 32 caracteres. Rotar sin downtime según procedimiento de rotación. |
-| `JWT_EXPIRY_MINUTES` | int | `15` | Vida útil del access token. Recomendado: 15 min para producción. |
-| `DB_URL` | string | `postgresql://iam:pass@db:5432/iam_db` | Connection string a `iam_db` en PostgreSQL. Debe incluir pool params en producción (`?pool_max=10`). |
-| `REDIS_URL` | string | `redis://redis:6379/0` | URL de Redis usado como lista de revocación de refresh tokens. Si no está disponible el servicio opera en modo degradado. |
-| `BCRYPT_COST` | int | `12` | Factor de costo para hashing de contraseñas. Valor mínimo: 12. Aumentar solo en hardware con mayor capacidad de cómputo; impacta latencia de login. |
-| `MAX_LOGIN_ATTEMPTS` | int | `5` | Intentos fallidos antes del bloqueo corto (15 min). A los 10 intentos el bloqueo es 24 h. Ver reglas en `data-model.md`. |
+Sin defaults de secreto: si falta una obligatoria, el servicio **debe fallar al arrancar**, nunca arrancar con
+un valor adivinable.
 
-> Variables adicionales recomendadas (no obligatorias al arrancar): `LOG_LEVEL`, `PORT` (default `8001`), `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`.
+| Variable | Obligatoria | Ejemplo | Descripción |
+|----------|:---:|---------|-------------|
+| `IAM_DB_DSN` | Sí | `jdbc:postgresql://postgres:5432/design-software-develop` | JDBC URL a la BD compartida (schemas `identity`/`identity_audit`/`session`/`rbac`/`rbac_catalog`). |
+| `IAM_DB_USERNAME` | Sí | `design_software_app` | Usuario de aplicación least-privilege (`iam_writer`, ver `docker-infra/create-app-user.sh`). |
+| `IAM_DB_PASSWORD` | Sí | — | Password del usuario de aplicación. |
+| `IAM_JWT_PRIVATE_KEY` | Sí | PEM o base64 PKCS#8 de una clave RSA | Clave privada RS256 para firmar access tokens. El servicio **rehúsa arrancar** sin ella. La pública se deriva y se publica en JWKS — nunca se configura por separado. |
+| `IAM_JWT_ISSUER` | Sí | `https://iam.design-software.local` | Claim `iss` de los tokens emitidos; los verificadores downstream lo validan. |
+| `IAM_JWT_KEY_ID` | No (default `iam-rsa-1`) | `iam-rsa-2026-08` | `kid` publicado en JWKS para esta clave. |
+| `IAM_JWT_PREVIOUS_PUBLIC_KEY` / `IAM_JWT_PREVIOUS_KEY_ID` | No | — | Solo durante una ventana de rotación (DEC-008): clave pública saliente + su `kid`, para que JWKS siga publicando ambas hasta que expiren los tokens firmados con la anterior (≤ 15 min). |
+| `SPRING_RABBITMQ_HOST` | No* | `rabbitmq` | Host del broker. **Si no está seteada, el outbox relay queda apagado** (no publica; los eventos se acumulan en `identity.outbox`) — no es un fallo de arranque. |
+| `SPRING_RABBITMQ_USERNAME` / `SPRING_RABBITMQ_PASSWORD` | Solo si `SPRING_RABBITMQ_HOST` está seteada | `app` / `app` | Credenciales del broker (perfil `broker`/`iam` de docker-infra). |
+| `SPRING_RABBITMQ_PORT` / `SPRING_RABBITMQ_VIRTUAL_HOST` | No | `5672` / `/` | Solo si se desvían de los defaults de Spring AMQP. |
+| `IAM_EVENTS_EXCHANGE` | No (default `iam-events`) | `iam-events` | Exchange topic (declarado como bean idempotente al arrancar — no depende de `definitions.json` del broker). |
+| `IAM_OUTBOX_RELAY_POLL_INTERVAL_MS` / `_INITIAL_DELAY_MS` / `_BATCH_SIZE` | No | `5000` / `5000` / `100` | Tuning del poller del relay. |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` / `OTEL_EXPORTER_OTLP_PROTOCOL` | No (recomendado en todo ambiente con observabilidad) | `http://otel-collector:4318` / `http/protobuf` | Endpoint OTLP del Collector (ADR-008). Sin esto, el OTel Java agent no exporta (no falla el arranque). |
+| `OTEL_SERVICE_NAME` | No (default lo toma del agente) | `iam-api` | Nombre del servicio en las trazas/métricas. |
+
+> \* Al menos en `develop`/`qa`/`staging`/`main` se espera el broker configurado (perfil `iam` de docker-infra
+> lo trae por defecto) para que HU-IAM-007 (eventos → `iam-events`) funcione E2E; queda opcional a nivel de
+> arranque solo para no acoplar los tests de slice/IT que no requieren broker.
+
+**Cómo levantarlo en local (docker-infra, perfil `iam`)**: ver
+[10-devops/local-setup.md](../../../10-devops/local-setup.md) §Perfil `iam`.
 
 ---
 
@@ -38,11 +99,11 @@
 
 | Alerta | Condición de disparo | Severidad | Impacto si no se atiende | Acción inmediata |
 |--------|---------------------|-----------|--------------------------|------------------|
-| **BD no responde** | Timeout > 5 s al conectar a `iam_db` o `GET /health/ready` devuelve `503` | P0 | Ningún usuario puede autenticarse. Todo el sistema queda bloqueado. | 1. Verificar estado del pod PostgreSQL. 2. Revisar logs de BD. 3. Si la BD está healthy, verificar `DB_URL` y red interna. 4. Si persiste > 5 min, escalar a infra. |
-| **Redis no responde** | Timeout > 2 s al conectar a Redis o `GET /health/ready` devuelve `"redis": "degraded"` | P1 | El servicio sigue autenticando. Los refresh tokens emitidos durante la caída **no podrán revocarse** hasta que Redis vuelva. Alertar. | 1. Verificar estado del pod Redis. 2. Revisar `REDIS_URL`. 3. Monitorear ventana de tokens no-revocables. 4. Si Redis no vuelve en 30 min, evaluar invalidación forzada de todas las sesiones activas en BD (`is_revoked = true` masivo). |
-| **Error rate > 5 % en 5 min** | Más del 5 % de requests a `/auth/*` retornan 5xx en ventana deslizante de 5 min | P1 | Degradación del flujo de autenticación para usuarios activos. | 1. Revisar logs de errores (`grep "ERROR\|FATAL"` en stdout del contenedor). 2. Verificar conectividad a BD y Redis. 3. Si el error es de pool agotado, escalar réplicas o reiniciar. |
-| **JWT_SECRET necesita rotación** | El secreto lleva > 90 días sin rotar, o existe sospecha de compromiso | P0 | Si el secreto está comprometido, un atacante puede emitir tokens válidos arbitrarios para cualquier rol. | Ver procedimiento completo en **Rotación de JWT_SECRET** más abajo. No reiniciar el servicio sin seguir ese procedimiento; un reinicio simple invalida todas las sesiones activas. |
-| **Account lockout masivo** | > 20 cuentas bloqueadas (`locked_until IS NOT NULL`) en un intervalo de 10 min | P2 | Posible ataque de fuerza bruta distribuido o credential stuffing. Usuarios legítimos pueden quedar bloqueados. | 1. Revisar `audit_login` por IP de origen. 2. Evaluar bloqueo de IP a nivel de red (firewall / ingress). 3. Notificar al equipo de seguridad. 4. Si las cuentas afectadas son de roles críticos, desbloquear manualmente (ver procedimiento). |
+| **BD no responde** | Timeout al conectar, o `/ready` devuelve `503` con `"db": "down"` | P0 | Ningún usuario puede autenticarse ni el RBAC resuelve. Todo el sistema queda bloqueado. | 1. Verificar el contenedor/pod de PostgreSQL. 2. Revisar logs de BD. 3. Si la BD está sana, revisar `IAM_DB_DSN`/`IAM_DB_USERNAME`/red interna. 4. Si persiste > 5 min, escalar a infra. |
+| **Broker no responde** | `/ready` devuelve `503` con `"broker": "down"` (solo si `SPRING_RABBITMQ_HOST` está configurada), o el outbox relay deja de drenar (`identity.outbox` con filas sin `published_at` creciendo) | P1 | Login/RBAC siguen funcionando con normalidad. Los eventos (`iam.user.created`, `iam.session.started`, etc.) **no se pierden** (quedan en `identity.outbox`) pero no llegan a consumidores hasta que el broker vuelve. | 1. Verificar RabbitMQ (`docker compose ps rabbitmq`). 2. Revisar `SPRING_RABBITMQ_*`. 3. Al reconectar, el relay drena el backlog automáticamente (no requiere reinicio de iam-api). 4. Si el backlog no drena en 15 min con broker sano, revisar logs de `OutboxRelay`/`RabbitEventPublisher`. |
+| **Error rate > 5 % en 5 min** | Más del 5 % de requests a `/api/v1/auth/*` retornan 5xx en ventana deslizante de 5 min | P1 | Degradación del flujo de autenticación para usuarios activos. | 1. Revisar logs (JSON estructurado con `trace_id`, ADR-008) — correlacionar en Grafana/Tempo. 2. Verificar conectividad a BD/broker. 3. Si es pool agotado, escalar réplicas o reiniciar. |
+| **`IAM_JWT_PRIVATE_KEY` comprometida** | Sospecha o confirmación de compromiso de la clave privada activa | P0 | Un atacante puede firmar tokens RS256 válidos con cualquier claim arbitrario. | Ver **Rotación de la clave de firma (DEC-008)** más abajo. No basta con reiniciar con una clave nueva sin coordinar la ventana de JWKS — servicios downstream cachean la clave pública. |
+| **Account lockout masivo** | > 20 cuentas bloqueadas (`locked_until IS NOT NULL`) en 10 min | P2 | Posible ataque de fuerza bruta/credential stuffing. Usuarios legítimos pueden quedar bloqueados. | 1. Revisar `identity_audit.audit_login` por IP. 2. Evaluar bloqueo de IP a nivel de red. 3. Notificar a seguridad. 4. Desbloqueo manual solo para roles críticos tras validar identidad. |
 
 ---
 
@@ -51,58 +112,35 @@
 ### Reinicio del servicio
 
 ```bash
-# Docker Compose
-docker compose restart iam-api
+# Docker Compose (perfil iam, docker-infra)
+docker compose --profile iam restart iam-api
 
 # Verificar que levantó correctamente
-docker compose logs --tail=50 iam-api
+docker compose --profile iam logs --tail=50 iam-api
 
 # Kubernetes — rollout restart (sin downtime si hay >= 2 réplicas)
 kubectl rollout restart deployment/iam-api -n <namespace>
-
-# Verificar estado del rollout
 kubectl rollout status deployment/iam-api -n <namespace>
-
-# Si el rollout se cuelga, inspeccionar el pod nuevo
-kubectl describe pod -l app=iam-api -n <namespace> | tail -30
 ```
 
-> Nota: un reinicio simple **no invalida** los JWT access tokens existentes (su vida útil es de `JWT_EXPIRY_MINUTES`). Los refresh tokens siguen válidos en BD. Solo se pierden las entradas en Redis, lo que impide revocación de tokens emitidos antes del reinicio hasta que Redis vuelva a tener los datos sincronizados.
+> Un reinicio **no invalida** los access tokens vigentes (expiran solos, 15 min) ni los refresh tokens en BD.
+> No hay lista de revocación en memoria/Redis que perder — DEC-001 acepta esto como trade-off conocido.
 
 ---
 
 ### Revisión de logs de autenticación fallida
 
 ```bash
-# Docker Compose — últimas 200 líneas filtrando errores de auth
-docker compose logs --tail=200 iam-api | grep -E "INVALID_PASSWORD|USER_NOT_FOUND|ACCOUNT_LOCKED|TOKEN_EXPIRED"
+# Docker Compose — últimas 200 líneas filtrando outcomes de auth
+docker compose --profile iam logs --tail=200 iam-api | grep -E "INVALID_PASSWORD|USER_NOT_FOUND|ACCOUNT_LOCKED|TOKEN_EXPIRED"
 
-# Kubernetes — logs del pod en ejecución
-kubectl logs -l app=iam-api -n <namespace> --tail=200 | grep -E "INVALID_PASSWORD|USER_NOT_FOUND|ACCOUNT_LOCKED|TOKEN_EXPIRED"
-
-# Ver intentos fallidos por IP (últimos 30 min) directamente en BD
-psql "$DB_URL" -c "
-  SELECT
-    ip_address,
-    COUNT(*)                   AS intentos,
-    COUNT(DISTINCT email_attempted) AS emails_distintos,
-    MAX(attempted_at)          AS ultimo_intento
-  FROM audit_login
-  WHERE
-    outcome != 'SUCCESS'
-    AND attempted_at > NOW() - INTERVAL '30 minutes'
-  GROUP BY ip_address
-  ORDER BY intentos DESC
-  LIMIT 20;
-"
-
-# Ver intentos fallidos sobre una cuenta específica
-psql "$DB_URL" -c "
-  SELECT outcome, ip_address, user_agent, attempted_at
-  FROM audit_login
-  WHERE email_attempted = 'usuario@ejemplo.com'
-  ORDER BY attempted_at DESC
-  LIMIT 50;
+# Intentos fallidos por IP (últimos 30 min) directamente en BD
+psql "$IAM_DB_DSN" -c "
+  SELECT ip_address, COUNT(*) AS intentos, COUNT(DISTINCT email_attempted) AS emails_distintos,
+         MAX(attempted_at) AS ultimo_intento
+  FROM identity_audit.audit_login
+  WHERE outcome != 'SUCCESS' AND attempted_at > NOW() - INTERVAL '30 minutes'
+  GROUP BY ip_address ORDER BY intentos DESC LIMIT 20;
 "
 ```
 
@@ -110,65 +148,35 @@ psql "$DB_URL" -c "
 
 ### Desbloquear cuenta de usuario manualmente
 
-Usar solo cuando el bloqueo es por falsos positivos confirmados, o luego de validar la identidad del usuario por canal alternativo.
+Usar solo cuando el bloqueo es por falsos positivos confirmados, o tras validar la identidad por canal alterno.
 
 ```sql
--- 1. Verificar estado actual de la cuenta
+-- 1. Verificar estado actual
 SELECT id, email, failed_attempts, locked_until, is_active
-FROM "user"
-WHERE email = 'usuario@ejemplo.com';
+FROM identity."user" WHERE email = 'usuario@ejemplo.com';
 
--- 2. Desbloquear: resetear contador y quitar bloqueo temporal
-UPDATE "user"
-SET
-  failed_attempts = 0,
-  locked_until    = NULL,
-  updated_at      = NOW()
-WHERE email = 'usuario@ejemplo.com'
-  AND is_active = true;
-
--- 3. Confirmar el cambio
-SELECT id, email, failed_attempts, locked_until
-FROM "user"
-WHERE email = 'usuario@ejemplo.com';
+-- 2. Desbloquear
+UPDATE identity."user"
+SET failed_attempts = 0, locked_until = NULL, updated_at = NOW()
+WHERE email = 'usuario@ejemplo.com' AND is_active = true;
 ```
 
-> Si `is_active = false`, la cuenta está deshabilitada (no es un bloqueo por intentos). Para reactivarla se necesita autorización del rol `SYSTEM_ADMIN` o `CENTER_DIRECTOR` con scope sobre el centro del usuario.
+> Si `is_active = false` la cuenta está desactivada (no es un bloqueo por intentos); reactivarla requiere
+> `SYSTEM_ADMIN` o `CENTER_DIRECTOR` con scope sobre el centro del usuario (HU-IAM-005).
 
 ---
 
 ### Revocar todas las sesiones de un usuario
 
-Usar cuando se sospecha que las credenciales de un usuario fueron comprometidas, o cuando se desactiva una cuenta y se quiere terminar sesiones activas inmediatamente.
-
 ```sql
--- 1. Revocar todos los refresh tokens activos en BD
-UPDATE refresh_token
-SET
-  is_revoked = true,
-  revoked_at = NOW()
-WHERE
-  user_id = (SELECT id FROM "user" WHERE email = 'usuario@ejemplo.com')
-  AND is_revoked = false
-  AND expires_at > NOW();
-
--- 2. Verificar cuántos tokens fueron revocados
-SELECT COUNT(*) AS tokens_revocados
-FROM refresh_token
-WHERE
-  user_id = (SELECT id FROM "user" WHERE email = 'usuario@ejemplo.com')
-  AND is_revoked = true
-  AND revoked_at > NOW() - INTERVAL '1 minute';
+UPDATE session.refresh_token
+SET is_revoked = true, revoked_at = NOW()
+WHERE user_id = (SELECT id FROM identity."user" WHERE email = 'usuario@ejemplo.com')
+  AND is_revoked = false AND expires_at > NOW();
 ```
 
-```bash
-# 3. (Opcional) Si Redis está disponible, forzar la entrada en la lista de revocación
-#    para que el access token actual también quede bloqueado antes de que expire.
-#    Reemplazar <user_id> y <jti> por los valores reales del JWT.
-redis-cli -u "$REDIS_URL" SET "revoked:<jti>" "1" EX 900
-```
-
-> Los access tokens vigentes siguen siendo válidos hasta su expiración natural (`JWT_EXPIRY_MINUTES`) a menos que se use la lista de revocación en Redis. Con `JWT_EXPIRY_MINUTES=15`, el riesgo máximo de exposición después de revocar en BD es de 15 minutos.
+> El access token vigente del usuario **sigue siendo válido hasta que expira** (máx. 15 min) — no hay
+> revocación de access tokens en curso (DEC-001). Esto es el diseño aceptado, no un bug operativo.
 
 ---
 
@@ -176,123 +184,64 @@ redis-cli -u "$REDIS_URL" SET "revoked:<jti>" "1" EX 900
 
 ### BD no conecta
 
-**Síntomas**: `GET /health/ready` devuelve `503`. Todos los logins retornan `503`. Los logs muestran `connection refused` o `timeout` a PostgreSQL.
+**Síntomas**: `/ready` → `503` con `"db": "down"`. Todo `/api/v1/auth/*` retorna 5xx.
 
 **Pasos**:
+1. Verificar el contenedor/pod de PostgreSQL (`docker compose ps postgres` / `kubectl get pods -l app=postgres`).
+2. Probar conectividad desde el pod de IAM.
+3. Si la BD está sana, revisar `IAM_DB_DSN`/`IAM_DB_USERNAME`/`IAM_DB_PASSWORD` y red interna.
+4. Si la BD estaba caída y vuelve: el pool de HikariCP se recupera solo. Si no reconecta en 60 s, reiniciar `iam-api`.
 
-1. Verificar que el pod/contenedor de PostgreSQL está corriendo:
-   ```bash
-   # Docker Compose
-   docker compose ps db
-   docker compose logs --tail=50 db
-
-   # Kubernetes
-   kubectl get pods -l app=postgres -n <namespace>
-   kubectl describe pod <postgres-pod> -n <namespace>
-   ```
-
-2. Probar conectividad directa desde el pod de IAM:
-   ```bash
-   # Kubernetes
-   kubectl exec -it <iam-pod> -n <namespace> -- \
-     pg_isready -h <db-host> -p 5432 -U iam
-   ```
-
-3. Si PostgreSQL está healthy pero IAM no conecta, revisar `DB_URL` y secretos del entorno:
-   ```bash
-   kubectl exec -it <iam-pod> -n <namespace> -- env | grep DB_URL
-   ```
-
-4. Si la BD está caída: seguir el runbook de PostgreSQL del equipo de infra. IAM no requiere acciones adicionales — al volver la BD, el pool de conexiones se recupera automáticamente.
-
-5. Si la BD vuelve pero IAM no reconecta en 60 s: reiniciar el pod de IAM (el pool no siempre se recupera solo con conexiones rotas a nivel TCP).
-
-6. Verificar `GET /health/ready` después de la recuperación.
-
-**Tiempo objetivo de recuperación (RTO)**: < 15 min si la causa es reinicio de BD. > 15 min escalar a infra.
+**RTO objetivo**: < 15 min si la causa es reinicio de BD.
 
 ---
 
-### Redis no conecta
+### Broker no conecta (RabbitMQ)
 
-**Síntomas**: `GET /health/ready` devuelve `200` con `"redis": "degraded"`. Alerta P1 disparada. Login y refresh siguen funcionando.
+**Síntomas**: `/ready` → `503` con `"broker": "down"` (solo si `SPRING_RABBITMQ_HOST` está configurada), pero
+login/RBAC siguen funcionando. Filas sin `published_at` creciendo en `identity.outbox`.
 
-**Comportamiento en modo degradado**:
-- Login (`POST /auth/login`): funciona normalmente.
-- Refresh (`POST /auth/refresh`): funciona. El nuevo refresh token se persiste en BD.
-- Logout (`POST /auth/logout`): el refresh token se marca `is_revoked = true` en BD, pero el access token activo **no se agrega a la lista de revocación de Redis**. Un access token no-expirado seguirá siendo aceptado por los servicios downstream hasta que expire.
-- `POST /auth/revoke`: misma limitación.
+**Comportamiento en modo degradado**: login, refresh, RBAC y todo lo síncrono funcionan sin cambios. Solo se
+detiene la **publicación** de eventos (`iam.user.created`, `iam.user.deactivated`, `iam.role.assigned`,
+`iam.session.started`) — quedan encolados en `identity.outbox` sin pérdida.
 
 **Pasos**:
-
-1. Verificar estado de Redis:
-   ```bash
-   docker compose ps redis
-   redis-cli -u "$REDIS_URL" PING
-   ```
-
-2. Si Redis está caído sin causa obvia, reiniciarlo:
-   ```bash
-   docker compose restart redis
-   # o en Kubernetes:
-   kubectl rollout restart deployment/redis -n <namespace>
-   ```
-
-3. Monitorear el tiempo sin revocación. Si supera 30 min y hay sesiones de usuarios de alto privilegio (`SYSTEM_ADMIN`, `CENTER_DIRECTOR`) activas durante la ventana, considerar invalidación forzada masiva de refresh tokens en BD para obligar re-login:
-   ```sql
-   UPDATE refresh_token
-   SET is_revoked = true, revoked_at = NOW()
-   WHERE is_revoked = false AND expires_at > NOW();
-   ```
-
-4. Al volver Redis, IAM retoma la escritura a la lista de revocación automáticamente. No requiere reinicio.
+1. Verificar RabbitMQ (`docker compose --profile iam ps rabbitmq`; `rabbitmq-diagnostics ping`).
+2. Si RabbitMQ está caído sin causa obvia, reiniciarlo. **Reset quirúrgico si hace falta recrear el volumen**:
+   `docker compose --profile iam stop rabbitmq && docker volume rm <proyecto>_rabbitmq_data && docker compose --profile iam up rabbitmq` —
+   **nunca** `docker compose down -v` (borraría también el volumen de Postgres compartido con todos los módulos).
+3. Al volver, el `OutboxRelay` drena el backlog en el siguiente ciclo de poll (`IAM_OUTBOX_RELAY_POLL_INTERVAL_MS`, default 5 s) — no requiere reiniciar `iam-api`.
+4. Confirmar drenado: `SELECT count(*) FROM identity.outbox WHERE published_at IS NULL;` debe volver a 0.
 
 ---
 
-### JWT_SECRET comprometido — Procedimiento de rotación
+### Rotación de la clave de firma (DEC-008 — JWKS, sin downtime)
 
-> Este procedimiento invalida **todas las sesiones activas** de todos los usuarios. Coordinarlo con el equipo antes de ejecutar.
-
-**Por qué no basta con reiniciar**: cambiar `JWT_SECRET` y reiniciar el servicio hace que todos los tokens firmados con el secreto anterior sean inmediatamente rechazados. Pero durante la ventana de rotación, los servicios downstream que cachean la clave pública (si se usa RS256) o que no recargan el secreto seguirán aceptando tokens viejos. Este procedimiento minimiza esa ventana.
-
-**Pasos**:
+> A diferencia de un secreto HMAC compartido, RS256 + JWKS permite rotar **sin invalidar sesiones activas**:
+> se publican ambas claves (`kid` actual + `kid` saliente) durante la ventana de transición.
 
 ```bash
-# 1. Generar un nuevo secreto seguro (mínimo 32 bytes de entropía)
-openssl rand -hex 32
-# Guardar el valor — lo necesitarás en los pasos siguientes
+# 1. Generar el nuevo par RSA (PKCS#8)
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out new-private.pem
+openssl pkey -in new-private.pem -pubout -out new-public.pem
 
-# 2. Revocar todos los refresh tokens activos en BD
-#    Esto fuerza re-login a todos los usuarios cuando el access token expire.
-psql "$DB_URL" -c "
-  UPDATE refresh_token
-  SET is_revoked = true, revoked_at = NOW()
-  WHERE is_revoked = false AND expires_at > NOW();
-"
-
-# 3. Actualizar el secreto en el gestor de secretos (Vault / K8s Secret / .env)
-#    Ejemplo con kubectl:
-kubectl create secret generic iam-secrets \
-  --from-literal=JWT_SECRET='<nuevo-secreto>' \
-  --namespace <namespace> \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-# 4. Reiniciar el servicio para que tome el nuevo secreto
+# 2. Desplegar con AMBAS claves configuradas: la nueva como activa, la saliente como "previous"
+#    IAM_JWT_PRIVATE_KEY        = contenido de new-private.pem
+#    IAM_JWT_KEY_ID             = nuevo kid, p. ej. iam-rsa-2026-09
+#    IAM_JWT_PREVIOUS_PUBLIC_KEY= clave pública de la clave SALIENTE (la que era IAM_JWT_PRIVATE_KEY antes)
+#    IAM_JWT_PREVIOUS_KEY_ID    = kid de la clave saliente
 kubectl rollout restart deployment/iam-api -n <namespace>
-kubectl rollout status deployment/iam-api -n <namespace>
 
-# 5. Verificar que el servicio arrancó y emite tokens con el nuevo secreto
-curl -s http://localhost:8001/health/ready | jq .
+# 3. Verificar que JWKS publica ambas entradas
+curl -s http://localhost:${EDGE_PORT}/iam/api/v1/auth/.well-known/jwks.json | jq '.keys[].kid'
 
-# 6. Verificar que un login produce un token válido
-curl -s -X POST http://localhost:8001/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"admin@sena.edu.co","password":"<pass>"}' | jq .access_token
+# 4. Esperar la ventana de transición (>= vida del access token, 15 min) para que
+#    expiren naturalmente los tokens firmados con la clave saliente.
 
-# 7. Registrar el incidente: fecha de rotación, motivo, quién ejecutó
+# 5. Retirar la clave saliente: quitar IAM_JWT_PREVIOUS_PUBLIC_KEY / IAM_JWT_PREVIOUS_KEY_ID y reiniciar.
 ```
 
-**Después de la rotación**: todos los usuarios verán que su sesión expiró y deberán hacer login nuevamente. Los access tokens con el secreto anterior quedarán huérfanos y serán rechazados automáticamente (firma inválida). La ventana de tokens "zombies" aceptados por servicios downstream es de máximo `JWT_EXPIRY_MINUTES` minutos si esos servicios no validan contra IAM (lo cual es el diseño intencionado — los servicios validan la firma localmente).
+**Registrar el incidente/rotación**: fecha, motivo (programada trimestral vs. compromiso), quién ejecutó.
 
 ---
 
@@ -300,9 +249,9 @@ curl -s -X POST http://localhost:8001/auth/login \
 
 | Condición | Paso siguiente | Contacto |
 |-----------|---------------|----------|
-| BD no vuelve en 15 min después de reinicio | Escalar a equipo de infra con logs de PostgreSQL adjuntos | @infra-oncall |
-| Redis no vuelve en 30 min | Evaluar impacto de sesiones sin revocación; escalar a infra | @infra-oncall |
-| Error rate > 5 % sostenido > 10 min sin causa clara | Escalar a tech lead con payload de logs y métricas de los últimos 15 min | @tech-lead |
-| JWT_SECRET comprometido (sospecha o confirmado) | Activar protocolo de incidente de seguridad P0 **antes** de cualquier acción técnica | @security-lead, @tech-lead |
-| Account lockout masivo (> 20 cuentas en 10 min) | Notificar a seguridad; no desbloquear cuentas hasta que seguridad confirme que no es ataque activo | @security-lead |
-| Servicio no levanta después de 2 reinicios | Revisar variables de entorno, secretos y logs de arranque; escalar a tech lead si no se identifica causa | @tech-lead |
+| BD no vuelve en 15 min después de reinicio | Escalar a infra con logs de PostgreSQL adjuntos | @infra-oncall |
+| Broker no vuelve en 30 min y `identity.outbox` sigue creciendo | Escalar a infra; evaluar impacto en consumidores de `iam-events` | @infra-oncall |
+| Error rate > 5 % sostenido > 10 min sin causa clara | Escalar a tech lead con trazas (Tempo) y logs de los últimos 15 min | @tech-lead |
+| Clave de firma comprometida (sospecha o confirmado) | Activar protocolo de incidente de seguridad P0 **antes** de cualquier acción técnica | @security-lead, @tech-lead |
+| Account lockout masivo (> 20 cuentas en 10 min) | Notificar a seguridad; no desbloquear hasta confirmar que no es ataque activo | @security-lead |
+| Servicio no levanta después de 2 reinicios | Revisar env vars/secretos/logs de arranque; escalar a tech lead si no se identifica causa | @tech-lead |

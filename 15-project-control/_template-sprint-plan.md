@@ -45,7 +45,7 @@
 
 ## Referencias
 
-- [Backlog](../03-product/backlog.md)
+- [Backlog](../03-product/product-backlog.md)
 - [Convenciones ágiles](../00-governance/agile-conventions.md)
 - [QA Report](../11-quality/_template-qa-report.md)
 - [Definition of Done](../00-governance/definition-of-done.md)

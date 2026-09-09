@@ -1,9 +1,11 @@
 # Historias de Usuario
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 > Fuente: [functional.md](./functional.md) · [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md) · [03-product/problem-framing.md](../03-product/problem-framing.md)
+
+> **Historias de planeación vs. de ejecución.** Las historias `HU-01..HU-23` de este documento son las de **planeación** del producto (por rol de negocio). La construcción real se ejecutó con IDs por épica — **`HU-IAM-001..012`** (EP-IAM) y **`HU-NOTIF-001..008`** (EP-NOTIF) — documentadas en la sección [Historias construidas](#rol-sistema--plataforma-historias-construidas) con su estado, fecha e issue. El estado vivo por historia está en **GitHub Project #3**.
 
 ## Cómo leer este documento
 
@@ -157,6 +159,8 @@ Criterios de aceptación:
 
 ## Rol: Administrador / Director de centro
 
+> **Nota de trazabilidad (construido).** Las historias `HU-16` (login), `HU-17` (RBAC por rol/centro) y `HU-18` (gestión de usuarios) son historias de **planeación**; su capacidad ya está **construida y ampliada** en `iam-service` bajo la épica **EP-IAM**. Mapa: `HU-16` → **HU-IAM-001** (login + lockout); `HU-17` → **HU-IAM-004/005/006** (catálogo RBAC + gestión de usuarios/roles + autorización feature+scope); `HU-18` → **HU-IAM-003** (contraseña temporal) + **HU-IAM-008** (provisión usuario↔actor). Ver detalle y criterios verificados en [Historias construidas](#rol-sistema--plataforma-historias-construidas).
+
 ### HU-16 — Iniciar sesión de forma segura
 **Como** usuario **quiero** autenticarme con mis credenciales **para** acceder según mi rol. *(RF-IAM-01)*
 
@@ -185,6 +189,145 @@ Criterios de aceptación:
 Criterios de aceptación:
 - El `center_code` es inmutable y un centro pertenece a un único municipio (RN-REF-01/02).
 - Solo `ADMIN_STAFF`/`SYSTEM_ADMIN` pueden editar catálogos; para el resto son solo lectura (RN-REF-03).
+
+---
+
+## Rol: Sistema / Plataforma (historias construidas)
+
+> Historias de **ejecución** efectivamente construidas y verificadas en el ambiente **`dev`**. IDs por épica (no del backlog de planeación). El actor es la **plataforma / administrador de plataforma**, no un rol de negocio del MVP. Estado vivo por historia en **GitHub Project #3**.
+
+### EP-IAM — `iam-service` (épica issue docs#79)
+
+#### HU-IAM-001 — Login seguro con bloqueo y auditoría · ✅ Done·Dev (2026-08-28) · docs#80
+**Como** plataforma **quiero** autenticar por credenciales, bloquear ante abuso y registrar cada intento **para** dar acceso seguro y trazable. *(RF-IAM-01, RF-IAM-05)*
+
+Criterios verificados:
+- Emite `access_token` (15 min) y `refresh_token` (7 días).
+- Bloqueo tras 5 intentos fallidos (15 min) y tras 10 (24 h); reinicio en login exitoso.
+- Registra cada intento en `audit_login` y expone `GET /auth/me` con el usuario autenticado.
+
+#### HU-IAM-002 — Gestión de sesiones (refresh / logout / revocar) · ✅ Done·Dev (2026-08-28) · docs#81
+**Como** plataforma **quiero** renovar, cerrar y revocar sesiones **para** controlar el ciclo de vida del acceso. *(RF-IAM-06)*
+
+Criterios verificados:
+- El `refresh_token` renueva el `access_token`; logout cierra la sesión.
+- El usuario puede listar sus sesiones activas y revocarlas individualmente.
+
+#### HU-IAM-003 — Contraseña temporal y reset · ✅ Done·Dev (2026-08-28) · docs#82
+**Como** plataforma **quiero** entregar contraseñas temporales y permitir su cambio **para** onboarding seguro del personal. *(RF-IAM-02)*
+
+Criterios verificados:
+- La contraseña temporal caduca en 72 h y debe cambiarse en el primer login.
+- Existe flujo de reset de contraseña.
+
+#### HU-IAM-004 — Catálogo RBAC · ✅ Done·Dev (2026-08-28) · docs#83
+**Como** plataforma **quiero** un catálogo de módulos, features y roles **para** sustentar la autorización. *(RF-IAM-03)*
+
+Criterios verificados:
+- Se administran módulos, features y roles como catálogo del sistema.
+
+#### HU-IAM-005 — Gestión de usuarios y roles (scope / centro) · ✅ Done·Dev (2026-08-28) · docs#84
+**Como** plataforma **quiero** crear usuarios y asignarles roles con alcance **para** reflejar la estructura organizativa. *(RF-IAM-03)*
+
+Criterios verificados:
+- Un rol puede ser global (`training_center_id = null`) o restringido a un centro.
+- Se asignan/retiran roles a usuarios respetando el scope.
+
+#### HU-IAM-006 — Autorización por feature + scope/centro · ✅ Done·Dev (2026-08-28) · docs#85
+**Como** plataforma **quiero** autorizar cada operación por feature y alcance **para** aislar datos entre centros. *(RF-IAM-03)*
+
+Criterios verificados:
+- Acceso sin token → 401; acceso a otro centro → 403 (violación de scope).
+- La autorización combina feature + scope/centro.
+
+#### HU-IAM-007 — Eventos de dominio vía outbox · ✅ Done·Dev (2026-08-28) · docs#86
+**Como** plataforma **quiero** publicar eventos de dominio de forma confiable **para** integrar otros servicios. *(RF-IAM-07)*
+
+Criterios verificados:
+- Patrón outbox publica hacia `iam-events` (p. ej. `session.started`, `iam.user.created`) con entrega at-least-once.
+
+#### HU-IAM-008 — Provisión usuario ↔ actor · ⚠️ Parcial·Dev (lado iam Done, 2026-08-28) · docs#87
+**Como** plataforma **quiero** coordinar la creación del usuario con su perfil de actor **para** mantener la invariante usuario↔actor. *(RF-IAM-04)*
+
+Criterios verificados / estado:
+- El lado `iam` emite `iam.user.created` con `actor_type` y `actor_id` (invariante de RF-IAM-04).
+- La **saga E3** que materializa el perfil en `actors-service` queda **DIFERIDA** hasta que ese servicio exista.
+
+#### HU-IAM-009 — Reporte de auditoría de login · ✅ Done·Dev (2026-08-28) · docs#88
+**Como** plataforma **quiero** consultar el histórico de accesos **para** auditar la actividad. *(RF-IAM-08)*
+
+Criterios verificados:
+- `GET /reports/login-audit` con paginación por cursor.
+
+#### HU-IAM-010 — JWT verificable + JWKS + rotación · ✅ Done·Dev (2026-08-28) · docs#89
+**Como** plataforma **quiero** JWT verificables localmente por cada servicio **para** autorizar sin llamada síncrona a `iam`. *(RF-IAM-09)*
+
+Criterios verificados:
+- El JWT lleva los claims del proyecto; la clave pública se expone en `/.well-known/jwks.json`.
+- Hay rotación de llaves de firma (DEC-008).
+
+#### HU-IAM-011 — Observabilidad y sondas de salud · ✅ Done·Dev (2026-08-28) · docs#90
+**Como** plataforma **quiero** trazas y sondas de salud **para** operar el servicio. *(NFR-OBS-04/06/07)*
+
+Criterios verificados:
+- Instrumentación OpenTelemetry; trazas visibles en Tempo.
+- Split `/health` (liveness) y `/ready` (readiness con BD + broker).
+
+#### HU-IAM-012 — Levantado local y prueba E2E · ✅ Done·Dev (2026-08-28) · docs#91
+**Como** plataforma **quiero** el servicio corriendo localmente y probado extremo a extremo **para** validar la integración. *(E2E de integración)*
+
+Criterios verificados:
+- Servicio levantado en local y flujo E2E ejecutado con éxito (162 tests en CI).
+
+### EP-NOTIF — `notification-service` (extraído de `monitoring`, ADR-005)
+
+#### HU-NOTIF-001 — Envío por API asíncrono · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** aceptar solicitudes de notificación por API sin bloquear **para** desacoplar al emisor de la entrega. *(RF-NOTIF-01)*
+
+Criterios verificados:
+- La API valida y responde `202 Accepted`; la entrega ocurre de forma asíncrona.
+
+#### HU-NOTIF-002 — Entrega dirigida por evento · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** generar notificaciones a partir de eventos de dominio **para** reaccionar a lo que ocurre en el sistema. *(RF-NOTIF-02)*
+
+Criterios verificados:
+- Consume eventos del broker y produce la notificación correspondiente.
+
+#### HU-NOTIF-003 — Canales EMAIL e IN_APP · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** entregar por varios canales **para** llegar al destinatario por el medio adecuado. *(RF-NOTIF-03)*
+
+Criterios verificados:
+- Soporta canales `EMAIL` e `IN_APP`.
+
+#### HU-NOTIF-004 — Resiliencia (retry / DLQ / idempotencia) · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** tolerar fallos sin duplicar ni perder mensajes **para** una entrega confiable. *(RF-NOTIF-04)*
+
+Criterios verificados:
+- Reintentos, DLQ para no entregables e **idempotencia por `event_id`** (probada: no duplica ante reintrega).
+
+#### HU-NOTIF-005 — Plantillas de notificación · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** componer el contenido con plantillas **para** estandarizar los mensajes. *(RF-NOTIF-05)*
+
+Criterios verificados:
+- Gestiona plantillas por tipo/canal.
+
+#### HU-NOTIF-006 — Consulta de notificaciones · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** consultar las notificaciones emitidas **para** dar visibilidad y soporte. *(RF-NOTIF-06)*
+
+Criterios verificados:
+- Endpoint `GET` para consultar notificaciones.
+
+#### HU-NOTIF-007 — Observabilidad · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** trazas y sondas de salud **para** operar el servicio. *(RF-NOTIF-07)*
+
+Criterios verificados:
+- OpenTelemetry (exporta por OTLP/gRPC `:4317`); endpoints `/health` y `/ready`.
+
+#### HU-NOTIF-008 — Publicación de `notification.notification.sent` · ✅ Done·Dev (2026-08-28)
+**Como** plataforma **quiero** anunciar cada entrega **para** que otros servicios reaccionen. *(RF-NOTIF-07)*
+
+Criterios verificados:
+- Publica el evento `notification.notification.sent` al completar la entrega.
 
 ---
 

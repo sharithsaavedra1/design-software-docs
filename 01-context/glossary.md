@@ -1,6 +1,6 @@
 # Glosario
 
-> Estado: 🟡 Borrador | Última actualización: 2026-06-17
+> Estado: 🟡 Borrador | Última actualización: 2026-08-28
 > Puente entre el lenguaje de dominio (español SENA) y el técnico (inglés). Ver [domain-map.md](../02-domain/domain-map.md).
 
 ## Términos de dominio SENA
@@ -38,6 +38,9 @@
 | Arquitectura Hexagonal | Patrón que separa el dominio de la infraestructura mediante puertos y adaptadores |
 | Read model | Proyección local de datos de otro servicio, poblada por eventos (ADR-002) |
 | JWT | JSON Web Token; credencial firmada que porta identidad y permisos |
+| JWKS | JSON Web Key Set; endpoint público (`/.well-known/jwks.json`) con las claves de firma de iam-service. Edge y servicios verifican el JWT RS256 **localmente** con estas claves, sin llamada síncrona a iam. Soporta rotación de clave (DEC-008) |
+| Refresh token | Token de larga vida (7 días) que renueva el `access_token` (vida corta, 15 min) sin re-autenticar. El access token porta identidad/permisos; el refresh solo sirve para obtener uno nuevo |
+| Idempotencia | Propiedad por la que procesar el mismo evento más de una vez produce el mismo resultado. Se garantiza deduplicando por `event_id` (p. ej. en notification-service) |
 | RBAC | Role-Based Access Control; autorización por rol |
 | Feature | Unidad atómica de permiso en este sistema (reemplaza resource+action) |
 | Scope | Alcance de datos que un rol puede ver/operar (GLOBAL, TRAINING_CENTER, OWN_*) |

@@ -1,6 +1,6 @@
 # Modelo de datos — monitoring-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-08-26
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 > Fuente de dominio: análisis M9 (Seguimiento y Analítica)
 
@@ -203,6 +203,25 @@ Arco exclusivo: como máximo una poblada; valida la aplicación (`CHECK (affecte
 
 ---
 
+### `outbox`
+
+Tabla técnica para publicar de forma confiable los eventos producidos por Monitoring. Se inserta
+en la misma transacción que modifica `generated_alert`; el relay publica las filas pendientes y
+marca `published_at` únicamente después del `ack` del broker.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK. |
+| `event_id` | UUID | No | Identificador canónico del evento; único para deduplicación. |
+| `event_type` | VARCHAR(150) | No | `monitoring.alert.triggered` u otro evento de Monitoring. |
+| `payload` | JSONB | No | Envelope completo del evento de integración. |
+| `created_at` | TIMESTAMPTZ | No | Momento de inserción transaccional. |
+| `published_at` | TIMESTAMPTZ | Sí | Null mientras está pendiente. |
+
+Índice mínimo: (`published_at`, `created_at`) con filtro `published_at IS NULL` para el relay.
+
+---
+
 ### `improvement_plan`
 
 Plan de mejoramiento a nivel de ficha. Generado por coordinador o instructor a partir de
@@ -227,29 +246,7 @@ una alerta activa. Diferente del `actor_improvement_plan` en actors-service, que
 
 ---
 
-### `sent_notification`
-
-Registro de notificaciones enviadas a actores del sistema. Append-only.
-
-| Campo | Tipo | Nullable | PII | Descripción |
-|-------|------|----------|-----|-------------|
-| `id` | UUID | No | — | PK |
-| `generated_alert_id` | UUID | Sí | — | FK → generated_alert (null si notif. manual) |
-| `recipient_id` | UUID | No | — | ID del usuario (iam-service) |
-| `recipient_email` | VARCHAR(255) | No | ✓ | |
-| `channel` | VARCHAR(20) | No | — | CHECK (`channel` IN (`EMAIL`, `IN_APP`)). Canal de envío |
-| `subject` | VARCHAR(300) | No | — | |
-| `body_summary` | TEXT | Sí | — | Resumen del cuerpo (no el cuerpo completo) |
-| `send_status` | VARCHAR(20) | No | — | CHECK (`send_status` IN (`PENDING`, `SENT`, `FAILED`)) |
-| `failure_reason` | TEXT | Sí | — | Solo si FAILED |
-| `sent_at` | TIMESTAMPTZ | Sí | — | null si aún PENDING |
-| `created_at` | TIMESTAMPTZ | No | — | |
-
-Tabla append-only: conserva únicamente su timestamp de inserción (`created_at`).
-
-**Retención**: `sent_notification` → 1 año. Coherente con la retención, la tabla se
-purga/particiona por período (particionado RANGE por `created_at`), de modo que el archivado y
-borrado de datos mayores a 1 año se hace por poda de particiones en lugar de DELETE masivos.
+> **Ownership actualizado (ADR-005):** `sent_notification` ya no pertenece a este modelo. La entidad y su persistencia viven en [`notification-service`](../10-notification-service/data-model.md).
 
 ---
 
@@ -280,8 +277,7 @@ borrado de datos mayores a 1 año se hace por poda de particiones en lugar de DE
 | `tracking_session` | `(ficha_tracking_id, session_date)` | B-Tree | Sesiones cronológicas por ficha |
 | `generated_alert` | `(ficha_tracking_id, is_resolved)` | B-Tree | Alertas activas por ficha |
 | `generated_alert` | `(alert_type_id, risk_level_id, generated_at)` | B-Tree | Reportes por tipo y severidad |
-| `sent_notification` | `recipient_id` | B-Tree | Notificaciones por usuario |
-| `sent_notification` | `send_status` WHERE `send_status = 'PENDING'` | Partial | Reintentos de notificaciones pendientes |
+| `outbox` | (`published_at`, `created_at`) WHERE `published_at IS NULL` | B-Tree | Eventos pendientes para el relay |
 
 ---
 
@@ -300,9 +296,8 @@ borrado de datos mayores a 1 año se hace por poda de particiones en lugar de DE
 
 - **`remediation-monitoring-960`:** 5 columnas estaban como **ENUM nativo** (viola ADR-004) →
   convertidas a `VARCHAR + CHECK` conservando los valores: `alert_type.threshold_unit`,
-  `tracking_session.session_type`, `improvement_plan.status`, `sent_notification.channel`,
-  `sent_notification.send_status` (el índice parcial `idx_sent_notification_pending` se recreó
-  con predicado de texto).
+  `tracking_session.session_type` e `improvement_plan.status`. Las columnas históricas de
+  `sent_notification` se excluyen de Monitoring desde ADR-005 y pasan a `notification_db`.
 - **`remediation-monitoring-961`:** `kpi_tracking` se implementa como tabla **particionada por
   RANGE mensual de `measured_at`** (antes se declaraba particionada en docs sin estarlo). La PK
   pasa a incluir la clave de partición.

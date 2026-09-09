@@ -1,6 +1,6 @@
 # Control de Proyecto
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Proyecto
 
 ## Contenido
@@ -9,7 +9,7 @@ Agrupa backlog técnico, riesgos, dependencias y preguntas abiertas del proyecto
 
 ## Estado del proyecto
 
-Hoy sólo existe la **capa de datos** (repos `*-db` con Liquibase + PostgreSQL 16). La capa de aplicación (API / worker / workflow) está pendiente de construir; ver plan por fases en [technical-backlog.md](./technical-backlog.md).
+La plataforma tiene **10 microservicios backend** con madurez heterogénea: **2 con capa de aplicación completa en `develop`** (`iam-service` 12/12 HU Done·Dev, `notification-service` 8/8 HU Done·Dev) y **8 aún sólo en capa `-db`**. El broker **RabbitMQ está provisionado y validado E2E en `develop`**. El backlog registra brechas de datos, aplicación, contratos e infraestructura por servicio; la separación de `notification-service` se controla en [notification-service-refactor.md](./notification-service-refactor.md). El **estado vivo del avance por HU se lleva en el board (GitHub Project #3 = SSOT)**.
 
 ## Archivos
 
@@ -18,7 +18,7 @@ Hoy sólo existe la **capa de datos** (repos `*-db` con Liquibase + PostgreSQL 1
 | [technical-backlog.md](./technical-backlog.md) | Pendientes técnicos y deuda documentada | 🟡 |
 | [risks.md](./risks.md) | Riesgos, impacto, probabilidad y mitigación | 🟡 |
 | [dependencies.md](./dependencies.md) | Dependencias internas y externas | 🟡 |
-| [open-questions.md](./open-questions.md) | Preguntas pendientes de decisión o aclaración | 🔴 |
+| [open-questions.md](./open-questions.md) | Preguntas pendientes de decisión o aclaración (PA-01…PA-04) | 🟡 |
 
 ## Plantillas
 

@@ -5,7 +5,12 @@
 
 Cómo se despliega el sistema hoy y cómo se prevé que se despliegue cuando exista la capa de aplicación. Complementa a [overview.md](./overview.md) §Topología, a [10-devops/local-setup.md](../10-devops/local-setup.md) y a [10-devops/environments.md](../10-devops/environments.md).
 
-> **Honestidad sobre el estado:** a la fecha **solo se despliega la capa de datos**. No hay APIs, workers, gateway ni broker corriendo. Lo que existe es una base de datos en contenedor y una serie de **runners de Liquibase por módulo** que aplican migraciones. El resto de esta página describe el **estado objetivo**, marcado como tal.
+> **Honestidad sobre el estado:** además de la capa de datos (Postgres + runners de Liquibase por módulo),
+> ya se despliegan por perfil de compose dos servicios de dominio reales: `notification` (HU-NOTIF-008,
+> api+worker) e `iam` (HU-IAM-012, api). Ambos corren detrás del edge gestionado (Traefik, ADR-007) y
+> exportan OTel al Collector (ADR-008) cuando el perfil `observability` está activo. El resto de los 9
+> servicios (RF-*) sigue sin desplegarse — el resto de esta página describe el **estado objetivo** para esos,
+> marcado como tal.
 
 ---
 

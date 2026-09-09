@@ -1,6 +1,6 @@
 # Ambientes
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
 Los ambientes del sistema de Gestión de Horarios SENA, cómo se configuran y qué reglas rigen en cada uno. Complementa a [00-governance/git-conventions.md](../00-governance/git-conventions.md), a [local-setup.md](./local-setup.md) y a [06-data/migration-strategy.md](../06-data/migration-strategy.md).
@@ -18,7 +18,26 @@ Cada ambiente es también una **rama protegida**: no se trabaja directamente sob
 
 Promoción: **`develop → qa → staging → main`**. El detalle del flujo de ramas (ramas `hu-*` por ambiente, `release/*` hacia `main`) está en [git-conventions.md](../00-governance/git-conventions.md).
 
-> **Estado real:** hoy cada ambiente materializa solo la **capa de datos** (PostgreSQL 16 en contenedor + migraciones Liquibase por módulo). Las APIs/workers por ambiente son parte del estado objetivo (ver [05-architecture/deployment.md](../05-architecture/deployment.md)).
+> **Estado real (difiere por ambiente):**
+> - **`develop`** ya corre **capa de aplicación**: perfiles de docker-compose que levantan `iam-api` (Java) y `notification` (api + worker, Go) sobre la BD compartida, con **edge Traefik** (`/iam/*` + StripPrefix, ADR-007) y **stack de observabilidad** (OTel → Tempo/Grafana, ADR-008).
+> - **`qa` / `staging` / `main`** materializan **solo la capa de datos** (PostgreSQL 16 en contenedor + migraciones Liquibase por módulo). Los perfiles de aplicación **aún no están promovidos** a estos ambientes — son parte del estado objetivo (ver [05-architecture/deployment.md](../05-architecture/deployment.md)).
+
+---
+
+## Puertos expuestos al host por ambiente (ADR-007)
+
+Cada ambiente aísla sus recursos por puerto para poder coexistir en la misma máquina. En `develop` estos recursos están vivos; en `qa`/`staging`/`main` hoy solo aplica la fila de Postgres (el resto queda reservado para cuando se promuevan los perfiles de aplicación).
+
+| Recurso | develop | qa | staging | main |
+|---|---|---|---|---|
+| Edge (Traefik) — único entry point | 18080 | 18081 | 18082 | 18083 |
+| Traefik dashboard | 18090 | 18091 | 18092 | 18093 |
+| Postgres | 15432 | 15433 | 15434 | 15435 |
+| RabbitMQ mgmt | 15672 | 15673 | 15674 | 15675 |
+| Grafana / Tempo / Prometheus / Loki (ADR-008) | base + offset | +1 | +2 | +3 |
+| `iam-api` (y cualquier `-api` de dominio) | **no expuesto** — solo vía edge | | | |
+
+El detalle operativo de bring-up de estos puertos vive en [local-setup.md](./local-setup.md).
 
 ---
 
@@ -40,7 +59,13 @@ docker compose --env-file .env.develop up postgres -d
 docker compose --env-file .env.develop --profile tooling run --rm liquibase-<modulo> update
 ```
 
-Estos archivos parametrizan, como mínimo, la conexión a Postgres (host, puerto, nombre de BD, usuario, clave) del ambiente correspondiente. El detalle operativo de los comandos está en [local-setup.md](./local-setup.md).
+Estos archivos parametrizan la conexión a Postgres (host, puerto, nombre de BD, usuario, clave) del ambiente correspondiente y, además, la **configuración de la capa de aplicación** de los perfiles que corren en ese ambiente:
+
+- **Datos:** conexión a Postgres del ambiente.
+- **Aplicación (`iam`):** `IAM_DB_USERNAME` / `IAM_DB_PASSWORD` (usuario de aplicación, ver `create-app-user.sh`), `IAM_JWT_PRIVATE_KEY` / `IAM_JWT_ISSUER` (y demás `IAM_JWT_*`).
+- **Edge / infra:** `EDGE_PORT` (puerto del Traefik del ambiente), `BACKEND_REPOS_DIR` (carpeta de repos de backend clonados para el build context).
+
+El detalle operativo de los comandos y la tabla completa de variables por servicio están en [local-setup.md](./local-setup.md).
 
 ---
 

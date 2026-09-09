@@ -1,6 +1,6 @@
 # Visión de Producto — SENA Gestión de Horarios
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 > Fuente: [discovery-brief.md](./discovery-brief.md) · [problem-framing.md](./problem-framing.md) · [01-context/overview.md](../01-context/overview.md)
@@ -66,6 +66,7 @@ Cubre el flujo completo "construir → validar → publicar → consultar" más 
 | Instructores (competencias, disponibilidad), aprendices, empresas | `actors-service` |
 | Generación de PDFs (constancias, horarios) en object storage | `document-service` |
 | KPIs por ficha, alertas configurables, planes de mejoramiento | `monitoring-service` (CORE) |
+| Entrega de notificaciones (email/IN_APP) por eventos, con Outbox y retry/DLQ | `notification-service` (transversal) |
 | Log de auditoría append-only | `audit-service` |
 | Consulta de horario por instructor y por aprendiz | `scheduling-service` (lectura) |
 

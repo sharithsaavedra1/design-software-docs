@@ -1,6 +1,6 @@
 # Requisitos Funcionales
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-08-28
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 > Fuente: [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md) · [03-product/vision.md](../03-product/vision.md) · [09-microservices/service-catalog.md](../09-microservices/service-catalog.md)
@@ -9,7 +9,9 @@
 
 Los requisitos funcionales se numeran `RF-<MÓDULO>-##`, donde el módulo corresponde al bounded context/servicio dueño. Cada RF describe una capacidad observable del sistema y referencia las **reglas de negocio** (RN-*) de [entities-and-rules.md](../02-domain/entities-and-rules.md) que la gobiernan. La trazabilidad completa RF ↔ historia ↔ servicio ↔ ADR está en [traceability-matrix.md](./traceability-matrix.md).
 
-Prefijos de módulo: `IAM` (identidad), `REF` (datos de referencia), `ACAD` (académico), `ENV` (ambientes), `SCH` (horarios — **CORE**), `ACT` (actores), `DOC` (documentos), `MON` (seguimiento — **CORE**), `AUD` (auditoría).
+Prefijos de módulo: `IAM` (identidad), `REF` (datos de referencia), `ACAD` (académico), `ENV` (ambientes), `SCH` (horarios — **CORE**), `ACT` (actores), `DOC` (documentos), `MON` (seguimiento — **CORE**), `NOTIF` (notificaciones), `AUD` (auditoría).
+
+> **Estado de construcción (dev).** A la fecha de esta actualización, dos módulos están **construidos y verificados en el ambiente `dev`**: `IAM` (iam-service, 12/12 HU Done·Dev, épica **EP-IAM** / issue docs#79, historias **HU-IAM-001..012** / issues docs#80–#91) y `NOTIF` (notification-service, 8/8 HU Done·Dev, épica **EP-NOTIF**). El resto de módulos permanecen en especificación. Los ambientes `qa`/`staging`/`main` aún no tienen estos servicios promovidos (solo está avanzada la capa de datos). El estado vivo por historia se lleva en **GitHub Project #3**; estos `.md` son la SSOT de trazabilidad HU↔requisito. Ver [traceability-matrix.md](./traceability-matrix.md) y [user-stories.md](./user-stories.md).
 
 ---
 
@@ -20,8 +22,12 @@ Prefijos de módulo: `IAM` (identidad), `REF` (datos de referencia), `ACAD` (aca
 | **RF-IAM-01** | El sistema debe autenticar usuarios por credenciales y emitir un `access_token` (15 min) y un `refresh_token` (7 días). Un usuario puede tener varias sesiones activas simultáneas. | RN-IAM-02 |
 | **RF-IAM-02** | El sistema debe permitir crear usuarios con una contraseña temporal que caduca en 72 h y debe cambiarse en el primer login. | RN-IAM-05 |
 | **RF-IAM-03** | El sistema debe autorizar cada operación por **feature + scope**: un rol puede ser global (`training_center_id = null`) o restringido a un centro; un coordinador solo opera en su centro. | RN-IAM-03 |
-| **RF-IAM-04** | El sistema debe crear de forma coordinada el usuario y el perfil de actor: no puede existir un instructor sin usuario ni un usuario instructor sin perfil en `actors-service`. | RN-IAM-04 |
+| **RF-IAM-04** | El sistema debe crear de forma coordinada el usuario y el perfil de actor: no puede existir un instructor sin usuario ni un usuario instructor sin perfil en `actors-service`. | RN-IAM-04 · **Parcial·Dev**: el lado `iam` está hecho — al crear un usuario emite `iam.user.created` con `actor_type`/`actor_id` (invariante de RF-IAM-04). La **saga E3** que materializa el perfil en `actors-service` está **DIFERIDA** hasta que exista ese servicio. |
 | **RF-IAM-05** | El sistema debe bloquear la cuenta tras 5 intentos fallidos (15 min) y tras 10 (24 h); el contador se reinicia en login exitoso. | RN-IAM-01 |
+| **RF-IAM-06** | El sistema debe gestionar el ciclo de vida de las sesiones: renovar el `access_token` con el `refresh_token`, cerrar sesión (logout), y listar y revocar las sesiones activas del usuario (`access_token` 15 min / `refresh_token` 7 días). | RN-IAM-02 |
+| **RF-IAM-07** | El sistema debe publicar sus eventos de dominio mediante el patrón **outbox** hacia el topic/exchange `iam-events` (p. ej. `iam.user.created`, `session.started`), con entrega at-least-once. | ADR-001; RN-CROSS-01 |
+| **RF-IAM-08** | El sistema debe exponer un reporte de auditoría de accesos `GET /reports/login-audit` con paginación por cursor. | RN-CROSS-01 |
+| **RF-IAM-09** | El sistema debe emitir JWT **verificables localmente por cada servicio**: claims estándar del proyecto, exposición de la clave pública vía JWKS en `/.well-known/jwks.json` y **rotación** de llaves de firma. | DEC-008; NFR-SCALE-03 |
 
 ## 2. Datos de referencia — `reference-data-service`
 
@@ -96,6 +102,20 @@ Prefijos de módulo: `IAM` (identidad), `REF` (datos de referencia), `ACAD` (aca
 | **RF-AUD-01** | El sistema debe registrar de forma **append-only** todas las acciones de negocio, consumiendo todos los topics de eventos, sin permitir edición ni borrado. | RN-CROSS-01, NFR-REC-04 |
 | **RF-AUD-02** | El sistema debe garantizar la entrega de eventos con at-least-once, idempotencia por `event_id`, reintentos y DLQ. | ADR-001 |
 | **RF-AUD-03** | El sistema debe aplicar el estándar transversal de auditoría y estados parametrizables (autoría, soft delete, `status`). | ADR-004 |
+
+## 10. Notificaciones — `notification-service`
+
+> Servicio **extraído de `monitoring-service`** como bounded context propio (ADR-005). **Construido y verificado en `dev`** (EP-NOTIF, 8/8 HU Done·Dev).
+
+| ID | Requisito | Regla / Nota |
+|----|-----------|--------------|
+| **RF-NOTIF-01** | El sistema debe aceptar solicitudes de notificación por API de forma **asíncrona**: valida la solicitud y responde **`202 Accepted`** sin bloquear en la entrega. | RN-CROSS-01 |
+| **RF-NOTIF-02** | El sistema debe **entregar notificaciones dirigidas por eventos**: consume eventos de dominio del broker y genera la notificación correspondiente. | ADR-001 |
+| **RF-NOTIF-03** | El sistema debe soportar múltiples **canales** de entrega: `EMAIL` e `IN_APP`. | Modelo `notification` |
+| **RF-NOTIF-04** | El sistema debe ser **resiliente**: reintentos con backoff, **DLQ** para mensajes no entregables e **idempotencia por `event_id`** (no duplica una notificación ante reintregas). | ADR-001; NFR-REC-03 |
+| **RF-NOTIF-05** | El sistema debe gestionar **plantillas** de notificación para componer el contenido por tipo/canal. | Modelo `notification_template` |
+| **RF-NOTIF-06** | El sistema debe permitir **consultar** las notificaciones emitidas (`GET`). | — |
+| **RF-NOTIF-07** | El sistema debe emitir observabilidad (OpenTelemetry, endpoints `/health` y `/ready`) y **publicar `notification.notification.sent`** al completar una entrega. | ADR-001; NFR-OBS-04 |
 
 ---
 

@@ -66,8 +66,8 @@ halts_registrados: ninguno
 ```
 /mi-horario                 → Mi horario semana (04 P1)      · scheduling-mfe
 /mi-horario/sesiones/:id    → Detalle de clase (04 P3)       · scheduling-mfe
-/notificaciones             → Notificaciones (04 P2)         · monitoring-mfe
-/notificaciones/:id         → Detalle de notificación (04 P4) · monitoring-mfe
+/notificaciones             → Notificaciones (04 P2)         · shell-host + notification-service (bloqueado)
+/notificaciones/:id         → Detalle de notificación (04 P4) · shell-host + notification-service
 ```
 
 ### Administrador de Centro / Director (`CENTER_DIRECTOR` / `ADMIN`)
