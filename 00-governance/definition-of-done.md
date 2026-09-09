@@ -32,3 +32,24 @@ las carpetas de docs que le correspondan según la [matriz de docs-touchpoints](
 Precedente: en los 2 primeros micros el docs derivó por falta de este sync (7 carpetas congeladas pese a 20 HU).
 El revisor central verifica los touchpoints antes de dar la HU/épica por cerrada. Orden de mantenimiento:
 **docs SSOT primero → backlog/board → repos de código** (gobernanza de punta a punta).
+
+## Done por ambiente — HU de código (regla 2026-09-09)
+
+El `Done` de una **HU de código** es **relativo al ambiente** al que se promovió. El
+registro de la HU (board Project #3 + hu-log) **debe declarar hasta qué ambiente llegó**:
+`Done·Dev`, `Done·QA`, `Done·Staging` o `Done·Main`. Los criterios son **acumulativos**
+(cada gate exige los anteriores) y se apoyan en el flujo de ambientes de
+[`10-devops/environments.md`](../10-devops/environments.md) y las
+[convenciones de Git](./git-conventions.md).
+
+| Gate | Criterios adicionales para alcanzarlo |
+|------|----------------------------------------|
+| **`Done·Dev`** | HU implementada; tests unitarios + de integración verdes; migraciones aplicadas a la BD `develop`; contrato en `shared-contracts` actualizado si aplica; sync de docs por HU (secciones anteriores); PR aprobado y mergeado a `develop`; entrada creada en el `hu-log`. |
+| **`Done·QA`** | Promovido a `qa` por PR/cherry-pick; migraciones **forward-only** aplicadas en la BD `qa`; validación funcional y técnica registrada. |
+| **`Done·Staging`** | Promovido a `staging`; validación de preproducción registrada. |
+| **`Done·Main`** (Producción) | Promovido a `main` vía `release/*`; documentación estable; release anotado. |
+
+Reglas:
+
+- Una HU **no puede marcarse `Hecho`** (estatus final en [agile-conventions](./agile-conventions.md)) sin declarar su `Done·<ambiente>`. `Hecho` sin ambiente es ambiguo y **no se acepta**.
+- Aplica a los **repos de código** (`-db`/`-service`/`-mfe`/`-infra`). El repo `-docs` es main-only y usa el DoD documental del inicio de este archivo.
