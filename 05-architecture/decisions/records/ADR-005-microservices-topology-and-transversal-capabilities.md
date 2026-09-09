@@ -74,7 +74,8 @@ queda como **UX** (mostrar conflictos al armar el borrador), no como mecanismo d
 ### Negativas / Trade-offs
 - +2 repos por extraer `notification` (`notification-service` + `notification-db`).
 - Renombrar 3 remotes (y mapear las carpetas del mockup, que conservan nombre corto).
-- 40 repos totales exigen gobierno uniforme (4 ambientes + git-flow) y tooling de CI/CD.
+- 38 repos de código exigen gobierno uniforme (4 ambientes + git-flow) y tooling de CI/CD
+  (ver [nota de actualización](#nota-de-actualización-2026-09-09--repos-de-soporte) para el inventario real).
 
 ### Riesgos
 - **Sobre-fragmentación de contenedores**: mitigación — cada servicio arranca con su `-api`; los
@@ -91,9 +92,38 @@ queda como **UX** (mostrar conflictos al armar el borrador), no como mecanismo d
 | `notification` dentro de monitoring | Capacidad transversal enterrada; acopla a todos los que notifican. Se extrae. |
 | MFE espejo con nombres cortos | Rompe el slug canónico 1:1. Se unifican a forma larga. |
 
+## Nota de actualización (2026-09-09) — repos de soporte
+
+Esta nota **no cambia la decisión**; corrige el inventario, que estaba incompleto frente a la
+organización real. El árbol de dominio de este ADR cubre los repos de **código**; existen además
+repos de **soporte** que operan hace tiempo y no estaban registrados aquí.
+
+| Categoría | Cantidad | Modelo de ramas |
+|---|---|---|
+| Repos de código (10 `-db` + 10 `-service` + 3 transversales backend + 13 frontend + infra + e2e) | 38 | `develop → qa → staging → main` |
+| Repos documentales / de soporte | 3 | **solo `main`** + rama efímera → PR → borrar |
+| **Total en la org `code-sena`** | **41** | — |
+
+Los 3 repos documentales son:
+
+| Repo | Propósito |
+|---|---|
+| `design-software-docs` | Fuente de verdad documental (este repo). |
+| `design-software-hu-log` | Registro de HU por microservicio + `STATUS.md`, el dashboard de estado repo × capa × ambiente. |
+| `design-software-pages` | Mockups SDD publicados por GitHub Pages (renombrado desde `design-software-mockup` el 2026-09-09). |
+
+El modelo de ramas por tipo de repo está fijado en
+[`git-conventions.md`](../../../00-governance/git-conventions.md).
+
+**Cómo se mantiene sincronizado.** El inventario canónico vive en
+[`topology.json`](https://github.com/code-sena/design-software-hu-log/blob/main/topology.json)
+del repo `hu-log`; su script `generate-status.ps1` compara esa lista contra la organización real y
+reporta cualquier repo nuevo sin registrar, repo faltante o repo cuyo modelo de ramas no cumple.
+Al crear un repo nuevo hay que registrarlo ahí **y** actualizar esta nota.
+
 ## Referencias
 
-- `TOPOLOGIA-REPOS.md` (workspace `design-software/`, fuera del repo docs) — árbol definitivo de los 40 repos
+- `TOPOLOGIA-REPOS.md` (workspace `design-software/`, fuera del repo docs) — árbol de los 38 repos de código
 - [ADR-001](./ADR-001-message-broker.md) · [ADR-002](./ADR-002-scheduling-read-models.md) · [ADR-003](./ADR-003-object-storage.md)
 - [service-catalog.md](../../../09-microservices/service-catalog.md) · [data-ownership-matrix.md](../../../09-microservices/data-ownership-matrix.md) · [event-catalog.md](../../../09-microservices/event-catalog.md)
 - [micro-frontends.md](../../../12-ux-ui/mockup-ddd/micro-frontends.md)
