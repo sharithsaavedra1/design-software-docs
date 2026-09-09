@@ -2,7 +2,7 @@
 
 Repositorio de documentación del proyecto **Horarios SENA**.
 
-Este repositorio es la fuente de verdad documental del proyecto. Todo cambio debe pasar por rama, Pull Request y revisión; no se trabaja directamente sobre `dev`, `qa` ni `main`.
+Este repositorio es la fuente de verdad documental del proyecto y **vive siempre en `main`** (no tiene ambientes `develop`/`qa`/`staging`). Todo cambio entra por **rama efímera → Pull Request → `main` → borrado de la rama**; no se hace commit directo a `main`. Ver [convenciones de Git](./00-governance/git-conventions.md).
 
 ## Reglas rápidas
 

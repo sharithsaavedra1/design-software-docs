@@ -3,18 +3,40 @@
 > Estado: 🟢 Estable | Última actualización: 2026-08-01
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Por definir
 
-Este repositorio usa ramas protegidas, Pull Requests y Conventional Commits para mantener trazabilidad documental.
+El ecosistema tiene **dos modelos de ramas** según el tipo de repositorio. Ambos usan Pull Requests y Conventional Commits.
 
-## Ramas protegidas
+## Alcance: dos modelos de ramas
 
-`develop`, `qa`, `staging` y `main` representan ambientes padre y no se trabajan directamente.
+| Tipo de repo | Modelo de ramas |
+|--------------|-----------------|
+| **`-docs`** (este repo, fuente de verdad) | **Solo `main`.** No tiene ambientes. |
+| **Repos de código** (`-db`, `-service`, `-mfe`, `-infra`, …) | **Flujo de ambientes** `develop → qa → staging → main`. |
+
+## Repo de documentación (`-docs`): solo `main`
+
+El repositorio de docs es la fuente de verdad y **vive siempre en `main`**; no se promueve por ambientes. En reposo solo existe la rama `main`.
+
+Flujo de cambio:
+
+1. Crear una **rama efímera** desde `main` (`docs/…`, `fix/…`, `chore/…` — ver [Ramas documentales](#ramas-documentales)).
+2. Commit(s) + push de la rama efímera.
+3. Abrir **PR hacia `main`**, revisar y mergear (squash).
+4. **Borrar la rama** al mergear.
+
+No existen ramas `develop`/`qa`/`staging` en este repo. No se hace commit directo a `main`.
+
+## Repos de código: ramas protegidas por ambiente
+
+En los repos de código, `develop`, `qa`, `staging` y `main` representan ambientes padre y no se trabajan directamente.
 
 | Rama | Propósito | Regla |
 |------|-----------|-------|
 | `develop` | Integración de trabajo en desarrollo | Recibe PRs desde ramas hijas |
 | `qa` | Validación funcional y técnica | Recibe PRs o cherry-picks aprobados desde `develop` |
 | `staging` | Preproducción / validación previa al release | Recibe PRs o cherry-picks aprobados desde `qa` |
-| `main` | Producción / documentación estable | Recibe solo PRs desde `release/*` (promovidos desde `staging`) |
+| `main` | Producción / código estable | Recibe solo PRs desde `release/*` (promovidos desde `staging`) |
+
+Las secciones siguientes (**Ramas por historia de usuario**, **Flujo hacia develop/qa/staging**, **Release hacia main**) aplican a **repos de código**. Para el repo `-docs`, usar únicamente el flujo de rama efímera → PR → `main` descrito arriba.
 
 ## Ramas documentales
 
