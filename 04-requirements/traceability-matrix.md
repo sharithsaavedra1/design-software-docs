@@ -5,7 +5,7 @@
 
 > Fuente: [functional.md](./functional.md) · [user-stories.md](./user-stories.md) · [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md)
 
-> **Dos esquemas de IDs.** Las historias `HU-01..HU-23` de las matrices originales son los IDs **de planeación** del backlog. La construcción real se ejecuta con IDs propios por épica: **`HU-IAM-001..012`** (épica **EP-IAM**, issue docs#79; issues docs#80–#91) y **`HU-NOTIF-001..008`** (épica **EP-NOTIF**). La sección [Matriz de ejecución real](#matriz-de-ejecución-real-construido) mapea estos IDs reales a sus RF, servicio y estado. El estado vivo por historia vive en **GitHub Project #3**; este `.md` es la SSOT de la trazabilidad HU↔RF.
+> **Dos capas de IDs** (ver [`00-governance/agile-conventions.md`](../00-governance/agile-conventions.md)). Las historias `HU-01..HU-23` son los IDs **de planeación** del backlog (capa de producto). La construcción real usa IDs **de ejecución** por microservicio, agrupados en épicas de ejecución `EP-<MICRO>-NN`: **`HU-IAM-001..012`** (épica **EP-IAM-01**, issue docs#79; issues docs#80–#91) y **`HU-NOTIF-001..008`** (épica **EP-NOTIF-01**). La sección [Matriz de ejecución real](#matriz-de-ejecución-real-construido) mapea estos IDs reales a sus RF, servicio y estado. El estado vivo por historia vive en **GitHub Project #3**; este `.md` es la SSOT de la trazabilidad HU↔RF.
 
 ## Propósito
 
@@ -65,7 +65,14 @@ Leyenda de servicios: `iam`, `reference-data`, `academic-management`, `training-
 
 Historias efectivamente construidas y verificadas en el ambiente **`dev`**. Estado por historia en **GitHub Project #3** (aquí se fija la trazabilidad HU real ↔ RF). Ningún servicio de estas épicas está promovido a `qa`/`staging`/`main` todavía.
 
-### EP-IAM — `iam-service` (épica issue docs#79) · 12/12 Done·Dev
+#### Mapeo épicas de ejecución → producto
+
+| Épica de ejecución | Microservicio | Realiza (producto) |
+|--------------------|---------------|--------------------|
+| `EP-IAM-01` | `iam-service` | `EPC-01` (Identidad y control de acceso) |
+| `EP-NOTIF-01` | `notification-service` | Transversal (capacidad de entrega; sin `EPC-NN` propia — ver [`15-project-control/open-questions.md`](../15-project-control/open-questions.md)) |
+
+### EP-IAM-01 — `iam-service` (épica issue docs#79) · 12/12 Done·Dev
 
 | HU real | RF | Capacidad construida | Servicio | Issue | Estado |
 |---------|----|----------------------|----------|-------|--------|
@@ -82,7 +89,7 @@ Historias efectivamente construidas y verificadas en el ambiente **`dev`**. Esta
 | HU-IAM-011 | NFR-OBS-04/06/07 | Observabilidad OTel + health (`/health`, `/ready`) | `iam-service` | docs#90 | ✅ Done·Dev |
 | HU-IAM-012 | (E2E integración local) | Servicio levantado localmente y probado E2E | `iam-service` | docs#91 | ✅ Done·Dev |
 
-### EP-NOTIF — `notification-service` (extraído de `monitoring`, ADR-005) · 8/8 Done·Dev
+### EP-NOTIF-01 — `notification-service` (extraído de `monitoring`, ADR-005) · 8/8 Done·Dev
 
 | HU real | RF | Capacidad construida | Servicio | Estado |
 |---------|----|----------------------|----------|--------|
