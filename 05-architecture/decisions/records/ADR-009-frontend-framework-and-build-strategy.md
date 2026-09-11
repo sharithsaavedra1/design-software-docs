@@ -1,7 +1,8 @@
 # ADR-009: Framework de frontend y estrategia de build para micro-frontends
 
-**Estado:** ACCEPTED (2026-09-09)
-**Fecha:** 2026-09-09
+**Estado:** ACCEPTED (2026-09-09, rev. 2)
+**Fecha:** 2026-09-09 (rev. 2: cierra 5 huecos de robustez detectados en autoauditoría — CSS, remotes
+por ambiente, ruteo anidado, falla de carga, gate de compatibilidad)
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Frontend, Formación (aprendices SENA)
 
@@ -105,9 +106,85 @@ integración con Testing Library. DoD de cada HU de frontend exige tests en verd
   `AuthClient`/`HttpClient`, sin `EventBus`).
 - **Container/Presentational** dentro de cada MFE: `adapter/in/pages` (containers, consumen hooks de
   `application/`) vs. componentes puramente presentacionales (reciben props, sin lógica de datos).
-- **Error boundary por remote** — un remote caído no debe tumbar el shell ni a los demás remotes.
+- **Error boundary por remote** — un remote caído no debe tumbar el shell ni a los demás remotes. Ver
+  §8 para el mecanismo exacto (Suspense + ErrorBoundary, no solo uno de los dos).
 
-### 7. Convención de código = ADR-006 §"Prohibido" (mismo estándar, sin duplicar)
+### 7bis. Aislamiento de CSS (obligatorio, no opcional)
+
+Ningún selector global fuera de `design-system` (que sí publica el reset/tokens base, por diseño —
+es la única fuente de estilos compartidos). Cada MFE usa **CSS Modules** (`*.module.css`, soportado
+nativo por Vite, cero dependencia extra): las clases se scope-an automáticamente por archivo, un
+`.button` en `scheduling-mfe` no puede pisar un `.button` en `iam-mfe`. Regla verificable: ningún
+archivo `.css` sin sufijo `.module.css` fuera de `design-system/src/`. Adicional: el contenedor raíz
+de cada remote monta con `data-mfe="<dominio>"` (ya presente en el `App.tsx` actual) — sirve como
+anclaje si algún día se necesita un selector defensivo adicional.
+
+### 8. Carga de remotes: Suspense + ErrorBoundary (no uno solo)
+
+Un Error Boundary **solo** atrapa errores de render — la carga de `remoteEntry.js` es una falla
+**async** (remote caído, red, deploy a medias) que un Error Boundary por sí solo no cubre limpio. El
+host monta cada remote así:
+
+```tsx
+const IamApp = lazy(() => import('iamMfe/App'))
+
+<ErrorBoundary fallback={<RemoteUnavailable domain="iam" />}>
+  <Suspense fallback={<LoadingRemote domain="iam" />}>
+    <IamApp />
+  </Suspense>
+</ErrorBoundary>
+```
+
+`Suspense` cubre el estado de carga (incluye la descarga de `remoteEntry.js`); `ErrorBoundary` cubre
+tanto el rechazo del `import()` (remote inalcanzable) como errores de render una vez montado.
+`RemoteUnavailable`/`LoadingRemote` viven en `design-system` (son UI compartida, no lógica de MFE).
+
+### 9. Resolución de remotes por ambiente (4 ambientes, no URLs fijas)
+
+El proyecto opera en **4 ambientes** (dev/qa/staging/main, ver skill `design-software-project`) — la
+URL de `remoteEntry.js` de cada remote **no puede** quedar hardcodeada en `vite.config.ts` (eso solo
+sirve para dev local). El host resuelve remotes en runtime, no en build time, vía
+`@module-federation/vite`'s `initManifest`/`init()` dinámico:
+
+- Un archivo `remotes.<env>.json` (uno por ambiente, no versionado con secretos) lista
+  `{ "iamMfe": "https://iam-mfe.<env>.horarios-sena.internal/remoteEntry.js", ... }` — el host lo
+  carga según `import.meta.env.MODE` (o la env var que ya use el proyecto para distinguir ambiente,
+  ver convención de `docker-infra`) **antes** de inicializar Module Federation.
+- Dev local sigue usando `localhost:51xx` (§ Puertos, en la skill) vía el mismo mecanismo, solo que
+  `remotes.dev.json` apunta a `localhost`.
+- Ningún commit debe tener una URL de `remoteEntry` de staging/main hardcodeada en código — igual
+  regla que "nunca secretos hardcodeados" de ADR-006, aplicada a endpoints de remotes.
+
+### 10. Ruteo anidado: shell enruta por dominio, remote enruta internamente
+
+`react-router-dom` se agrega a la lista de `shared: { singleton: true }` (junto a react/react-dom) —
+sin esto, shell y remote traen cada uno su propio contexto de router y `useNavigate`/`Link` dejan de
+interoperar. Convención de composición:
+
+- El shell declara **una ruta comodín por dominio**: `<Route path="/scheduling/*" element={<IamApp />} />`.
+- Cada remote trae su **propio árbol de rutas internas** bajo ese prefijo
+  (`/scheduling`, `/scheduling/:id`, `/scheduling/new`), declarado dentro de su propio `<Routes>` — el
+  remote es dueño de su sub-árbol, el shell no conoce las rutas internas de ningún dominio (mismo
+  principio de "el shell no tiene lógica de dominio").
+- Una sola instancia de `BrowserRouter`/historial — la crea el shell; los remotes nunca instancian su
+  propio `Router` de nivel superior.
+
+### 11. Gate de compatibilidad host↔remote (equivalente a Pact, resuelto — no queda pendiente)
+
+Dos capas, no una sola:
+
+1. **Contrato de tipos TS** — `frontend-platform/src/contracts/remote-props.ts` exporta una interfaz
+   por dominio (`IamMfeProps`, `SchedulingMfeProps`, …) que describe la forma del componente que cada
+   remote expone. El `App.tsx` real de cada remote debe **implementar** esa interfaz (`App: FC<IamMfeProps>`
+   o equivalente); si un remote cambia su forma expuesta de modo incompatible, **su propio build de TS
+   falla** antes de llegar a integrarse con el host — no hace falta esperar a runtime.
+2. **Smoke test de integración en el CI del host** — el pipeline de `web-shell` importa dinámicamente
+   el `remoteEntry.js` real de cada remote (contra el manifest de QA, no localhost) y lo monta con
+   Testing Library, asertando que renderiza sin lanzar. Esto atrapa lo que los tipos no pueden
+   (cambios runtime-only, un remote que rompe su propio bootstrap). Una falla aquí **bloquea el merge**
+   del host — mismo principio que "build en rojo bloquea" del gate Pact backend (ADR-006 §7).
+
+### 12. Convención de código = ADR-006 §"Prohibido" (mismo estándar, sin duplicar)
 
 Código, nombres, comentarios y mensajes de commit en **inglés**, Conventional Commits
 (`feat(<dominio>-mfe): ...`); secretos nunca hardcodeados; solo copy visible al usuario y
@@ -130,8 +207,8 @@ documentación funcional en español. Mismo `sena-platform`-style guardrail que 
 
 ### Riesgos
 - Repetir el mismo error que backend ya evitó con `shared-contracts`: MFEs que copian tipos a mano en
-  vez de generarlos del contrato → deriva. Mitigación: regla 3 de esta ADR + Pact-equivalente pendiente
-  de definir para frontend (fuera de alcance de esta ADR, ver Pendientes).
+  vez de generarlos del contrato → deriva. Mitigación: regla 5 (SDD) + regla 11 (gate de compatibilidad
+  host↔remote, contrato de tipos + smoke test en CI).
 - Design system con tokens vacíos "por defecto" indefinidamente. Mitigación: es DoR explícito de la
   primera HU de `design-system` (no se cierra la HU sin migrar `design-tokens.md` a código).
 
@@ -146,9 +223,9 @@ documentación funcional en español. Mismo `sena-platform`-style guardrail que 
 
 ## Pendientes (fuera de alcance de esta ADR)
 
-- Gate de contrato en CI equivalente a Pact para frontend (¿MSW + contract tests? ¿Pact también del
-  lado consumer?) — evaluar cuando el primer remote piloto esté construido.
 - Framework de Web Components para `design-system` si se reabre la decisión de multi-framework.
+- Observabilidad frontend (RUM/OTel en navegador) — no cubierto aquí; evaluar junto con
+  [ADR-008](./ADR-008-observability-opentelemetry.md) cuando el primer remote piloto esté en QA.
 
 ## Referencias
 
