@@ -125,6 +125,7 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 | `ACT_COMPANY_VIEW` | Ver empresas vinculadas | READ |
 | `ACT_COMPANY_MANAGE` | CRUD de empresas | WRITE |
 | `ACT_ACTIVITY_LOG_VIEW` | Ver bitácora de actividad de actores | READ |
+| `ACT_INTERNAL_FICHA_LEARNER_COUNT` | Contar aprendices activos por ficha (interno, servicio-a-servicio) | READ |
 
 ### MOD_DOCUMENTS
 
@@ -250,6 +251,7 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `ACT_COMPETENCY_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_PROFILE | ❌ | ❌ |
 | `ACT_COMPETENCY_ASSIGN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `ACT_PRODUCTIVE_STAGE_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
+| `ACT_INTERNAL_FICHA_LEARNER_COUNT` | ✅ GLOBAL | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `MON_DASHBOARD_FULL` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `MON_DASHBOARD_OWN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
 | `MON_TRACKING_SESSION_CREATE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
@@ -262,6 +264,15 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `NOTIF_SEND` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `NOTIF_TEMPLATE_MANAGE` | ✅ GLOBAL | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `AUDIT_LOG_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ | ❌ |
+
+> **M2M / service-to-service:** `ACT_INTERNAL_FICHA_LEARNER_COUNT` no se otorga a roles
+> humanos de operación diaria. Debe emitirse en tokens de cliente de servicio
+> (client credentials) para `academic-management-service` con scope `GLOBAL`, de modo
+> que pueda invocar
+> `GET /internal/fichas/{ficha_id}/active-learners/count` en actors-service.
+> `SYSTEM_ADMIN` conserva el feature con scope `GLOBAL` solo para diagnóstico.
+> El JWT de llamada también debe incluir `ACADEMIC_FICHA_VIEW:GLOBAL` cuando Actors
+> valide la existencia de la ficha contra Academic Management (acuerdo IAM/Academic).
 
 ---
 
