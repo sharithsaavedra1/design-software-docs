@@ -26,7 +26,6 @@ tags:
     description: Reportes propios del dominio de actores.
 
 paths:
-  # ---------------------------------------------------------------- companies
   /companies:
     get:
       operationId: listCompanies
@@ -159,7 +158,6 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
 
-  # ---------------------------------------------------------------- instructors
   /instructors:
     get:
       operationId: listInstructors
@@ -805,6 +803,55 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+
+
+  # ---------------------------------------------------------------- internal (service-to-service)
+  /internal/fichas/{ficha_id}/active-learners/count:
+    servers:
+      - url: /
+    get:
+      operationId: countActiveLearnersByFicha
+      tags: [learners]
+      summary: Cuenta aprendices activos por ficha.
+      description: >-
+        Endpoint interno servicio-a-servicio consumido por academic-management-service
+        para validar reducciones de cupo sin acceder directamente a la base de datos
+        de actors-service. La operacion es de solo lectura.
+      x-required-feature: ACT_INTERNAL_FICHA_LEARNER_COUNT
+      parameters:
+        - name: ficha_id
+          in: path
+          required: true
+          description: Identificador de la ficha en academic-management-service.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conteo de aprendices activos de la ficha.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLearnersCount'
+              examples:
+                without_active_learners:
+                  value:
+                    ficha_id: 00000000-0000-4000-8000-000000000001
+                    active_learners: 0
+                with_active_learners:
+                  value:
+                    ficha_id: 00000000-0000-4000-8000-000000000002
+                    active_learners: 25
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '502':
+          description: Academic Management no disponible para validar la existencia de la ficha.
+          content:
+            application/json:
+              schema:
+                $ref: '_shared.yaml#/components/schemas/Error'
 
   # ---------------------------------------------------------------- tracking (own domain)
   /productive-stages:
@@ -1826,6 +1873,21 @@ components:
           type: integer
           minimum: 0
           description: Excepciones de disponibilidad que solapan el rango from/to consultado.
+
+
+    ActiveLearnersCount:
+      type: object
+      required: [ficha_id, active_learners]
+      properties:
+        ficha_id:
+          type: string
+          format: uuid
+          description: Identificador de la ficha consultada.
+        active_learners:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Numero de aprendices activos con inscripcion vigente en la ficha.
 
   securitySchemes:
     bearerAuth:
