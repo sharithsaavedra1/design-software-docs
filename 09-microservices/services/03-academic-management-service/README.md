@@ -1,17 +1,20 @@
-﻿# academic-management-service
+# academic-management-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M5 + M6 |
+| Módulo | M5 + M6 |
 | App repo | `design-software-academic-management-service` |
 | DB repo | `design-software-academic-management-db` |
 | Stack | Java / Spring Boot / Maven |
 | Deployables | academic-management-api |
-| Estado observado | Implementado con arquitectura hexagonal y modulos academic-core, academic-adapters y academic-management-api. |
+| Estado observado | Implementado con arquitectura hexagonal y módulos academic-core, academic-adapters y academic-management-api. |
 
 ## Responsabilidad
 
-Lineas/redes tecnologicas, programas, competencias, resultados de aprendizaje y fichas.
+Líneas/redes tecnológicas, programas, competencias, resultados de aprendizaje y fichas.
 
 ## Persistencia
 
@@ -55,7 +58,7 @@ Lineas/redes tecnologicas, programas, competencias, resultados de aprendizaje y 
 | GET | `/training-programs/{programId}/competencies` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
 | POST | `/training-programs/{programId}/competencies` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
 
-## Configuracion
+## Configuración
 
 - `ACADEMIC_COMPETENCY_ROUTING_KEY`
 - `ACADEMIC_EVENTS_EXCHANGE`
@@ -75,4 +78,4 @@ Lineas/redes tecnologicas, programas, competencias, resultados de aprendizaje y 
 
 ## Notas
 
-Consulta reference-data y actors; publica eventos de ficha/programa por RabbitMQ.
+Consulta reference-data y actors; pública eventos de ficha/programa por RabbitMQ.

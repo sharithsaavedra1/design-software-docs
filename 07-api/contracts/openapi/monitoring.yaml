@@ -1,30 +1,30 @@
-﻿openapi: 3.1.0
+openapi: 3.1.0
 info:
-  title: Monitoring Service API â€” Horarios SENA
+  title: Monitoring Service API — Horarios SENA
   version: 1.0.0
   description: >-
-    Seguimiento de fichas en ejecuciÃ³n: KPIs medidos, alertas por umbral, sesiones de
-    seguimiento periÃ³dico y planes de mejoramiento a nivel de ficha. Alineado con el modelo
+    Seguimiento de fichas en ejecución: KPIs medidos, alertas por umbral, sesiones de
+    seguimiento periódico y planes de mejoramiento a nivel de ficha. Alineado con el modelo
     de datos de monitoring-service (`monitoring_db`)
-    y con 07-api/guidelines.md. Fuente de verdad del contrato. La extensiÃ³n
-    `x-required-feature` declara el feature RBAC que exige cada operaciÃ³n (o
+    y con 07-api/guidelines.md. Fuente de verdad del contrato. La extensión
+    `x-required-feature` declara el feature RBAC que exige cada operación (o
     `x-required-feature-any: [A, B]` cuando acepta cualquiera de varios, p. ej.
     `MON_DASHBOARD_FULL` o `MON_DASHBOARD_OWN`) (ver
-    rbac-design.md, mÃ³dulo `MOD_MONITORING`). Reportes descentralizados: este servicio
-    sÃ³lo publica los KPIs/indicadores de su propio dominio (guidelines Â§11).
+    rbac-design.md, módulo `MOD_MONITORING`). Reportes descentralizados: este servicio
+    sólo pública los KPIs/indicadores de su propio dominio (guidelines §11).
 servers:
   - url: /api/v1
 security:
   - bearerAuth: []
 tags:
   - name: catalogs
-    description: CatÃ¡logos propios (tipos de KPI, tipos de alerta, niveles de riesgo, estados de KPI).
+    description: Catálogos propios (tipos de KPI, tipos de alerta, niveles de riesgo, estados de KPI).
   - name: tracking
-    description: Seguimiento consolidado de ficha y sesiones periÃ³dicas de seguimiento.
+    description: Seguimiento consolidado de ficha y sesiones periódicas de seguimiento.
   - name: kpis
     description: Mediciones de KPI por ficha (serie temporal).
   - name: alerts
-    description: Alertas generadas por umbral y su resoluciÃ³n.
+    description: Alertas generadas por umbral y su resolución.
   - name: improvement-plans
     description: Planes de mejoramiento a nivel de ficha.
   - name: reports
@@ -45,7 +45,7 @@ paths:
         - name: code
           in: query
           required: false
-          description: Filtra por cÃ³digo exacto (ej. ATTENDANCE, DROPOUT_RISK).
+          description: Filtra por código exacto (ej. ATTENDANCE, DROPOUT_RISK).
           schema: { type: string }
         - name: is_active
           in: query
@@ -53,7 +53,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: PÃ¡gina de tipos de KPI.
+          description: Página de tipos de KPI.
           content:
             application/json:
               schema:
@@ -153,7 +153,7 @@ paths:
         - name: code
           in: query
           required: false
-          description: Filtra por cÃ³digo exacto (ej. LOW_ATTENDANCE, INSTRUCTOR_OVERLOAD).
+          description: Filtra por código exacto (ej. LOW_ATTENDANCE, INSTRUCTOR_OVERLOAD).
           schema: { type: string }
         - name: is_active
           in: query
@@ -161,7 +161,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: PÃ¡gina de tipos de alerta.
+          description: Página de tipos de alerta.
           content:
             application/json:
               schema:
@@ -306,11 +306,11 @@ paths:
         - name: overall_status
           in: query
           required: false
-          description: Filtra por cÃ³digo de kpi_status (ej. ON_TRACK, AT_RISK, CRITICAL).
+          description: Filtra por código de kpi_status (ej. ON_TRACK, AT_RISK, CRITICAL).
           schema: { type: string }
       responses:
         '200':
-          description: PÃ¡gina de seguimientos de ficha.
+          description: Página de seguimientos de ficha.
           content:
             application/json:
               schema:
@@ -330,7 +330,7 @@ paths:
     get:
       operationId: getFichaTracking
       tags: [tracking]
-      summary: Seguimiento consolidado de una ficha (estado global, alertas activas, prÃ³ximas fechas).
+      summary: Seguimiento consolidado de una ficha (estado global, alertas activas, próximas fechas).
       description: >-
         Solo lectura: `ficha_tracking` se recalcula por el `alert-worker` a partir de
         eventos de dominio; no se crea ni actualiza por REST.
@@ -351,7 +351,7 @@ paths:
     get:
       operationId: listTrackingSessions
       tags: [tracking]
-      summary: Sesiones de seguimiento de la ficha (cronolÃ³gico).
+      summary: Sesiones de seguimiento de la ficha (cronológico).
       x-required-feature: MON_TRACKING_SESSION_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -375,7 +375,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: PÃ¡gina de sesiones de seguimiento.
+          description: Página de sesiones de seguimiento.
           content:
             application/json:
               schema:
@@ -392,9 +392,9 @@ paths:
     post:
       operationId: createTrackingSession
       tags: [tracking]
-      summary: Registra una sesiÃ³n de seguimiento (append-only).
+      summary: Registra una sesión de seguimiento (append-only).
       description: >-
-        Normativa SENA: seguimiento mÃ­nimo mensual para fichas en EjecuciÃ³n
+        Normativa SENA: seguimiento mínimo mensual para fichas en Ejecución
         (Acuerdo 00003/2012). `attendance_percentage` es calculada por el servidor.
       x-required-feature: MON_TRACKING_SESSION_CREATE
       requestBody:
@@ -404,7 +404,7 @@ paths:
             schema: { $ref: '#/components/schemas/TrackingSessionCreate' }
       responses:
         '201':
-          description: SesiÃ³n de seguimiento registrada.
+          description: Sesión de seguimiento registrada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrackingSession' }
@@ -420,16 +420,16 @@ paths:
       - name: session_id
         in: path
         required: true
-        description: UUID de la sesiÃ³n de seguimiento.
+        description: UUID de la sesión de seguimiento.
         schema: { type: string, format: uuid }
     get:
       operationId: getTrackingSession
       tags: [tracking]
-      summary: Detalle de una sesiÃ³n de seguimiento.
+      summary: Detalle de una sesión de seguimiento.
       x-required-feature: MON_TRACKING_SESSION_VIEW
       responses:
         '200':
-          description: SesiÃ³n de seguimiento.
+          description: Sesión de seguimiento.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrackingSession' }
@@ -442,10 +442,11 @@ paths:
     get:
       operationId: listKpiTrackings
       tags: [kpis]
-      summary: Mediciones de KPI (paginaciÃ³n por cursor; colecciÃ³n de crecimiento continuo).
+      summary: Mediciones de KPI (paginación por cursor; colección de crecimiento continuo).
       description: >-
-        Solo lectura: `kpi_tracking` se produce por el `alert-worker` a partir de
-        eventos de dominio; no se crea por REST. Particionada por `measured_at`.
+        `kpi_tracking` se produce por el `alert-worker` a partir de eventos de dominio
+        y también puede registrarse por REST mediante `POST /kpi-trackings` para
+        conciliación con el endpoint implementado RecordKpi. Particionada por `measured_at`.
       x-required-feature: MON_KPI_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/cursor'
@@ -457,12 +458,12 @@ paths:
         - name: kpi_type
           in: query
           required: false
-          description: Filtra por cÃ³digo de kpi_type (ej. ATTENDANCE).
+          description: Filtra por código de kpi_type (ej. ATTENDANCE).
           schema: { type: string }
         - name: kpi_status
           in: query
           required: false
-          description: Filtra por cÃ³digo de kpi_status (ej. AT_RISK).
+          description: Filtra por código de kpi_status (ej. AT_RISK).
           schema: { type: string }
         - name: from
           in: query
@@ -476,7 +477,7 @@ paths:
           schema: { type: string, format: date-time }
       responses:
         '200':
-          description: PÃ¡gina de mediciones de KPI.
+          description: Página de mediciones de KPI.
           content:
             application/json:
               schema:
@@ -489,6 +490,31 @@ paths:
                   pagination: { $ref: '_shared.yaml#/components/schemas/CursorPagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+    post:
+      operationId: recordKpi
+      tags: [kpis]
+      summary: Registra una medición KPI.
+      description: >-
+        Endpoint de escritura rastreado como RecordKpi en el servicio. Crea una medición
+        `kpi_tracking` y deja al ciclo de vida de alertas/estado a cargo del
+        `alert-worker`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Medición de KPI registrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KpiTracking' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
   /kpi-trackings/{id}:
     parameters:
@@ -496,11 +522,11 @@ paths:
     get:
       operationId: getKpiTracking
       tags: [kpis]
-      summary: Detalle de una mediciÃ³n puntual de KPI.
+      summary: Detalle de una medición puntual de KPI.
       x-required-feature: MON_KPI_VIEW
       responses:
         '200':
-          description: MediciÃ³n de KPI.
+          description: Medición de KPI.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/KpiTracking' }
@@ -513,7 +539,7 @@ paths:
     get:
       operationId: listGeneratedAlerts
       tags: [alerts]
-      summary: Alertas generadas (paginaciÃ³n por cursor; colecciÃ³n de crecimiento continuo).
+      summary: Alertas generadas (paginación por cursor; colección de crecimiento continuo).
       description: >-
         Solo lectura: `generated_alert` se produce por el `alert-worker` a partir de
         eventos de dominio; no se crea por REST. Esta API permite consultarlas y
@@ -529,12 +555,12 @@ paths:
         - name: alert_type
           in: query
           required: false
-          description: Filtra por cÃ³digo de alert_type (ej. LOW_ATTENDANCE).
+          description: Filtra por código de alert_type (ej. LOW_ATTENDANCE).
           schema: { type: string }
         - name: risk_level
           in: query
           required: false
-          description: Filtra por cÃ³digo de risk_level.
+          description: Filtra por código de risk_level.
           schema:
             type: string
             enum: [INFO, LOW, MEDIUM, HIGH, CRITICAL]
@@ -554,7 +580,7 @@ paths:
           schema: { type: string, format: date-time }
       responses:
         '200':
-          description: PÃ¡gina de alertas generadas.
+          description: Página de alertas generadas.
           content:
             application/json:
               schema:
@@ -645,7 +671,7 @@ paths:
             enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED]
       responses:
         '200':
-          description: PÃ¡gina de planes de mejoramiento.
+          description: Página de planes de mejoramiento.
           content:
             application/json:
               schema:
@@ -700,10 +726,10 @@ paths:
     put:
       operationId: updateImprovementPlan
       tags: [improvement-plans]
-      summary: Actualiza el plan de mejoramiento (avance, cierre o cancelaciÃ³n).
+      summary: Actualiza el plan de mejoramiento (avance, cierre o cancelación).
       description: >-
-        TransiciÃ³n de estado vÃ¡lida: PENDING â†’ IN_PROGRESS â†’ COMPLETED / CANCELLED.
-        Una transiciÃ³n invÃ¡lida (ej. plan ya COMPLETED) retorna 409.
+        Transición de estado válida: PENDING → IN_PROGRESS → COMPLETED / CANCELLED.
+        Una transición inválida (ej. plan ya COMPLETED) retorna 409.
       x-required-feature: MON_IMPROVEMENT_PLAN_MANAGE
       requestBody:
         required: true
@@ -728,12 +754,12 @@ paths:
     get:
       operationId: reportKpiSummary
       tags: [reports]
-      summary: Ãšltima mediciÃ³n de cada KPI por ficha, con su estado y nivel de riesgo.
+      summary: Última medición de cada KPI por ficha, con su estado y nivel de riesgo.
       description: >-
-        Reporte propio del dominio de monitoreo. Cruza `kpi_tracking` (Ãºltima mediciÃ³n
+        Reporte propio del dominio de monitoreo. Cruza `kpi_tracking` (última medición
         por ficha_tracking_id + kpi_type_id) con `kpi_type`, `kpi_status` y `risk_level`.
         No incluye datos de otros servicios (solo referencias externas por id). Solo
-        lectura. Inventario â€” Usuarios: coordinaciÃ³n acadÃ©mica, instructores de
+        lectura. Inventario — Usuarios: coordinación académica, instructores de
         seguimiento, panel de monitoreo; Frecuencia: on-demand; Formato: JSON; Fuente:
         `monitoring_db.kpi_tracking`, `kpi_type`, `kpi_status`, `risk_level`.
       x-required-feature: MON_REPORT_VIEW
@@ -748,12 +774,12 @@ paths:
         - name: kpi_type
           in: query
           required: false
-          description: Filtra por cÃ³digo de kpi_type.
+          description: Filtra por código de kpi_type.
           schema: { type: string }
         - name: status
           in: query
           required: false
-          description: Filtra por cÃ³digo de kpi_status.
+          description: Filtra por código de kpi_status.
           schema: { type: string }
         - name: from
           in: query
@@ -767,7 +793,7 @@ paths:
           schema: { type: string, format: date-time }
       responses:
         '200':
-          description: PÃ¡gina del reporte de KPIs.
+          description: Página del reporte de KPIs.
           content:
             application/json:
               schema:
@@ -789,11 +815,11 @@ paths:
       summary: Indicadores agregados de salud de fichas por estado y nivel de riesgo.
       description: >-
         Reporte propio del dominio de monitoreo. Agrega `ficha_tracking` por
-        `overall_status_id` (vÃ­a `kpi_status` â†’ `risk_level`), contando fichas y
+        `overall_status_id` (vía `kpi_status` → `risk_level`), contando fichas y
         promediando `active_alert_count`. Vista de tablero, no de detalle por ficha
         (para eso ver `/reports/kpi-summary` o `/ficha-trackings`). No incluye datos
-        de otros servicios. Solo lectura. Inventario â€” Usuarios: direcciÃ³n de centro,
-        coordinaciÃ³n acadÃ©mica; Frecuencia: on-demand (refrescado por triggers de
+        de otros servicios. Solo lectura. Inventario — Usuarios: dirección de centro,
+        coordinación académica; Frecuencia: on-demand (refrescado por triggers de
         `active_alert_count`); Formato: JSON; Fuente: `monitoring_db.ficha_tracking`,
         `kpi_status`, `risk_level`.
       x-required-feature: MON_REPORT_VIEW
@@ -804,7 +830,7 @@ paths:
         - name: status
           in: query
           required: false
-          description: Filtra por cÃ³digo de kpi_status.
+          description: Filtra por código de kpi_status.
           schema: { type: string }
         - name: assigned_instructor_id
           in: query
@@ -813,7 +839,7 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
-          description: PÃ¡gina del reporte de indicadores.
+          description: Página del reporte de indicadores.
           content:
             application/json:
               schema:
@@ -842,30 +868,6 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-  /kpis:
-    post:
-      operationId: recordKpi
-      tags: [kpis]
-      summary: Registra una medicion KPI.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: true
-      responses:
-        '201':
-          description: KPI registrado.
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-
 components:
   parameters:
     KpiTypeId:
@@ -890,7 +892,7 @@ components:
       name: id
       in: path
       required: true
-      description: UUID de la mediciÃ³n de KPI.
+      description: UUID de la medición de KPI.
       schema: { type: string, format: uuid }
     GeneratedAlertId:
       name: id
@@ -951,7 +953,7 @@ components:
           type: [string, 'null']
         default_threshold:
           type: [number, 'null']
-          description: 'Valor umbral por defecto (ej. 0.80 = 80% asistencia mÃ­nima).'
+          description: 'Valor umbral por defecto (ej. 0.80 = 80% asistencia mínima).'
         threshold_unit:
           type: [string, 'null']
           enum: [PERCENTAGE, COUNT, DAYS, HOURS, null]
@@ -1017,11 +1019,11 @@ components:
         ficha_id:
           type: string
           format: uuid
-          description: Referencia lÃ³gica a enrollment_ficha.id en academic-management-service (sin FK fÃ­sica).
+          description: Referencia lógica a enrollment_ficha.id en academic-management-service (sin FK física).
         assigned_instructor_id:
           type: string
           format: uuid
-          description: Referencia lÃ³gica a instructor.id en actors-service (sin FK fÃ­sica).
+          description: Referencia lógica a instructor.id en actors-service (sin FK física).
         overall_status_id:
           type: string
           format: uuid
@@ -1047,7 +1049,7 @@ components:
         instructor_id:
           type: string
           format: uuid
-          description: Referencia lÃ³gica a instructor.id en actors-service (sin FK fÃ­sica).
+          description: Referencia lógica a instructor.id en actors-service (sin FK física).
         session_date: { type: string, format: date }
         session_type:
           type: string
@@ -1094,7 +1096,7 @@ components:
         current_value: { type: number }
         threshold_value:
           type: number
-          description: Umbral de la alerta relacionada al momento de la mediciÃ³n.
+          description: Umbral de la alerta relacionada al momento de la medición.
         kpi_status_id: { type: string, format: uuid }
         period_start: { type: string, format: date }
         period_end: { type: string, format: date }
@@ -1111,17 +1113,17 @@ components:
         source_event_id:
           type: string
           format: uuid
-          description: event_id del evento del bus de mensajes que disparÃ³ la alerta (no es una entidad consultable).
+          description: event_id del evento del bus de mensajes que disparó la alerta (no es una entidad consultable).
         affected_learner_id:
           type: [string, 'null']
           format: uuid
           description: >-
-            Referencia lÃ³gica a learner.id en actors-service (sin FK fÃ­sica). Arco
-            exclusivo con affected_instructor_id: como mÃ¡ximo uno de los dos estÃ¡ poblado.
+            Referencia lógica a learner.id en actors-service (sin FK física). Arco
+            exclusivo con affected_instructor_id: como máximo uno de los dos está poblado.
         affected_instructor_id:
           type: [string, 'null']
           format: uuid
-          description: Referencia lÃ³gica a instructor.id en actors-service (sin FK fÃ­sica). Ver arco exclusivo.
+          description: Referencia lógica a instructor.id en actors-service (sin FK física). Ver arco exclusivo.
         triggered_value:
           type: [number, 'null']
         threshold_value:
@@ -1131,7 +1133,7 @@ components:
         resolved_by:
           type: [string, 'null']
           format: uuid
-          description: Referencia lÃ³gica a user.id en iam-service (sin FK fÃ­sica).
+          description: Referencia lógica a user.id en iam-service (sin FK física).
         resolution_notes:
           type: [string, 'null']
         generated_at: { type: string, format: date-time }
@@ -1159,11 +1161,11 @@ components:
         learner_id:
           type: [string, 'null']
           format: uuid
-          description: Referencia lÃ³gica a learner.id en actors-service (sin FK fÃ­sica); null si aplica a toda la ficha.
+          description: Referencia lógica a learner.id en actors-service (sin FK física); null si aplica a toda la ficha.
         instructor_id:
           type: [string, 'null']
           format: uuid
-          description: Referencia lÃ³gica a instructor.id en actors-service (sin FK fÃ­sica).
+          description: Referencia lógica a instructor.id en actors-service (sin FK física).
         title: { type: string, maxLength: 200 }
         description: { type: string }
         specific_actions:
@@ -1178,7 +1180,7 @@ components:
         created_by:
           type: string
           format: uuid
-          description: Referencia lÃ³gica a user.id en iam-service (sin FK fÃ­sica).
+          description: Referencia lógica a user.id en iam-service (sin FK física).
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 
@@ -1244,14 +1246,14 @@ components:
         as_of:
           type: string
           format: date-time
-          description: Momento de cÃ¡lculo del agregado.
+          description: Momento de cálculo del agregado.
 
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
 
 
 

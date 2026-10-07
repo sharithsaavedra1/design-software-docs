@@ -1,28 +1,28 @@
-﻿openapi: 3.1.0
+openapi: 3.1.0
 info:
-  title: IAM Service API â€” Horarios SENA
+  title: IAM Service API — Horarios SENA
   version: 1.0.0
   description: >-
-    AutenticaciÃ³n (JWT RS256/JWKS), gestiÃ³n de usuarios, roles/features (RBAC
-    feature+scope), sesiones, overrides de scope y reporte de auditorÃ­a de login.
+    Autenticación (JWT RS256/JWKS), gestión de usuarios, roles/features (RBAC
+    feature+scope), sesiones, overrides de scope y reporte de auditoría de login.
     Fuente de verdad del contrato. Alineado con el modelo de datos de iam-service
-    y con 07-api/guidelines.md. La extensiÃ³n `x-required-feature` declara el feature
-    RBAC que exige cada operaciÃ³n.
+    y con 07-api/guidelines.md. La extensión `x-required-feature` declara el feature
+    RBAC que exige cada operación.
 servers:
   - url: /api/v1
 security:
   - bearerAuth: []
 tags:
   - name: auth
-    description: AutenticaciÃ³n y sesiÃ³n.
+    description: Autenticación y sesión.
   - name: users
-    description: GestiÃ³n de cuentas de usuario.
+    description: Gestión de cuentas de usuario.
   - name: sessions
     description: Sesiones activas de usuario (tokens de refresco vigentes).
   - name: roles
     description: Roles, features y asignaciones.
   - name: modules
-    description: CatÃ¡logo de mÃ³dulos y features (solo lectura).
+    description: Catálogo de módulos y features (solo lectura).
   - name: reports
     description: Reportes propios del dominio IAM.
 
@@ -32,7 +32,7 @@ paths:
     post:
       operationId: login
       tags: [auth]
-      summary: Autentica con email y contraseÃ±a.
+      summary: Autentica con email y contraseña.
       security: []
       requestBody:
         required: true
@@ -41,7 +41,7 @@ paths:
             schema: { $ref: '#/components/schemas/LoginRequest' }
       responses:
         '200':
-          description: AutenticaciÃ³n exitosa; devuelve tokens y usuario con features.
+          description: Autenticación exitosa; devuelve tokens y usuario con features.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TokenResponse' }
@@ -73,17 +73,17 @@ paths:
     post:
       operationId: logout
       tags: [auth]
-      summary: Revoca el refresh_token activo de la sesiÃ³n.
+      summary: Revoca el refresh_token activo de la sesión.
       responses:
         '204':
-          description: SesiÃ³n cerrada.
+          description: Sesión cerrada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
 
   /auth/me:
     get:
       operationId: getMe
       tags: [auth]
-      summary: Usuario autenticado con sus features y mÃ³dulos calculados.
+      summary: Usuario autenticado con sus features y módulos calculados.
       responses:
         '200':
           description: Perfil del usuario autenticado.
@@ -122,7 +122,7 @@ paths:
             schema: { $ref: '#/components/schemas/PasswordResetConfirm' }
       responses:
         '204':
-          description: ContraseÃ±a actualizada.
+          description: Contraseña actualizada.
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- users
@@ -139,7 +139,7 @@ paths:
         - name: training_center_id
           in: query
           required: false
-          description: Filtra por centro de formaciÃ³n.
+          description: Filtra por centro de formación.
           schema: { type: string, format: uuid }
         - name: role
           in: query
@@ -153,7 +153,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: PÃ¡gina de usuarios.
+          description: Página de usuarios.
           content:
             application/json:
               schema:
@@ -169,7 +169,7 @@ paths:
     post:
       operationId: createUser
       tags: [users]
-      summary: Crea un usuario y devuelve su contraseÃ±a temporal.
+      summary: Crea un usuario y devuelve su contraseña temporal.
       x-required-feature: IDENTITY_USER_MANAGE
       requestBody:
         required: true
@@ -208,7 +208,7 @@ paths:
     put:
       operationId: updateUser
       tags: [users]
-      summary: Actualiza datos del usuario (no contraseÃ±a).
+      summary: Actualiza datos del usuario (no contraseña).
       x-required-feature: IDENTITY_USER_MANAGE
       requestBody:
         required: true
@@ -272,11 +272,11 @@ paths:
     delete:
       operationId: revokeUserSession
       tags: [sessions]
-      summary: Revoca una sesiÃ³n especÃ­fica del usuario.
+      summary: Revoca una sesión específica del usuario.
       x-required-feature: IDENTITY_USER_VIEW
       responses:
         '204':
-          description: SesiÃ³n revocada.
+          description: Sesión revocada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -430,11 +430,11 @@ paths:
     get:
       operationId: listModules
       tags: [modules]
-      summary: MÃ³dulos del sistema con sus features.
+      summary: Módulos del sistema con sus features.
       x-required-feature: IDENTITY_ROLE_VIEW
       responses:
         '200':
-          description: Lista de mÃ³dulos con features.
+          description: Lista de módulos con features.
           content:
             application/json:
               schema:
@@ -448,11 +448,11 @@ paths:
     get:
       operationId: reportLoginAudit
       tags: [reports]
-      summary: AuditorÃ­a de intentos de login (paginaciÃ³n por cursor).
+      summary: Auditoría de intentos de login (paginación por cursor).
       description: >-
         Reporte propio del dominio IAM sobre la tabla `audit_login`. Solo lectura.
-        Usa paginaciÃ³n por cursor por ser una colecciÃ³n grande/continua (guidelines Â§6).
-        Inventario â€” Usuarios: seguridad/administraciÃ³n; Frecuencia: on-demand;
+        Usa paginación por cursor por ser una colección grande/continua (guidelines §6).
+        Inventario — Usuarios: seguridad/administración; Frecuencia: on-demand;
         Formato: JSON; Fuente: `identity_audit.audit_login`.
       x-required-feature: AUDIT_LOG_VIEW
       parameters:
@@ -485,7 +485,7 @@ paths:
           schema: { type: string, format: date-time }
       responses:
         '200':
-          description: PÃ¡gina de eventos de login.
+          description: Página de eventos de login.
           content:
             application/json:
               schema:
@@ -528,7 +528,7 @@ paths:
                 type: object
                 additionalProperties: true
         '503':
-          description: Alguna dependencia no esta lista.
+          description: Alguna dependencia no está lista.
           content:
             application/json:
               schema:
@@ -542,7 +542,7 @@ paths:
       security: []
       responses:
         '200':
-          description: Conjunto de llaves publicas JSON Web Key Set.
+          description: Conjunto de llaves públicas JSON Web Key Set.
           content:
             application/json:
               schema:
@@ -660,7 +660,7 @@ components:
         actor_id:
           type: [string, 'null']
           format: uuid
-          description: Referencia lÃ³gica al actor en actors-service (sin FK fÃ­sica).
+          description: Referencia lógica al actor en actors-service (sin FK física).
         is_active: { type: boolean }
         last_login_at:
           type: [string, 'null']
@@ -695,7 +695,7 @@ components:
         temporary_password:
           type: string
           writeOnly: true
-          description: ContraseÃ±a temporal; tambiÃ©n se envÃ­a al email del usuario.
+          description: Contraseña temporal; también se envía al email del usuario.
 
     UserUpdate:
       type: object
@@ -800,7 +800,7 @@ components:
 
     Feature:
       type: object
-      description: Feature RBAC de un mÃ³dulo (vista completa).
+      description: Feature RBAC de un módulo (vista completa).
       required: [code, name, action_level, scope_type]
       properties:
         code: { type: string, maxLength: 60 }
@@ -825,7 +825,7 @@ components:
           enum: [GLOBAL, TRAINING_CENTER, AREA, OWN_FICHAS, OWN_SCHEDULE, OWN_PROFILE, OWN_FICHA_AS_LEARNER]
         is_allowed:
           type: boolean
-          description: true = acceso adicional; false = bloqueo explÃ­cito.
+          description: true = acceso adicional; false = bloqueo explícito.
         reason: { type: string }
         granted_by: { type: string, format: uuid }
         expires_at:
@@ -871,7 +871,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
 
 
 

@@ -1,4 +1,7 @@
-﻿# Revision de contratos OpenAPI
+# Revisión de contratos OpenAPI
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 > Fecha: 2026-10-07. Resultado preparado en `07-api/contracts/openapi` dentro de esta carpeta, sin tocar `design-software-docs`.
 
@@ -18,11 +21,11 @@
   - `training-environment.yaml`: `GET /health`
   - `actors.yaml`: `GET /catalogs`, `GET /catalogs/{catalog_id}/details`, `GET /reports/active-catalog`
 
-## Resultado de cobertura contra codigo
+## Resultado de cobertura contra código
 
-Despues de normalizar prefijos `/api/v1` y nombres de path params, todos los endpoints detectados en codigo quedan representados en los contratos preparados.
+Después de normalizar prefijos `/api/v1` y nombres de path params, todos los endpoints detectados en código quedan representados en los contratos preparados.
 
-| Servicio | Endpoints detectados en codigo | Operaciones en contrato preparado | Faltantes despues de correccion |
+| Servicio | Endpoints detectados en código | Operaciones en contrato preparado | Faltantes después de corrección |
 |---|---:|---:|---:|
 | `academic-management-service` | 32 | 38 | 0 |
 | `actors-service` | 50 | 53 | 0 |
@@ -35,16 +38,16 @@ Despues de normalizar prefijos `/api/v1` y nombres de path params, todos los end
 | `scheduling-service` | 19 | 29 | 0 |
 | `training-environment-service` | 24 | 24 | 0 |
 
-## Contrato por delante de implementacion
+## Contrato por delante de implementación
 
-Varios contratos documentan endpoints de negocio que todavia no aparecen como rutas implementadas en el codigo actual. Eso no se elimino, porque en el repo de docs parecen funcionar como contrato objetivo/producto, no solo como snapshot de implementacion. Los casos mas claros son:
+Varios contratos documentan endpoints de negocio que todavía no aparecen como rutas implementadas en el código actual. Eso no se eliminó, porque en el repo de docs parecen funcionar como contrato objetivo/producto, no solo como snapshot de implementación. Los casos más claros son:
 
-- `audit-service`: contrato incluye consulta/export de auditoria; codigo actual solo expone health en `audit-query-api`.
-- `document-service`: contrato incluye documentos/versiones/reportes; codigo actual tiene APIs FastAPI con health minimo.
-- `monitoring-service`: contrato incluye catalogos KPI/alertas/reportes; codigo actual expone health y registro KPI inicial.
-- `reference-data-service`: contrato completo de jerarquia/catalogos; detector solo observa health porque las rutas se registran desde estructuras protegidas internas y no con `HandleFunc` directo.
-- `iam-service`: contrato fuente OpenAPI define auth/users/roles/modules/reportes; los controladores implementan interfaces generadas, por eso el detector automatico solo ve health/ready/JWKS.
+- `audit-service`: contrato incluye consulta/export de auditoría; código actual solo expone health en `audit-query-api`.
+- `document-service`: contrato incluye documentos/versiones/reportes; código actual tiene APIs FastAPI con health mínimo.
+- `monitoring-service`: contrato incluye catálogos KPI/alertas/reportes; código actual expone health y registro KPI inicial.
+- `reference-data-service`: contrato completo de jerarquía/catálogos; detector solo observa health porque las rutas se registran desde estructuras protegidas internas y no con `HandleFunc` directo.
+- `iam-service`: contrato fuente OpenAPI define auth/users/roles/modules/reportes; los controladores implementan interfaces generadas, por eso el detector automático solo ve health/ready/JWKS.
 
 ## Nota de uso
 
-Para actualizar `design-software-docs`, crear primero una rama y copiar esta carpeta sobre `07-api/contracts/openapi`. Luego revisar el diff, especialmente los contratos que estan por delante de implementacion.
+Para actualizar `design-software-docs`, crear primero una rama y copiar esta carpeta sobre `07-api/contracts/openapi`. Luego revisar el diff, especialmente los contratos que están por delante de implementación.

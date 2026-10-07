@@ -1,8 +1,11 @@
-﻿# audit-service
+# audit-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | Transversal |
+| Módulo | Transversal |
 | App repo | `design-software-audit-service` |
 | DB repo | `design-software-audit-db` |
 | Stack | Go |
@@ -11,7 +14,7 @@
 
 ## Responsabilidad
 
-Registro append-only de auditoria y consulta de eventos auditables.
+Registro append-only de auditoría y consulta de eventos auditables.
 
 ## Persistencia
 
@@ -24,10 +27,10 @@ Registro append-only de auditoria y consulta de eventos auditables.
 |---|---|---|
 | GET | `/health` | `.\design-software-audit-service\cmd\audit-query-api\main.go` |
 
-## Configuracion
+## Configuración
 
 - `PORT`
 
 ## Notas
 
-Debe consumir eventos por AMQP y persistir auditoria idempotente.
+Debe consumir eventos por AMQP y persistir auditoría idempotente.

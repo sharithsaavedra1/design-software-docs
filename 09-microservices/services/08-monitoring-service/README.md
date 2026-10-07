@@ -1,8 +1,11 @@
-﻿# monitoring-service
+# monitoring-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M9 |
+| Módulo | M9 |
 | App repo | `design-software-monitoring-service` |
 | DB repo | `design-software-monitoring-db` |
 | Stack | Python / FastAPI |
@@ -25,9 +28,9 @@ KPIs, seguimiento de fichas, sesiones de seguimiento, alertas generadas y planes
 | GET | `/health` | `.\design-software-monitoring-service\src\monitoring\adapter\inbound\http\router.py` |
 | POST | `/kpis` | `.\design-software-monitoring-service\src\monitoring\adapter\inbound\http\router.py` |
 
-## Configuracion
+## Configuración
 
-- Sin variables detectadas automaticamente en archivos de configuracion/codigo.
+- Sin variables detectadas automáticamente en archivos de configuración/código.
 
 ## Notas
 

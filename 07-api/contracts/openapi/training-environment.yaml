@@ -1,28 +1,28 @@
-﻿openapi: 3.1.0
+openapi: 3.1.0
 info:
-  title: Training Environment Service API â€” Horarios SENA
+  title: Training Environment Service API — Horarios SENA
   version: 1.0.0
   description: >-
-    GestiÃ³n de ambientes fÃ­sicos de formaciÃ³n (aulas, laboratorios, talleres),
-    su catÃ¡logo de tipos, reglas recurrentes de disponibilidad, perÃ­odos de
+    Gestión de ambientes físicos de formación (aulas, laboratorios, talleres),
+    su catálogo de tipos, reglas recurrentes de disponibilidad, períodos de
     mantenimiento, reservas puntuales (con anti-solapamiento) y reporte de
-    utilizaciÃ³n de ambientes. Fuente de verdad del contrato. Alineado con el
+    utilización de ambientes. Fuente de verdad del contrato. Alineado con el
     modelo de datos de training-environment-service y con 07-api/guidelines.md.
-    La extensiÃ³n `x-required-feature` declara el feature RBAC que exige cada
-    operaciÃ³n.
+    La extensión `x-required-feature` declara el feature RBAC que exige cada
+    operación.
 servers:
   - url: /api/v1
 security:
   - bearerAuth: []
 tags:
   - name: training-environments
-    description: Ambientes fÃ­sicos de formaciÃ³n (aulas, laboratorios, talleres).
+    description: Ambientes físicos de formación (aulas, laboratorios, talleres).
   - name: environment-types
-    description: CatÃ¡logo de tipos de ambiente (solo lectura + alta administrativa).
+    description: Catálogo de tipos de ambiente (solo lectura + alta administrativa).
   - name: availability-rules
     description: Reglas recurrentes de disponibilidad de un ambiente.
   - name: maintenance
-    description: PerÃ­odos de mantenimiento que bloquean un ambiente.
+    description: Períodos de mantenimiento que bloquean un ambiente.
   - name: reservations
     description: Reservas puntuales de un ambiente fuera del horario de clase asignado.
   - name: reports
@@ -34,11 +34,11 @@ paths:
     get:
       operationId: listEnvironmentTypes
       tags: [environment-types]
-      summary: Lista el catÃ¡logo de tipos de ambiente.
+      summary: Lista el catálogo de tipos de ambiente.
       x-required-feature: ENV_VIEW
       responses:
         '200':
-          description: CatÃ¡logo de tipos de ambiente.
+          description: Catálogo de tipos de ambiente.
           content:
             application/json:
               schema:
@@ -49,7 +49,7 @@ paths:
     post:
       operationId: createEnvironmentType
       tags: [environment-types]
-      summary: Crea un tipo de ambiente (catÃ¡logo administrativo).
+      summary: Crea un tipo de ambiente (catálogo administrativo).
       x-required-feature: ENV_MANAGE
       requestBody:
         required: true
@@ -91,7 +91,7 @@ paths:
     get:
       operationId: listTrainingEnvironments
       tags: [training-environments]
-      summary: Lista paginada de ambientes de formaciÃ³n.
+      summary: Lista paginada de ambientes de formación.
       x-required-feature: ENV_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -105,7 +105,7 @@ paths:
         - name: training_center_id
           in: query
           required: false
-          description: Filtra por centro de formaciÃ³n (referencia externa a reference-data-service).
+          description: Filtra por centro de formación (referencia externa a reference-data-service).
           schema: { type: string, format: uuid }
         - name: is_active
           in: query
@@ -130,7 +130,7 @@ paths:
           schema: { type: string, format: time }
       responses:
         '200':
-          description: PÃ¡gina de ambientes.
+          description: Página de ambientes.
           content:
             application/json:
               schema:
@@ -147,7 +147,7 @@ paths:
     post:
       operationId: createTrainingEnvironment
       tags: [training-environments]
-      summary: Registra un nuevo ambiente de formaciÃ³n.
+      summary: Registra un nuevo ambiente de formación.
       x-required-feature: ENV_MANAGE
       requestBody:
         required: true
@@ -172,7 +172,7 @@ paths:
     get:
       operationId: getTrainingEnvironment
       tags: [training-environments]
-      summary: Detalle de un ambiente de formaciÃ³n.
+      summary: Detalle de un ambiente de formación.
       x-required-feature: ENV_VIEW
       responses:
         '200':
@@ -228,7 +228,7 @@ paths:
     delete:
       operationId: deactivateTrainingEnvironment
       tags: [training-environments]
-      summary: Da de baja lÃ³gica al ambiente (is_active = false).
+      summary: Da de baja lógica al ambiente (is_active = false).
       x-required-feature: ENV_MANAGE
       responses:
         '204':
@@ -250,7 +250,7 @@ paths:
         - name: day_of_week
           in: query
           required: false
-          description: 1=Lunes â€¦ 7=Domingo.
+          description: 1=Lunes … 7=Domingo.
           schema: { type: integer, minimum: 1, maximum: 7 }
       responses:
         '200':
@@ -334,7 +334,7 @@ paths:
       tags: [availability-rules]
       summary: Elimina una regla de disponibilidad.
       description: >-
-        EliminaciÃ³n fÃ­sica: la tabla `availability_rule` no tiene columnas de soft
+        Eliminación física: la tabla `availability_rule` no tiene columnas de soft
         delete (ver data-model.md). Publica `environment.availability.changed`
         (change_type=RULE_REMOVED).
       x-required-feature: ENV_AVAILABILITY_QUERY
@@ -352,13 +352,13 @@ paths:
     get:
       operationId: listMaintenancePeriods
       tags: [maintenance]
-      summary: PerÃ­odos de mantenimiento del ambiente.
+      summary: Períodos de mantenimiento del ambiente.
       x-required-feature: ENV_VIEW
       parameters:
         - name: from
           in: query
           required: false
-          description: Filtra perÃ­odos que se solapan con el rango (inclusive).
+          description: Filtra períodos que se solapan con el rango (inclusive).
           schema: { type: string, format: date }
         - name: to
           in: query
@@ -367,7 +367,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: PerÃ­odos de mantenimiento del ambiente.
+          description: Períodos de mantenimiento del ambiente.
           content:
             application/json:
               schema:
@@ -379,7 +379,7 @@ paths:
     post:
       operationId: createMaintenancePeriod
       tags: [maintenance]
-      summary: Registra un perÃ­odo de mantenimiento y bloquea el ambiente.
+      summary: Registra un período de mantenimiento y bloquea el ambiente.
       description: >-
         Publica el evento `environment.maintenance.started`; scheduling-service
         re-sincroniza su read model al recibirlo.
@@ -408,14 +408,14 @@ paths:
     get:
       operationId: getMaintenancePeriod
       tags: [maintenance]
-      summary: Detalle de un perÃ­odo de mantenimiento.
+      summary: Detalle de un período de mantenimiento.
       description: >-
-        Registro append-only (sin columnas de actualizaciÃ³n ni borrado en el
+        Registro append-only (sin columnas de actualización ni borrado en el
         modelo de datos): no admite PUT/PATCH/DELETE.
       x-required-feature: ENV_VIEW
       responses:
         '200':
-          description: PerÃ­odo de mantenimiento.
+          description: Período de mantenimiento.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Maintenance' }
@@ -461,7 +461,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: PÃ¡gina de reservas.
+          description: Página de reservas.
           content:
             application/json:
               schema:
@@ -480,7 +480,7 @@ paths:
       tags: [reservations]
       summary: Crea una reserva puntual sobre un ambiente.
       description: >-
-        Puede fallar con `409 Conflict` (cÃ³digo `RESERVATION_OVERLAP`) porque la
+        Puede fallar con `409 Conflict` (código `RESERVATION_OVERLAP`) porque la
         base de datos impone no-solapamiento por ambiente mediante una constraint
         `EXCLUDE` GiST sobre reservas no canceladas (ver data-model.md). Publica el
         evento `environment.reservation.created` al confirmarse.
@@ -548,9 +548,9 @@ paths:
     delete:
       operationId: cancelReservation
       tags: [reservations]
-      summary: Cancela la reserva (baja lÃ³gica vÃ­a status = CANCELLED).
+      summary: Cancela la reserva (baja lógica vía status = CANCELLED).
       description: >-
-        EliminaciÃ³n lÃ³gica por defecto (ADR-004): la tabla `reservation` no tiene
+        Eliminación lógica por defecto (ADR-004): la tabla `reservation` no tiene
         `deleted_at`; el estado de negocio `status` cumple ese rol, por lo que
         cancelar transiciona `status` a `CANCELLED` en vez de borrar la fila.
       x-required-feature: ENV_RESERVATION_MANAGE
@@ -566,15 +566,15 @@ paths:
     get:
       operationId: reportEnvironmentUtilization
       tags: [reports]
-      summary: OcupaciÃ³n/utilizaciÃ³n de ambientes en un rango de fechas.
+      summary: Ocupación/utilización de ambientes en un rango de fechas.
       description: >-
         Reporte propio del dominio training-environment. Solo lectura; cruza
         `environment` con `availability_rule`, `maintenance` y `reservation` para
         calcular horas disponibles, reservadas y en mantenimiento por ambiente.
-        Inventario â€” Usuarios: coordinadores, scheduling-service, monitoring-service;
+        Inventario — Usuarios: coordinadores, scheduling-service, monitoring-service;
         Frecuencia: on-demand; Formato: JSON; Fuente: `environment`, `availability_rule`,
-        `maintenance`, `reservation`. Mide disponibilidad/utilizaciÃ³n fÃ­sica del ambiente a
-        partir de las tablas propias de training-environment; para la ocupaciÃ³n por sesiones
+        `maintenance`, `reservation`. Mide disponibilidad/utilización física del ambiente a
+        partir de las tablas propias de training-environment; para la ocupación por sesiones
         de horario efectivamente programadas, ver `environment-occupancy` en scheduling.yaml.
       x-required-feature: ENVIRONMENT_REPORT_VIEW
       parameters:
@@ -595,16 +595,16 @@ paths:
         - name: from
           in: query
           required: true
-          description: Inicio del perÃ­odo a calcular (inclusive).
+          description: Inicio del período a calcular (inclusive).
           schema: { type: string, format: date }
         - name: to
           in: query
           required: true
-          description: Fin del perÃ­odo a calcular (exclusive).
+          description: Fin del período a calcular (exclusive).
           schema: { type: string, format: date }
       responses:
         '200':
-          description: PÃ¡gina de utilizaciÃ³n por ambiente.
+          description: Página de utilización por ambiente.
           content:
             application/json:
               schema:
@@ -640,7 +640,7 @@ components:
       name: id
       in: path
       required: true
-      description: UUID del ambiente de formaciÃ³n.
+      description: UUID del ambiente de formación.
       schema: { type: string, format: uuid }
     EnvironmentTypeId:
       name: id
@@ -658,7 +658,7 @@ components:
       name: maintenance_id
       in: path
       required: true
-      description: UUID del perÃ­odo de mantenimiento.
+      description: UUID del período de mantenimiento.
       schema: { type: string, format: uuid }
     ReservationId:
       name: id
@@ -697,12 +697,12 @@ components:
         training_center_id:
           type: string
           format: uuid
-          description: Referencia externa a reference-data-service (sin FK fÃ­sica).
+          description: Referencia externa a reference-data-service (sin FK física).
         name: { type: string, maxLength: 100, example: Aula 201 }
         capacity:
           type: integer
           minimum: 1
-          description: NÃºmero mÃ¡ximo de personas.
+          description: Número máximo de personas.
         location:
           type: [string, 'null']
           maxLength: 200
@@ -745,7 +745,7 @@ components:
           type: integer
           minimum: 1
           maximum: 7
-          description: 1=Lunes â€¦ 7=Domingo.
+          description: 1=Lunes … 7=Domingo.
         start_time: { type: string, format: time, description: 'Formato HH:MM:SS.' }
         end_time: { type: string, format: time, description: 'Formato HH:MM:SS.' }
         effective_from: { type: string, format: date }
@@ -793,7 +793,7 @@ components:
         created_by:
           type: string
           format: uuid
-          description: Referencia externa a iam-service (sin FK fÃ­sica).
+          description: Referencia externa a iam-service (sin FK física).
         created_at: { type: string, format: date-time }
 
     MaintenanceCreate:
@@ -818,7 +818,7 @@ components:
         requester_id:
           type: string
           format: uuid
-          description: Referencia externa a iam-service (sin FK fÃ­sica).
+          description: Referencia externa a iam-service (sin FK física).
         status:
           type: string
           enum: [PENDING, CONFIRMED, CANCELLED]
@@ -870,13 +870,13 @@ components:
         period_to: { type: string, format: date }
         available_hours:
           type: number
-          description: Horas totales cubiertas por reglas de disponibilidad en el perÃ­odo.
+          description: Horas totales cubiertas por reglas de disponibilidad en el período.
         reserved_hours:
           type: number
-          description: Horas ocupadas por reservas no canceladas en el perÃ­odo.
+          description: Horas ocupadas por reservas no canceladas en el período.
         maintenance_hours:
           type: number
-          description: Horas bloqueadas por mantenimiento en el perÃ­odo.
+          description: Horas bloqueadas por mantenimiento en el período.
         utilization_percentage:
           type: number
           minimum: 0
@@ -888,7 +888,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
 
 
 

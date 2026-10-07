@@ -1,17 +1,20 @@
-﻿# reference-data-service
+# reference-data-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M2 + M4 |
+| Módulo | M2 + M4 |
 | App repo | `design-software-reference-data-service` |
 | DB repo | `design-software-reference-data-db` |
 | Stack | Go |
 | Deployables | reference-data-api |
-| Estado observado | Implementado con API HTTP, seguridad JWT/JWKS y publicacion AMQP opcional. |
+| Estado observado | Implementado con API HTTP, seguridad JWT/JWKS y publicación AMQP opcional. |
 
 ## Responsabilidad
 
-Jerarquia institucional, centros de formacion, unidades institucionales, catalogos y parametros.
+Jerarquía institucional, centros de formación, unidades institucionales, catálogos y parámetros.
 
 ## Persistencia
 
@@ -26,7 +29,7 @@ Jerarquia institucional, centros de formacion, unidades institucionales, catalog
 | GET | `/health/live` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
 | GET | `/health/ready` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
 
-## Configuracion
+## Configuración
 
 - `HU_REF_018_ADMIN_EMAIL`
 - `HU_REF_018_ADMIN_PASSWORD`
@@ -45,4 +48,4 @@ Jerarquia institucional, centros de formacion, unidades institucionales, catalog
 
 ## Notas
 
-Servicio base para catalogos consumidos por otros dominios.
+Servicio base para catálogos consumidos por otros dominios.

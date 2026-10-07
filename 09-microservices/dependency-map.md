@@ -1,35 +1,36 @@
-﻿# Mapa actualizado de dependencias
+# Mapa actualizado de dependencias
 
-> Estado: actualizado desde repos locales en `develop` el 2026-10-07.
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 ## Criterio
 
-- `sync`: llamada HTTP directa necesaria para resolver una operacion de negocio.
-- `async`: publicacion/consumo de eventos por broker AMQP/RabbitMQ u outbox.
-- `auth`: validacion JWT/JWKS con IAM. No cuenta como dependencia de negocio.
+- `sync`: llamada HTTP directa necesaria para resolver una operación de negocio.
+- `async`: publicación/consumo de eventos por broker AMQP/RabbitMQ u outbox.
+- `auth`: validación JWT/JWKS con IAM. No cuenta como dependencia de negocio.
 
-## Dependencias sincronas observadas/configuradas
+## Dependencias síncronas observadas/configuradas
 
 | Origen | Destino | Motivo | Evidencia |
 |---|---|---|---|
-| `academic-management-service` | `reference-data-service` | Validar/consultar centros, catalogos o estructura de referencia. | `REFERENCE_DATA_BASE_URL` |
+| `academic-management-service` | `reference-data-service` | Validar/consultar centros, catálogos o estructura de referencia. | `REFERENCE_DATA_BASE_URL` |
 | `academic-management-service` | `actors-service` | Validar ownership/alcance de fichas. | `ACTORS_SERVICE_BASE_URL` |
 | `actors-service` | `academic-management-service` | Consultas de ficha/competencias para actores. | `ACADEMIC_MANAGEMENT_BASE_URL` |
-| `scheduling-service` | `academic-management-service` | Validacion de ficha/programa al construir horario. | Contrato de arquitectura vigente |
+| `scheduling-service` | `academic-management-service` | Validación de ficha/programa al construir horario. | Contrato de arquitectura vigente |
 | `training-environment-service` | `reference-data-service` | Referencia institucional/centros para ambientes. | Dependencia de dominio vigente |
 
-## Dependencias asincronas principales
+## Dependencias asíncronas principales
 
-| Origen | Destino/consumidor | Canal | Proposito |
+| Origen | Destino/consumidor | Canal | Propósito |
 |---|---|---|---|
 | `iam-service` | `audit-service`, `actors-service` | Outbox/RabbitMQ | Eventos de identidad, roles y sesiones. |
-| `reference-data-service` | `audit-service` y consumidores de catalogo | AMQP opcional | Cambios en centros/catalogos/parametros. |
-| `academic-management-service` | `audit-service`, `monitoring-service`, `actors-service`, `notification-service` | RabbitMQ | Cambios de fichas, programas y eventos academicos. |
+| `reference-data-service` | `audit-service` y consumidores de catálogo | AMQP opcional | Cambios en centros/catálogos/parámetros. |
+| `academic-management-service` | `audit-service`, `monitoring-service`, `actors-service`, `notification-service` | RabbitMQ | Cambios de fichas, programas y eventos académicos. |
 | `training-environment-service` | `audit-service`, `scheduling-service` | Eventos de dominio | Cambios de ambientes, disponibilidad, mantenimiento y reservas. |
 | `actors-service` | `audit-service`, `monitoring-service`, `scheduling-service` | Eventos de dominio | Cambios de instructor/aprendiz/empresa y disponibilidad. |
-| `scheduling-service` | `audit-service`, `monitoring-service`, `actors-service`, `document-service`, `notification-service` | Outbox/RabbitMQ | Validacion/publicacion de horarios y sesiones. |
-| `monitoring-service` | `audit-service`, `notification-service` | Eventos de alerta | Alertas detectadas y solicitudes de notificacion. |
-| `notification-service` | `audit-service` | Eventos de notificacion | Resultado de entrega EMAIL/IN_APP. |
+| `scheduling-service` | `audit-service`, `monitoring-service`, `actors-service`, `document-service`, `notification-service` | Outbox/RabbitMQ | Validación/publicación de horarios y sesiones. |
+| `monitoring-service` | `audit-service`, `notification-service` | Eventos de alerta | Alertas detectadas y solicitudes de notificación. |
+| `notification-service` | `audit-service` | Eventos de notificación | Resultado de entrega EMAIL/IN_APP. |
 
 ## Diagrama Mermaid
 

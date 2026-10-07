@@ -1,7 +1,7 @@
 # Datos
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
-> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Datos
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 ## Contenido
 
@@ -20,6 +20,7 @@ Documenta modelos de datos, diccionario y estrategia de migración.
 | [data-dictionary.md](./data-dictionary.md) | Índice de entidades por servicio y reglas comunes | 🟡 |
 | [normalization-assessment.md](./normalization-assessment.md) | Evaluación de normalización (NF) y calidad del modelo real | 🟢 |
 | [migration-strategy.md](./migration-strategy.md) | Estrategia Liquibase: orden DDL, seeds, rollbacks, ambientes | 🟡 |
+| [database-map.md](./database-map.md) | Mapa actualizado de esquemas y tablas por microservicio | 🟡 |
 
 ## Plantillas
 

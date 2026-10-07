@@ -1,6 +1,9 @@
-﻿# Mapa de configuracion runtime
+# Mapa de configuración runtime
 
-> Variables detectadas desde archivos de configuracion y codigo el 2026-10-07. No incluir secretos reales en Git.
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
+
+> Variables detectadas desde archivos de configuración y código el 2026-10-07. No incluir secretos reales en Git.
 
 | Repo | Variables detectadas |
 |---|---|

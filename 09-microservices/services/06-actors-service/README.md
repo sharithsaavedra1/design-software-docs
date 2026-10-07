@@ -1,17 +1,20 @@
-﻿# actors-service
+# actors-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M7 |
+| Módulo | M7 |
 | App repo | `design-software-actors-service` |
 | DB repo | `design-software-actors-db` |
 | Stack | Java / Spring Boot / Maven |
 | Deployables | actors-api |
-| Estado observado | Implementado con modulos actors-core, actors-adapters y actors-api. |
+| Estado observado | Implementado con módulos actors-core, actors-adapters y actors-api. |
 
 ## Responsabilidad
 
-Instructores, aprendices, empresas, etapa productiva, asignacion de competencias y planes de mejora.
+Instructores, aprendices, empresas, etapa productiva, asignación de competencias y planes de mejora.
 
 ## Persistencia
 
@@ -73,7 +76,7 @@ Instructores, aprendices, empresas, etapa productiva, asignacion de competencias
 | GET | `/api/v1/reports/learner-tracking` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
 | GET | `/internal/fichas/{fichaId}/active-learners/count` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalFichaLearnerController.java` |
 
-## Configuracion
+## Configuración
 
 - `ACADEMIC_MANAGEMENT_BASE_URL`
 - `ACTORS_DB_PASSWORD`
@@ -86,4 +89,4 @@ Instructores, aprendices, empresas, etapa productiva, asignacion de competencias
 
 ## Notas
 
-Integra con academic-management para informacion de fichas/competencias.
+Integra con academic-management para información de fichas/competencias.

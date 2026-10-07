@@ -1,8 +1,11 @@
-﻿# notification-service
+# notification-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | Transversal |
+| Módulo | Transversal |
 | App repo | `design-software-notification-service` |
 | DB repo | `design-software-notification-db` |
 | Stack | Go |
@@ -11,7 +14,7 @@
 
 ## Responsabilidad
 
-Envio, trazabilidad e idempotencia de notificaciones EMAIL e IN_APP.
+Envío, trazabilidad e idempotencia de notificaciones EMAIL e IN_APP.
 
 ## Persistencia
 
@@ -29,7 +32,7 @@ Envio, trazabilidad e idempotencia de notificaciones EMAIL e IN_APP.
 | GET | `/ready` | `.\design-software-notification-service\cmd\notification-worker\main.go` |
 | GET | `/ready` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
 
-## Configuracion
+## Configuración
 
 - `ID`
 - `NOTIFICATION_AMQP_URL`
@@ -45,4 +48,4 @@ Envio, trazabilidad e idempotencia de notificaciones EMAIL e IN_APP.
 
 ## Notas
 
-Propietario unico de sent_notification y notification_template.
+Propietario único de sent_notification y notification_template.

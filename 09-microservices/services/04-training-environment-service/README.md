@@ -1,8 +1,11 @@
-﻿# training-environment-service
+# training-environment-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M3 |
+| Módulo | M3 |
 | App repo | `design-software-training-environment-service` |
 | DB repo | `design-software-training-environment-db` |
 | Stack | Go |
@@ -11,7 +14,7 @@
 
 ## Responsabilidad
 
-Ambientes de formacion, tipos, inventario, reglas de disponibilidad, mantenimientos y reservas.
+Ambientes de formación, tipos, inventario, reglas de disponibilidad, mantenimientos y reservas.
 
 ## Persistencia
 
@@ -47,7 +50,7 @@ Ambientes de formacion, tipos, inventario, reglas de disponibilidad, mantenimien
 | POST | `/training-environments/{id}/maintenance` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
 | GET | `/training-environments/{id}/maintenance/{maintenance_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
 
-## Configuracion
+## Configuración
 
 - `APP_ENV`
 - `DATABASE_URL`

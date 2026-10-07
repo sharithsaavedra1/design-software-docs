@@ -1,17 +1,20 @@
-﻿# scheduling-service
+# scheduling-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M8 |
+| Módulo | M8 |
 | App repo | `design-software-scheduling-service` |
 | DB repo | `design-software-scheduling-db` |
 | Stack | Java / Spring Boot / Maven |
 | Deployables | schedules-api, scheduling-engine, conflict-validator |
-| Estado observado | Implementado con modulos contracts, scheduling-core, scheduling-adapters, schedules-api, scheduling-engine y conflict-validator. |
+| Estado observado | Implementado con módulos contracts, scheduling-core, scheduling-adapters, schedules-api, scheduling-engine y conflict-validator. |
 
 ## Responsabilidad
 
-Creacion, validacion, publicacion, archivo y consulta de horarios y sesiones.
+Creación, validación, publicación, archivo y consulta de horarios y sesiones.
 
 ## Persistencia
 
@@ -42,7 +45,7 @@ Creacion, validacion, publicacion, archivo y consulta de horarios y sesiones.
 | PUT | `/api/v1/sessions/{id}` | `.\design-software-scheduling-service\scheduling-adapters\src\main\java\co\sena\scheduling\adapter\in\rest\SessionController.java` |
 | POST | `/api/v1/sessions/{id}/cancel` | `.\design-software-scheduling-service\scheduling-adapters\src\main\java\co\sena\scheduling\adapter\in\rest\SessionController.java` |
 
-## Configuracion
+## Configuración
 
 - `OTEL_EXPORTER_OTLP_ENDPOINT`
 - `OTEL_TRACES_ENABLED`

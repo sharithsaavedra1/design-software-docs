@@ -1,15 +1,15 @@
-﻿openapi: 3.1.0
+openapi: 3.1.0
 info:
-  title: Document Service API â€” Horarios SENA
+  title: Document Service API — Horarios SENA
   version: 1.0.0
   description: >-
     Ciclo de vida de documentos generados/almacenados por la plataforma (agregados
-    `document` + `document_version`). GeneraciÃ³n asÃ­ncrona a partir de plantillas,
+    `document` + `document_version`). Generación asíncrona a partir de plantillas,
     registro manual de documentos ya subidos a object storage, carga de nuevas
-    versiones vÃ­a `multipart/form-data` y descarga por URL firmada (el binario
+    versiones vía `multipart/form-data` y descarga por URL firmada (el binario
     nunca se sirve ni se persiste en este servicio; ver ADR-003). Alineado con el
-    modelo de datos de document-service y con 07-api/guidelines.md. La extensiÃ³n
-    `x-required-feature` declara el feature RBAC que exige cada operaciÃ³n.
+    modelo de datos de document-service y con 07-api/guidelines.md. La extensión
+    `x-required-feature` declara el feature RBAC que exige cada operación.
 servers:
   - url: /api/v1
 security:
@@ -47,7 +47,7 @@ paths:
         - name: owner_service
           in: query
           required: false
-          description: Filtra por servicio propietario que originÃ³ el documento.
+          description: Filtra por servicio propietario que originó el documento.
           schema: { type: string, maxLength: 50 }
         - name: owner_entity_id
           in: query
@@ -56,7 +56,7 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
-          description: PÃ¡gina de documentos.
+          description: Página de documentos.
           content:
             application/json:
               schema:
@@ -74,7 +74,7 @@ paths:
       tags: [documents]
       summary: Registra un documento cuyo binario ya fue subido al object storage.
       description: >-
-        Uso tÃ­pico: integraciÃ³n servicio-a-servicio que ya escribiÃ³ el archivo en
+        Uso típico: integración servicio-a-servicio que ya escribió el archivo en
         MinIO/S3 (p. ej. mediante una URL de subida firmada emitida fuera de esta
         API) y solo necesita registrar los metadatos. `storage_key` es de solo
         escritura: nunca se retorna en las respuestas (ver `GET /documents/{id}/download-url`).
@@ -100,13 +100,13 @@ paths:
     post:
       operationId: generateDocument
       tags: [documents]
-      summary: Solicita la generaciÃ³n asÃ­ncrona de un documento a partir de una plantilla.
+      summary: Solicita la generación asíncrona de un documento a partir de una plantilla.
       description: >-
         Crea el registro `document` en `status = GENERATING`, encola la solicitud
         en `document-generation-queue` para el pdf-renderer-worker y retorna de
         inmediato. El cliente debe sondear `GET /documents/{id}` hasta observar
-        `status = AVAILABLE` o `GENERATION_FAILED` (decisiÃ³n 02 de decisions.md).
-        La generaciÃ³n es siempre asÃ­ncrona; no existe variante sÃ­ncrona.
+        `status = AVAILABLE` o `GENERATION_FAILED` (decisión 02 de decisions.md).
+        La generación es siempre asíncrona; no existe variante síncrona.
       x-required-feature: DOC_CREATE
       requestBody:
         required: true
@@ -144,9 +144,9 @@ paths:
     patch:
       operationId: updateDocument
       tags: [documents]
-      summary: Actualiza metadatos del documento (tÃ­tulo, dominio).
+      summary: Actualiza metadatos del documento (título, dominio).
       description: >-
-        ActualizaciÃ³n parcial. `row_version` es obligatorio para bloqueo optimista;
+        Actualización parcial. `row_version` es obligatorio para bloqueo optimista;
         si no coincide con el valor actual del recurso, responde `409 Conflict`.
       x-required-feature: DOC_CREATE
       requestBody:
@@ -184,11 +184,11 @@ paths:
     get:
       operationId: getDocumentDownloadUrl
       tags: [documents]
-      summary: Genera una URL firmada de descarga de la versiÃ³n vigente.
+      summary: Genera una URL firmada de descarga de la versión vigente.
       description: >-
         La URL firmada se emite solo tras validar el scope del usuario sobre la
         entidad propietaria; TTL por defecto 300 s (ADR-003). El binario nunca se
-        proxya a travÃ©s de esta API y `storage_key` nunca se expone al cliente;
+        proxya a través de esta API y `storage_key` nunca se expone al cliente;
         el consumidor descarga directamente desde el object storage con la URL
         devuelta. Requiere `status = AVAILABLE`.
       x-required-feature: DOC_DOWNLOAD
@@ -226,13 +226,13 @@ paths:
     post:
       operationId: uploadDocumentVersion
       tags: [versions]
-      summary: Sube el binario de una nueva versiÃ³n del documento.
+      summary: Sube el binario de una nueva versión del documento.
       description: >-
-        Carga directa vÃ­a `multipart/form-data` (guidelines Â§1): el binario viaja
+        Carga directa vía `multipart/form-data` (guidelines §1): el binario viaja
         en la parte `file`. El servicio lo escribe en object storage, crea el
         `document_version` con `version_number` autoincremental y actualiza
-        `document.storage_key`/`status = AVAILABLE` para apuntar a esta versiÃ³n
-        (desnormalizaciÃ³n intencional, ver data-model.md).
+        `document.storage_key`/`status = AVAILABLE` para apuntar a esta versión
+        (desnormalización intencional, ver data-model.md).
       x-required-feature: DOC_CREATE
       requestBody:
         required: true
@@ -244,7 +244,7 @@ paths:
                 contentType: application/octet-stream, application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
       responses:
         '201':
-          description: VersiÃ³n creada.
+          description: Versión creada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentVersion' }
@@ -261,11 +261,11 @@ paths:
     get:
       operationId: getDocumentVersion
       tags: [versions]
-      summary: Detalle de una versiÃ³n especÃ­fica del documento.
+      summary: Detalle de una versión específica del documento.
       x-required-feature: DOC_VIEW
       responses:
         '200':
-          description: VersiÃ³n del documento.
+          description: Versión del documento.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentVersion' }
@@ -281,8 +281,8 @@ paths:
       summary: Inventario de documentos por entidad propietaria, dominio y estado.
       description: >-
         Reporte propio del dominio document-service sobre `document`. Solo lectura;
-        no muta estado. PaginaciÃ³n por offset (guidelines Â§6) por tratarse de un
-        inventario acotado, no de un log continuo. Inventario â€” Usuarios: servicios
+        no muta estado. Paginación por offset (guidelines §6) por tratarse de un
+        inventario acotado, no de un log continuo. Inventario — Usuarios: servicios
         propietarios (SCHEDULE, FICHA, CERTIFICATE, ACTOR, REPORT) y coordinadores/
         administradores; Frecuencia: on-demand; Formato: JSON; Fuente: `document`.
       x-required-feature: DOC_REPORT_VIEW
@@ -317,7 +317,7 @@ paths:
           schema: { type: string, format: date-time }
       responses:
         '200':
-          description: PÃ¡gina del inventario de documentos.
+          description: Página del inventario de documentos.
           content:
             application/json:
               schema:
@@ -358,13 +358,13 @@ components:
       name: version_id
       in: path
       required: true
-      description: UUID de la versiÃ³n del documento.
+      description: UUID de la versión del documento.
       schema: { type: string, format: uuid }
 
   schemas:
     DocumentDomain:
       type: string
-      description: Contexto de negocio que originÃ³ el documento.
+      description: Contexto de negocio que originó el documento.
       enum: [SCHEDULE, FICHA, CERTIFICATE, ACTOR, REPORT]
 
     DocumentStatus:
@@ -396,14 +396,14 @@ components:
         owner_service:
           type: string
           maxLength: 100
-          description: Servicio que solicitÃ³/originÃ³ el documento.
+          description: Servicio que solicitó/originó el documento.
         owner_entity_id:
           type: string
           format: uuid
           description: >-
             UUID de la entidad de negocio propietaria en `owner_service` (p. ej.
-            un `schedule_id` en scheduling-service). Referencia lÃ³gica cross-service,
-            sin FK fÃ­sica ni endpoint de join.
+            un `schedule_id` en scheduling-service). Referencia lógica cross-service,
+            sin FK física ni endpoint de join.
         mime_type: { type: string, maxLength: 100, example: application/pdf }
         size_bytes:
           type: [integer, 'null']
@@ -417,7 +417,7 @@ components:
         created_by:
           type: string
           format: uuid
-          description: ID de usuario (iam-service); referencia lÃ³gica sin FK fÃ­sica.
+          description: ID de usuario (iam-service); referencia lógica sin FK física.
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 
@@ -437,7 +437,7 @@ components:
           writeOnly: true
           description: >-
             Clave del objeto ya subido a object storage (fuera de esta API).
-            Nunca se retorna en las respuestas; la descarga se resuelve vÃ­a
+            Nunca se retorna en las respuestas; la descarga se resuelve vía
             `GET /documents/{id}/download-url`.
         mime_type: { type: string, maxLength: 100 }
         size_bytes:
@@ -453,7 +453,7 @@ components:
         domain: { $ref: '#/components/schemas/DocumentDomain' }
         row_version:
           type: integer
-          description: Valor de `row_version` leÃ­do por el cliente; debe coincidir con el actual o responde 409.
+          description: Valor de `row_version` leído por el cliente; debe coincidir con el actual o responde 409.
 
     GenerateDocumentRequest:
       type: object
@@ -495,11 +495,11 @@ components:
         created_by:
           type: string
           format: uuid
-          description: ID de usuario (iam-service); referencia lÃ³gica sin FK fÃ­sica.
+          description: ID de usuario (iam-service); referencia lógica sin FK física.
         created_at: { type: string, format: date-time }
         notes:
           type: [string, 'null']
-          description: Observaciones sobre esta versiÃ³n.
+          description: Observaciones sobre esta versión.
 
     DocumentVersionUpload:
       type: object
@@ -508,10 +508,10 @@ components:
         file:
           type: string
           format: binary
-          description: Binario de la nueva versiÃ³n del documento.
+          description: Binario de la nueva versión del documento.
         notes:
           type: string
-          description: Observaciones sobre esta versiÃ³n.
+          description: Observaciones sobre esta versión.
 
     DownloadUrlResponse:
       type: object
@@ -539,7 +539,7 @@ components:
         status: { $ref: '#/components/schemas/DocumentStatus' }
         current_version_number:
           type: [integer, 'null']
-          description: NÃºmero de la versiÃ³n vigente (`document_version.version_number`); null si aÃºn no tiene versiones.
+          description: Número de la versión vigente (`document_version.version_number`); null si aún no tiene versiones.
         updated_at: { type: string, format: date-time }
 
   securitySchemes:
@@ -547,7 +547,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
 
 
 

@@ -1,8 +1,11 @@
-﻿# document-service
+# document-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | Transversal |
+| Módulo | Transversal |
 | App repo | `design-software-document-service` |
 | DB repo | `design-software-document-db` |
 | Stack | Python / FastAPI |
@@ -25,10 +28,10 @@ Documentos, versiones, plantillas, variables de plantilla, renderizado PDF y cic
 | GET | `/health` | `.\design-software-document-service\apps\template_api\main.py` |
 | GET | `/health` | `.\design-software-document-service\apps\document_api\main.py` |
 
-## Configuracion
+## Configuración
 
-- Sin variables detectadas automaticamente en archivos de configuracion/codigo.
+- Sin variables detectadas automáticamente en archivos de configuración/código.
 
 ## Notas
 
-Aun tiene endpoints minimos de health en las APIs.
+Aún tiene endpoints minimos de health en las APIs.

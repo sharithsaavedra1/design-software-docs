@@ -1,8 +1,11 @@
-﻿# iam-service
+# iam-service
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Modulo | M1 |
+| Módulo | M1 |
 | App repo | `design-software-iam-service` |
 | DB repo | `design-software-iam-db` |
 | Stack | Java / Spring Boot / Maven |
@@ -11,7 +14,7 @@
 
 ## Responsabilidad
 
-Identidad, autenticacion, sesiones, RBAC, JWT/JWKS y auditoria de login.
+Identidad, autenticación, sesiones, RBAC, JWT/JWKS y auditoría de login.
 
 ## Persistencia
 
@@ -26,7 +29,7 @@ Identidad, autenticacion, sesiones, RBAC, JWT/JWKS y auditoria de login.
 | GET | `/health` | `.\design-software-iam-service\iam-adapters\src\main\java\co\sena\iam\adapter\in\rest\HealthController.java` |
 | GET | `/ready` | `.\design-software-iam-service\iam-adapters\src\main\java\co\sena\iam\adapter\in\rest\HealthController.java` |
 
-## Configuracion
+## Configuración
 
 - `IAM_DB_DSN`
 - `IAM_DB_PASSWORD`
@@ -43,4 +46,4 @@ Identidad, autenticacion, sesiones, RBAC, JWT/JWKS y auditoria de login.
 
 ## Notas
 
-Publica eventos IAM por outbox/RabbitMQ; expone JWKS para validacion de JWT por otros servicios.
+Publica eventos IAM por outbox/RabbitMQ; expone JWKS para validación de JWT por otros servicios.

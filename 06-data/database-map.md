@@ -1,4 +1,7 @@
-﻿# Mapa actualizado de datos por microservicio
+# Mapa actualizado de datos por microservicio
+
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 > Generado desde scripts `01_ddl` de los repos `*-db` en `develop` el 2026-10-07.
 
@@ -20,4 +23,4 @@
 - Los cambios estructurales deben agregarse en `01_ddl` y su rollback en `05_rollbacks`.
 - Los seeds funcionales deben ir en `02_dml` con rollback correspondiente cuando aplique.
 - Evitar escrituras cruzadas: un servicio no debe mutar tablas de otro bounded context.
-- Para `monitoring.sent_notification`, documentar como legado si no se elimina en la migracion; la fuente vigente de notificaciones entregadas es `notification.sent_notification`.
+- Para `monitoring.sent_notification`, documentar como legado si no se elimina en la migración; la fuente vigente de notificaciones entregadas es `notification.sent_notification`.
