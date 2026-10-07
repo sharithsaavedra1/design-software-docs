@@ -221,8 +221,9 @@ Los campos que actors-service copia del evento `iam.user.created` al registro de
 | Campo en `iam.user.created` | Campo en actors-service |
 |-----------------------------|-------------------------|
 | `user_id` | `user_id` (join key) |
-| `email` | `contact_email` |
-| `full_name` | `full_name` |
+| `email` | `email` |
+| `first_name` | `first_name` |
+| `last_name` | `last_name` |
 | `actor_type` | determina la entidad destino (`instructor` o `learner`) |
 
 El resto de los campos del perfil de actor (número de documento, tipo de contrato, competencias, etc.) se completan mediante la API de actors-service una vez creado el registro base.
