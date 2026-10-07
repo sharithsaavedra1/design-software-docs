@@ -1,25 +1,25 @@
-openapi: 3.1.0
+﻿openapi: 3.1.0
 info:
-  title: Reference Data Service API — Horarios SENA
+  title: Reference Data Service API â€” Horarios SENA
   version: 1.0.0
   description: >-
-    Jerarquía institucional (macrorregión → microrregión → departamento → municipio →
-    centro de formación → unidad institucional), catálogos parametrizables
-    (`catalog`/`catalog_detail`) y parámetros del sistema (EAV). Fuente de verdad del
+    JerarquÃ­a institucional (macrorregiÃ³n â†’ microrregiÃ³n â†’ departamento â†’ municipio â†’
+    centro de formaciÃ³n â†’ unidad institucional), catÃ¡logos parametrizables
+    (`catalog`/`catalog_detail`) y parÃ¡metros del sistema (EAV). Fuente de verdad del
     contrato. Alineado con el modelo de datos de reference-data-service y con
-    07-api/guidelines.md. La extensión `x-required-feature` declara el feature RBAC
-    que exige cada operación (ver rbac-design.md, módulo `MOD_REFERENCE`).
+    07-api/guidelines.md. La extensiÃ³n `x-required-feature` declara el feature RBAC
+    que exige cada operaciÃ³n (ver rbac-design.md, mÃ³dulo `MOD_REFERENCE`).
 servers:
   - url: /api/v1
 security:
   - bearerAuth: []
 tags:
   - name: institutional-hierarchy
-    description: Jerarquía geográfica e institucional (macrorregión…unidad institucional).
+    description: JerarquÃ­a geogrÃ¡fica e institucional (macrorregiÃ³nâ€¦unidad institucional).
   - name: catalogs
-    description: Catálogos parametrizables y sus valores.
+    description: CatÃ¡logos parametrizables y sus valores.
   - name: parameters
-    description: Parámetros del sistema (patrón EAV).
+    description: ParÃ¡metros del sistema (patrÃ³n EAV).
   - name: reports
     description: Reportes propios del dominio de datos de referencia.
 
@@ -38,7 +38,7 @@ paths:
         - name: code
           in: query
           required: false
-          description: Filtra por código SENA exacto.
+          description: Filtra por cÃ³digo SENA exacto.
           schema: { type: string, maxLength: 10 }
         - name: is_active
           in: query
@@ -46,7 +46,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de macrorregiones.
+          description: PÃ¡gina de macrorregiones.
           content:
             application/json:
               schema:
@@ -63,7 +63,7 @@ paths:
     post:
       operationId: createMacroregion
       tags: [institutional-hierarchy]
-      summary: Crea una macrorregión.
+      summary: Crea una macrorregiÃ³n.
       x-required-feature: REF_HIERARCHY_MANAGE
       requestBody:
         required: true
@@ -72,7 +72,7 @@ paths:
             schema: { $ref: '#/components/schemas/MacroregionCreate' }
       responses:
         '201':
-          description: Macrorregión creada.
+          description: MacrorregiÃ³n creada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Macroregion' }
@@ -88,11 +88,11 @@ paths:
     get:
       operationId: getMacroregion
       tags: [institutional-hierarchy]
-      summary: Detalle de una macrorregión.
+      summary: Detalle de una macrorregiÃ³n.
       x-required-feature: REF_HIERARCHY_VIEW
       responses:
         '200':
-          description: Macrorregión.
+          description: MacrorregiÃ³n.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Macroregion' }
@@ -102,7 +102,7 @@ paths:
     put:
       operationId: updateMacroregion
       tags: [institutional-hierarchy]
-      summary: Actualiza una macrorregión.
+      summary: Actualiza una macrorregiÃ³n.
       x-required-feature: REF_HIERARCHY_MANAGE
       requestBody:
         required: true
@@ -111,7 +111,7 @@ paths:
             schema: { $ref: '#/components/schemas/MacroregionUpdate' }
       responses:
         '200':
-          description: Macrorregión actualizada.
+          description: MacrorregiÃ³n actualizada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Macroregion' }
@@ -123,11 +123,11 @@ paths:
     delete:
       operationId: deleteMacroregion
       tags: [institutional-hierarchy]
-      summary: Desactiva una macrorregión (soft delete vía is_active).
+      summary: Desactiva una macrorregiÃ³n (soft delete vÃ­a is_active).
       x-required-feature: REF_HIERARCHY_MANAGE
       responses:
         '204':
-          description: Macrorregión desactivada.
+          description: MacrorregiÃ³n desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -147,7 +147,7 @@ paths:
         - name: macroregion_id
           in: query
           required: false
-          description: Filtra por macrorregión padre.
+          description: Filtra por macrorregiÃ³n padre.
           schema: { type: string, format: uuid }
         - name: code
           in: query
@@ -159,7 +159,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de microrregiones.
+          description: PÃ¡gina de microrregiones.
           content:
             application/json:
               schema:
@@ -176,7 +176,7 @@ paths:
     post:
       operationId: createMicroregion
       tags: [institutional-hierarchy]
-      summary: Crea una microrregión.
+      summary: Crea una microrregiÃ³n.
       x-required-feature: REF_HIERARCHY_MANAGE
       requestBody:
         required: true
@@ -185,7 +185,7 @@ paths:
             schema: { $ref: '#/components/schemas/MicroregionCreate' }
       responses:
         '201':
-          description: Microrregión creada.
+          description: MicrorregiÃ³n creada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Microregion' }
@@ -202,11 +202,11 @@ paths:
     get:
       operationId: getMicroregion
       tags: [institutional-hierarchy]
-      summary: Detalle de una microrregión.
+      summary: Detalle de una microrregiÃ³n.
       x-required-feature: REF_HIERARCHY_VIEW
       responses:
         '200':
-          description: Microrregión.
+          description: MicrorregiÃ³n.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Microregion' }
@@ -216,7 +216,7 @@ paths:
     put:
       operationId: updateMicroregion
       tags: [institutional-hierarchy]
-      summary: Actualiza una microrregión.
+      summary: Actualiza una microrregiÃ³n.
       x-required-feature: REF_HIERARCHY_MANAGE
       requestBody:
         required: true
@@ -225,7 +225,7 @@ paths:
             schema: { $ref: '#/components/schemas/MicroregionUpdate' }
       responses:
         '200':
-          description: Microrregión actualizada.
+          description: MicrorregiÃ³n actualizada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Microregion' }
@@ -237,11 +237,11 @@ paths:
     delete:
       operationId: deleteMicroregion
       tags: [institutional-hierarchy]
-      summary: Desactiva una microrregión (soft delete vía is_active).
+      summary: Desactiva una microrregiÃ³n (soft delete vÃ­a is_active).
       x-required-feature: REF_HIERARCHY_MANAGE
       responses:
         '204':
-          description: Microrregión desactivada.
+          description: MicrorregiÃ³n desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -261,12 +261,12 @@ paths:
         - name: microregion_id
           in: query
           required: false
-          description: Filtra por microrregión padre.
+          description: Filtra por microrregiÃ³n padre.
           schema: { type: string, format: uuid }
         - name: dane_code
           in: query
           required: false
-          description: Filtra por código DANE exacto.
+          description: Filtra por cÃ³digo DANE exacto.
           schema: { type: string, maxLength: 5 }
         - name: is_active
           in: query
@@ -274,7 +274,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de departamentos.
+          description: PÃ¡gina de departamentos.
           content:
             application/json:
               schema:
@@ -352,7 +352,7 @@ paths:
     delete:
       operationId: deleteDepartment
       tags: [institutional-hierarchy]
-      summary: Desactiva un departamento (soft delete vía is_active).
+      summary: Desactiva un departamento (soft delete vÃ­a is_active).
       x-required-feature: REF_HIERARCHY_MANAGE
       responses:
         '204':
@@ -381,7 +381,7 @@ paths:
         - name: dane_code
           in: query
           required: false
-          description: Filtra por código DANE exacto.
+          description: Filtra por cÃ³digo DANE exacto.
           schema: { type: string, maxLength: 8 }
         - name: is_active
           in: query
@@ -389,7 +389,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de municipios.
+          description: PÃ¡gina de municipios.
           content:
             application/json:
               schema:
@@ -467,7 +467,7 @@ paths:
     delete:
       operationId: deleteMunicipality
       tags: [institutional-hierarchy]
-      summary: Desactiva un municipio (soft delete vía is_active).
+      summary: Desactiva un municipio (soft delete vÃ­a is_active).
       x-required-feature: REF_HIERARCHY_MANAGE
       responses:
         '204':
@@ -482,7 +482,7 @@ paths:
     get:
       operationId: listTrainingCenters
       tags: [institutional-hierarchy]
-      summary: Lista paginada de centros de formación.
+      summary: Lista paginada de centros de formaciÃ³n.
       x-required-feature: REF_HIERARCHY_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -496,7 +496,7 @@ paths:
         - name: center_code
           in: query
           required: false
-          description: Filtra por código SENA exacto del centro.
+          description: Filtra por cÃ³digo SENA exacto del centro.
           schema: { type: string, maxLength: 10 }
         - name: is_active
           in: query
@@ -504,7 +504,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de centros de formación.
+          description: PÃ¡gina de centros de formaciÃ³n.
           content:
             application/json:
               schema:
@@ -521,7 +521,7 @@ paths:
     post:
       operationId: createTrainingCenter
       tags: [institutional-hierarchy]
-      summary: Crea un centro de formación.
+      summary: Crea un centro de formaciÃ³n.
       x-required-feature: REF_HIERARCHY_MANAGE
       requestBody:
         required: true
@@ -530,7 +530,7 @@ paths:
             schema: { $ref: '#/components/schemas/TrainingCenterCreate' }
       responses:
         '201':
-          description: Centro de formación creado.
+          description: Centro de formaciÃ³n creado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrainingCenter' }
@@ -547,11 +547,11 @@ paths:
     get:
       operationId: getTrainingCenter
       tags: [institutional-hierarchy]
-      summary: Detalle de un centro de formación.
+      summary: Detalle de un centro de formaciÃ³n.
       x-required-feature: REF_HIERARCHY_VIEW
       responses:
         '200':
-          description: Centro de formación.
+          description: Centro de formaciÃ³n.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrainingCenter' }
@@ -561,7 +561,7 @@ paths:
     put:
       operationId: updateTrainingCenter
       tags: [institutional-hierarchy]
-      summary: Actualiza un centro de formación.
+      summary: Actualiza un centro de formaciÃ³n.
       x-required-feature: REF_HIERARCHY_MANAGE
       requestBody:
         required: true
@@ -570,7 +570,7 @@ paths:
             schema: { $ref: '#/components/schemas/TrainingCenterUpdate' }
       responses:
         '200':
-          description: Centro de formación actualizado.
+          description: Centro de formaciÃ³n actualizado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrainingCenter' }
@@ -582,11 +582,11 @@ paths:
     delete:
       operationId: deleteTrainingCenter
       tags: [institutional-hierarchy]
-      summary: Desactiva un centro de formación (soft delete vía is_active).
+      summary: Desactiva un centro de formaciÃ³n (soft delete vÃ­a is_active).
       x-required-feature: REF_HIERARCHY_MANAGE
       responses:
         '204':
-          description: Centro de formación desactivado.
+          description: Centro de formaciÃ³n desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -606,7 +606,7 @@ paths:
         - name: training_center_id
           in: query
           required: false
-          description: Filtra por centro de formación padre.
+          description: Filtra por centro de formaciÃ³n padre.
           schema: { type: string, format: uuid }
         - name: unit_type
           in: query
@@ -620,7 +620,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de unidades institucionales.
+          description: PÃ¡gina de unidades institucionales.
           content:
             application/json:
               schema:
@@ -698,7 +698,7 @@ paths:
     delete:
       operationId: deleteInstitutionalUnit
       tags: [institutional-hierarchy]
-      summary: Desactiva una unidad institucional (soft delete vía is_active).
+      summary: Desactiva una unidad institucional (soft delete vÃ­a is_active).
       x-required-feature: REF_HIERARCHY_MANAGE
       responses:
         '204':
@@ -713,7 +713,7 @@ paths:
     get:
       operationId: listCatalogs
       tags: [catalogs]
-      summary: Lista paginada de catálogos.
+      summary: Lista paginada de catÃ¡logos.
       x-required-feature: REF_CATALOG_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -722,7 +722,7 @@ paths:
         - name: code
           in: query
           required: false
-          description: 'Filtra por clave de catálogo (ej: MODALITY, SHIFT).'
+          description: 'Filtra por clave de catÃ¡logo (ej: MODALITY, SHIFT).'
           schema: { type: string, maxLength: 50 }
         - name: is_active
           in: query
@@ -730,7 +730,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de catálogos.
+          description: PÃ¡gina de catÃ¡logos.
           content:
             application/json:
               schema:
@@ -747,7 +747,7 @@ paths:
     post:
       operationId: createCatalog
       tags: [catalogs]
-      summary: Crea un catálogo.
+      summary: Crea un catÃ¡logo.
       x-required-feature: REF_CATALOG_MANAGE
       requestBody:
         required: true
@@ -756,7 +756,7 @@ paths:
             schema: { $ref: '#/components/schemas/CatalogCreate' }
       responses:
         '201':
-          description: Catálogo creado.
+          description: CatÃ¡logo creado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Catalog' }
@@ -772,11 +772,11 @@ paths:
     get:
       operationId: getCatalog
       tags: [catalogs]
-      summary: Detalle de un catálogo.
+      summary: Detalle de un catÃ¡logo.
       x-required-feature: REF_CATALOG_VIEW
       responses:
         '200':
-          description: Catálogo.
+          description: CatÃ¡logo.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Catalog' }
@@ -786,7 +786,7 @@ paths:
     put:
       operationId: updateCatalog
       tags: [catalogs]
-      summary: Actualiza un catálogo.
+      summary: Actualiza un catÃ¡logo.
       x-required-feature: REF_CATALOG_MANAGE
       requestBody:
         required: true
@@ -795,7 +795,7 @@ paths:
             schema: { $ref: '#/components/schemas/CatalogUpdate' }
       responses:
         '200':
-          description: Catálogo actualizado.
+          description: CatÃ¡logo actualizado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Catalog' }
@@ -807,11 +807,11 @@ paths:
     delete:
       operationId: deleteCatalog
       tags: [catalogs]
-      summary: Desactiva un catálogo (soft delete vía is_active).
+      summary: Desactiva un catÃ¡logo (soft delete vÃ­a is_active).
       x-required-feature: REF_CATALOG_MANAGE
       responses:
         '204':
-          description: Catálogo desactivado.
+          description: CatÃ¡logo desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -823,12 +823,12 @@ paths:
       - name: catalog_id
         in: path
         required: true
-        description: UUID del catálogo padre.
+        description: UUID del catÃ¡logo padre.
         schema: { type: string, format: uuid }
     get:
       operationId: listCatalogDetails
       tags: [catalogs]
-      summary: Lista paginada de valores de un catálogo.
+      summary: Lista paginada de valores de un catÃ¡logo.
       x-required-feature: REF_CATALOG_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -845,7 +845,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de valores del catálogo.
+          description: PÃ¡gina de valores del catÃ¡logo.
           content:
             application/json:
               schema:
@@ -863,7 +863,7 @@ paths:
     post:
       operationId: createCatalogDetail
       tags: [catalogs]
-      summary: Agrega un valor a un catálogo.
+      summary: Agrega un valor a un catÃ¡logo.
       x-required-feature: REF_CATALOG_MANAGE
       requestBody:
         required: true
@@ -872,7 +872,7 @@ paths:
             schema: { $ref: '#/components/schemas/CatalogDetailCreate' }
       responses:
         '201':
-          description: Valor de catálogo creado.
+          description: Valor de catÃ¡logo creado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/CatalogDetail' }
@@ -888,21 +888,21 @@ paths:
       - name: catalog_id
         in: path
         required: true
-        description: UUID del catálogo padre.
+        description: UUID del catÃ¡logo padre.
         schema: { type: string, format: uuid }
       - name: id
         in: path
         required: true
-        description: UUID del valor de catálogo.
+        description: UUID del valor de catÃ¡logo.
         schema: { type: string, format: uuid }
     get:
       operationId: getCatalogDetail
       tags: [catalogs]
-      summary: Detalle de un valor de catálogo.
+      summary: Detalle de un valor de catÃ¡logo.
       x-required-feature: REF_CATALOG_VIEW
       responses:
         '200':
-          description: Valor de catálogo.
+          description: Valor de catÃ¡logo.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/CatalogDetail' }
@@ -912,7 +912,7 @@ paths:
     put:
       operationId: updateCatalogDetail
       tags: [catalogs]
-      summary: Actualiza un valor de catálogo.
+      summary: Actualiza un valor de catÃ¡logo.
       x-required-feature: REF_CATALOG_MANAGE
       requestBody:
         required: true
@@ -921,7 +921,7 @@ paths:
             schema: { $ref: '#/components/schemas/CatalogDetailUpdate' }
       responses:
         '200':
-          description: Valor de catálogo actualizado.
+          description: Valor de catÃ¡logo actualizado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/CatalogDetail' }
@@ -933,11 +933,11 @@ paths:
     delete:
       operationId: deleteCatalogDetail
       tags: [catalogs]
-      summary: Desactiva un valor de catálogo (soft delete vía is_active).
+      summary: Desactiva un valor de catÃ¡logo (soft delete vÃ­a is_active).
       x-required-feature: REF_CATALOG_MANAGE
       responses:
         '204':
-          description: Valor de catálogo desactivado.
+          description: Valor de catÃ¡logo desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -948,7 +948,7 @@ paths:
     get:
       operationId: listParameters
       tags: [parameters]
-      summary: Lista paginada de parámetros del sistema.
+      summary: Lista paginada de parÃ¡metros del sistema.
       x-required-feature: REF_PARAMETER_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -967,7 +967,7 @@ paths:
             enum: [integer, string, boolean, json]
       responses:
         '200':
-          description: Página de parámetros.
+          description: PÃ¡gina de parÃ¡metros.
           content:
             application/json:
               schema:
@@ -984,7 +984,7 @@ paths:
     post:
       operationId: createParameter
       tags: [parameters]
-      summary: Crea un parámetro del sistema.
+      summary: Crea un parÃ¡metro del sistema.
       x-required-feature: REF_PARAMETER_MANAGE
       requestBody:
         required: true
@@ -993,7 +993,7 @@ paths:
             schema: { $ref: '#/components/schemas/ParameterCreate' }
       responses:
         '201':
-          description: Parámetro creado.
+          description: ParÃ¡metro creado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Parameter' }
@@ -1009,11 +1009,11 @@ paths:
     get:
       operationId: getParameter
       tags: [parameters]
-      summary: Detalle de un parámetro del sistema.
+      summary: Detalle de un parÃ¡metro del sistema.
       x-required-feature: REF_PARAMETER_VIEW
       responses:
         '200':
-          description: Parámetro.
+          description: ParÃ¡metro.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Parameter' }
@@ -1023,10 +1023,10 @@ paths:
     put:
       operationId: updateParameter
       tags: [parameters]
-      summary: Actualiza el valor de un parámetro del sistema.
+      summary: Actualiza el valor de un parÃ¡metro del sistema.
       description: >-
         No expone DELETE: la tabla `parameter` no tiene `is_active`/`deleted_at`
-        (ver data-model.md). Los valores se superseden vía PUT, no se eliminan.
+        (ver data-model.md). Los valores se superseden vÃ­a PUT, no se eliminan.
       x-required-feature: REF_PARAMETER_MANAGE
       requestBody:
         required: true
@@ -1035,7 +1035,7 @@ paths:
             schema: { $ref: '#/components/schemas/ParameterUpdate' }
       responses:
         '200':
-          description: Parámetro actualizado.
+          description: ParÃ¡metro actualizado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Parameter' }
@@ -1050,14 +1050,14 @@ paths:
     get:
       operationId: reportActiveCatalog
       tags: [reports]
-      summary: Inventario de catálogos activos con sus valores activos.
+      summary: Inventario de catÃ¡logos activos con sus valores activos.
       description: >-
         Reporte propio del dominio de datos de referencia sobre `catalog` +
         `catalog_detail` (solo filas con `is_active = true`). Permite precargar de una
         sola llamada todos los selects/dropdowns parametrizados en vez de resolver
-        `catalog_detail` por catálogo (N+1). Solo lectura.
-        Inventario — Consumidores: frontend (selects), academic-management-service,
-        training-environment-service, actors-service; Frecuencia: al iniciar sesión /
+        `catalog_detail` por catÃ¡logo (N+1). Solo lectura.
+        Inventario â€” Consumidores: frontend (selects), academic-management-service,
+        training-environment-service, actors-service; Frecuencia: al iniciar sesiÃ³n /
         cacheado con TTL en el consumidor; Formato: JSON; Fuente: `catalog` +
         `catalog_detail`.
       x-required-feature: REF_CATALOG_VIEW
@@ -1067,11 +1067,11 @@ paths:
         - name: catalog_code
           in: query
           required: false
-          description: Limita el reporte a un único catálogo por código.
+          description: Limita el reporte a un Ãºnico catÃ¡logo por cÃ³digo.
           schema: { type: string, maxLength: 50 }
       responses:
         '200':
-          description: Página de catálogos activos con sus valores activos.
+          description: PÃ¡gina de catÃ¡logos activos con sus valores activos.
           content:
             application/json:
               schema:
@@ -1085,19 +1085,69 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 
+  /health/live:
+    get:
+      operationId: live
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Alias de liveness probe.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /health/ready:
+    get:
+      operationId: ready
+      tags: [health]
+      summary: Readiness probe con verificacion de dependencias.
+      security: []
+      responses:
+        '200':
+          description: Dependencias listas.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '503':
+          description: Alguna dependencia no esta lista.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
 components:
   parameters:
     MacroregionId:
       name: id
       in: path
       required: true
-      description: UUID de la macrorregión.
+      description: UUID de la macrorregiÃ³n.
       schema: { type: string, format: uuid }
     MicroregionId:
       name: id
       in: path
       required: true
-      description: UUID de la microrregión.
+      description: UUID de la microrregiÃ³n.
       schema: { type: string, format: uuid }
     DepartmentId:
       name: id
@@ -1115,7 +1165,7 @@ components:
       name: id
       in: path
       required: true
-      description: UUID del centro de formación.
+      description: UUID del centro de formaciÃ³n.
       schema: { type: string, format: uuid }
     InstitutionalUnitId:
       name: id
@@ -1127,24 +1177,24 @@ components:
       name: id
       in: path
       required: true
-      description: UUID del catálogo.
+      description: UUID del catÃ¡logo.
       schema: { type: string, format: uuid }
     ParameterId:
       name: id
       in: path
       required: true
-      description: UUID del parámetro.
+      description: UUID del parÃ¡metro.
       schema: { type: string, format: uuid }
 
   schemas:
-    # ---------------------------------------------------- jerarquía institucional
+    # ---------------------------------------------------- jerarquÃ­a institucional
     Macroregion:
       type: object
       required: [id, name, code, is_active]
       properties:
         id: { type: string, format: uuid }
         name: { type: string, maxLength: 100 }
-        code: { type: string, maxLength: 10, description: UNIQUE; código SENA. }
+        code: { type: string, maxLength: 10, description: UNIQUE; cÃ³digo SENA. }
         is_active: { type: boolean }
 
     MacroregionCreate:
@@ -1169,7 +1219,7 @@ components:
         id: { type: string, format: uuid }
         macroregion_id: { type: string, format: uuid }
         name: { type: string, maxLength: 100 }
-        code: { type: string, maxLength: 10, description: UNIQUE dentro de la macrorregión padre. }
+        code: { type: string, maxLength: 10, description: UNIQUE dentro de la macrorregiÃ³n padre. }
         is_active: { type: boolean }
 
     MicroregionCreate:
@@ -1196,7 +1246,7 @@ components:
         id: { type: string, format: uuid }
         microregion_id: { type: string, format: uuid }
         name: { type: string, maxLength: 100 }
-        dane_code: { type: string, maxLength: 5, description: UNIQUE nacional; código DANE del departamento. }
+        dane_code: { type: string, maxLength: 5, description: UNIQUE nacional; cÃ³digo DANE del departamento. }
         is_active: { type: boolean }
 
     DepartmentCreate:
@@ -1223,7 +1273,7 @@ components:
         id: { type: string, format: uuid }
         department_id: { type: string, format: uuid }
         name: { type: string, maxLength: 150 }
-        dane_code: { type: string, maxLength: 8, description: UNIQUE nacional; código DANE del municipio. }
+        dane_code: { type: string, maxLength: 8, description: UNIQUE nacional; cÃ³digo DANE del municipio. }
         is_active: { type: boolean }
 
     MunicipalityCreate:
@@ -1249,7 +1299,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         municipality_id: { type: string, format: uuid }
-        center_code: { type: string, maxLength: 10, description: UNIQUE; código SENA del centro; referenciado desde otros servicios. }
+        center_code: { type: string, maxLength: 10, description: UNIQUE; cÃ³digo SENA del centro; referenciado desde otros servicios. }
         name: { type: string, maxLength: 200 }
         address:
           type: [string, 'null']
@@ -1322,13 +1372,13 @@ components:
           enum: [ACADEMIC, ADMINISTRATIVE, MIXED]
         is_active: { type: boolean }
 
-    # ---------------------------------------------------- catálogos
+    # ---------------------------------------------------- catÃ¡logos
     Catalog:
       type: object
       required: [id, code, name, is_active, created_at]
       properties:
         id: { type: string, format: uuid }
-        code: { type: string, maxLength: 50, description: 'UNIQUE; clave del catálogo (ej: MODALITY, SHIFT).' }
+        code: { type: string, maxLength: 50, description: 'UNIQUE; clave del catÃ¡logo (ej: MODALITY, SHIFT).' }
         name: { type: string, maxLength: 100 }
         description:
           type: [string, 'null']
@@ -1360,7 +1410,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         catalog_id: { type: string, format: uuid }
-        code: { type: string, maxLength: 50, description: 'UNIQUE dentro del catálogo padre (ej: IN_PERSON).' }
+        code: { type: string, maxLength: 50, description: 'UNIQUE dentro del catÃ¡logo padre (ej: IN_PERSON).' }
         label: { type: string, maxLength: 255 }
         display_order:
           type: [integer, 'null']
@@ -1386,7 +1436,7 @@ components:
           type: [integer, 'null']
         is_active: { type: boolean }
 
-    # ---------------------------------------------------- parámetros (EAV)
+    # ---------------------------------------------------- parÃ¡metros (EAV)
     Parameter:
       type: object
       required: [id, key, value, value_type, created_at]
@@ -1395,7 +1445,7 @@ components:
         key: { type: string, maxLength: 100, description: 'UNIQUE (ej: MAX_HOURS_PER_WEEK).' }
         value:
           type: string
-          description: Valor almacenado como string; validado según value_type en la capa de aplicación.
+          description: Valor almacenado como string; validado segÃºn value_type en la capa de aplicaciÃ³n.
         value_type:
           type: string
           enum: [integer, string, boolean, json]
@@ -1448,4 +1498,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+
+
+

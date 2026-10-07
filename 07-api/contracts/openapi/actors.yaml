@@ -1,14 +1,14 @@
-openapi: 3.1.0
+﻿openapi: 3.1.0
 info:
-  title: Actors Service API — Horarios SENA
+  title: Actors Service API â€” Horarios SENA
   version: 1.0.0
   description: >-
-    Gestión de instructores, aprendices y empresas: contratos, áreas de conocimiento,
+    GestiÃ³n de instructores, aprendices y empresas: contratos, Ã¡reas de conocimiento,
     competencias asignadas, disponibilidad, historial de fichas, etapa productiva,
     visitas de seguimiento y planes de mejoramiento individual. Alineado con el modelo
     de datos de actors-service (schema `actors_parameterization`) y con
-    07-api/guidelines.md. Fuente de verdad del contrato. La extensión
-    `x-required-feature` declara el feature RBAC que exige cada operación.
+    07-api/guidelines.md. Fuente de verdad del contrato. La extensiÃ³n
+    `x-required-feature` declara el feature RBAC que exige cada operaciÃ³n.
 servers:
   - url: /api/v1
 security:
@@ -17,7 +17,7 @@ tags:
   - name: companies
     description: Empresas que participan en la etapa productiva.
   - name: instructors
-    description: Instructores, contratos, áreas, competencias y disponibilidad.
+    description: Instructores, contratos, Ã¡reas, competencias y disponibilidad.
   - name: learners
     description: Aprendices y su historial de fichas.
   - name: tracking
@@ -39,7 +39,7 @@ paths:
         - name: nit
           in: query
           required: false
-          description: Filtra por número de identificación tributaria.
+          description: Filtra por nÃºmero de identificaciÃ³n tributaria.
           schema: { type: string }
         - name: city_id
           in: query
@@ -52,7 +52,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de empresas.
+          description: PÃ¡gina de empresas.
           content:
             application/json:
               schema:
@@ -175,12 +175,12 @@ paths:
         - name: area
           in: query
           required: false
-          description: Filtra por nombre de área tecnológica (instructor_area.area_name).
+          description: Filtra por nombre de Ã¡rea tecnolÃ³gica (instructor_area.area_name).
           schema: { type: string }
         - name: training_center_id
           in: query
           required: false
-          description: Filtra por centro de formación del contrato vigente (reference-data-service).
+          description: Filtra por centro de formaciÃ³n del contrato vigente (reference-data-service).
           schema: { type: string, format: uuid }
         - name: is_active
           in: query
@@ -188,7 +188,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de instructores.
+          description: PÃ¡gina de instructores.
           content:
             application/json:
               schema:
@@ -300,11 +300,11 @@ paths:
     get:
       operationId: listInstructorAreas
       tags: [instructors]
-      summary: Áreas tecnológicas del instructor.
+      summary: Ãreas tecnolÃ³gicas del instructor.
       x-required-feature: ACT_INSTRUCTOR_VIEW
       responses:
         '200':
-          description: Lista de áreas.
+          description: Lista de Ã¡reas.
           content:
             application/json:
               schema:
@@ -316,7 +316,7 @@ paths:
     post:
       operationId: addInstructorArea
       tags: [instructors]
-      summary: Asigna un área tecnológica al instructor.
+      summary: Asigna un Ã¡rea tecnolÃ³gica al instructor.
       x-required-feature: ACT_INSTRUCTOR_MANAGE
       requestBody:
         required: true
@@ -325,7 +325,7 @@ paths:
             schema: { $ref: '#/components/schemas/InstructorAreaCreate' }
       responses:
         '201':
-          description: Área asignada.
+          description: Ãrea asignada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InstructorArea' }
@@ -345,11 +345,11 @@ paths:
     delete:
       operationId: removeInstructorArea
       tags: [instructors]
-      summary: Retira un área tecnológica del instructor (soft delete, is_active = false).
+      summary: Retira un Ã¡rea tecnolÃ³gica del instructor (soft delete, is_active = false).
       x-required-feature: ACT_INSTRUCTOR_MANAGE
       responses:
         '204':
-          description: Área retirada.
+          description: Ãrea retirada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -540,7 +540,7 @@ paths:
             schema: { $ref: '#/components/schemas/InstructorAvailabilityExceptionCreate' }
       responses:
         '201':
-          description: Excepción registrada; dispara actors.instructor.availability_changed.
+          description: ExcepciÃ³n registrada; dispara actors.instructor.availability_changed.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InstructorAvailabilityException' }
@@ -564,7 +564,7 @@ paths:
       x-required-feature: ACT_INSTRUCTOR_MANAGE
       responses:
         '204':
-          description: Excepción eliminada; dispara actors.instructor.availability_changed.
+          description: ExcepciÃ³n eliminada; dispara actors.instructor.availability_changed.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -575,14 +575,14 @@ paths:
     get:
       operationId: listInstructorActivityLog
       tags: [instructors]
-      summary: Bitácora funcional del instructor (solo lectura, append-only).
+      summary: BitÃ¡cora funcional del instructor (solo lectura, append-only).
       x-required-feature: ACT_INSTRUCTOR_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/cursor'
         - $ref: '_shared.yaml#/components/parameters/limit'
       responses:
         '200':
-          description: Página de eventos de bitácora.
+          description: PÃ¡gina de eventos de bitÃ¡cora.
           content:
             application/json:
               schema:
@@ -621,12 +621,12 @@ paths:
           in: query
           required: false
           description: >-
-            Filtra por el estado de la inscripción vigente
+            Filtra por el estado de la inscripciÃ³n vigente
             (learner_ficha_enrollment.enrollment_status_id, is_current = true).
           schema: { type: string, format: uuid }
       responses:
         '200':
-          description: Página de aprendices.
+          description: PÃ¡gina de aprendices.
           content:
             application/json:
               schema:
@@ -724,7 +724,7 @@ paths:
       operationId: deleteLearner
       tags: [learners]
       summary: >-
-        Cancela la vinculación del aprendiz (soft delete; transita
+        Cancela la vinculaciÃ³n del aprendiz (soft delete; transita
         learner_ficha_enrollment.enrollment_status_id vigente al estado CANCELLED).
       x-required-feature: ACT_LEARNER_MANAGE
       responses:
@@ -744,7 +744,7 @@ paths:
       x-required-feature: ACT_LEARNER_VIEW
       responses:
         '200':
-          description: Lista de inscripciones (histórico y vigente).
+          description: Lista de inscripciones (histÃ³rico y vigente).
           content:
             application/json:
               schema:
@@ -756,7 +756,7 @@ paths:
     post:
       operationId: createLearnerFichaEnrollment
       tags: [learners]
-      summary: Inscribe (o traslada) al aprendiz a una ficha; cierra la inscripción vigente anterior.
+      summary: Inscribe (o traslada) al aprendiz a una ficha; cierra la inscripciÃ³n vigente anterior.
       x-required-feature: ACT_LEARNER_MANAGE
       requestBody:
         required: true
@@ -765,7 +765,7 @@ paths:
             schema: { $ref: '#/components/schemas/LearnerFichaEnrollmentCreate' }
       responses:
         '201':
-          description: Inscripción creada; dispara actors.learner.enrolled.
+          description: InscripciÃ³n creada; dispara actors.learner.enrolled.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/LearnerFichaEnrollment' }
@@ -782,14 +782,14 @@ paths:
     get:
       operationId: listLearnerActivityLog
       tags: [learners]
-      summary: Bitácora funcional del aprendiz (solo lectura, append-only).
+      summary: BitÃ¡cora funcional del aprendiz (solo lectura, append-only).
       x-required-feature: ACT_LEARNER_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/cursor'
         - $ref: '_shared.yaml#/components/parameters/limit'
       responses:
         '200':
-          description: Página de eventos de bitácora.
+          description: PÃ¡gina de eventos de bitÃ¡cora.
           content:
             application/json:
               schema:
@@ -879,7 +879,7 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
-          description: Página de etapas productivas.
+          description: PÃ¡gina de etapas productivas.
           content:
             application/json:
               schema:
@@ -934,7 +934,7 @@ paths:
     put:
       operationId: updateProductiveStage
       tags: [tracking]
-      summary: Actualiza avance, cierre o interrupción de la etapa productiva.
+      summary: Actualiza avance, cierre o interrupciÃ³n de la etapa productiva.
       x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
       requestBody:
         required: true
@@ -1063,7 +1063,7 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         '200':
-          description: Página de planes de mejoramiento.
+          description: PÃ¡gina de planes de mejoramiento.
           content:
             application/json:
               schema:
@@ -1146,11 +1146,11 @@ paths:
     get:
       operationId: reportLearnerTracking
       tags: [reports]
-      summary: Seguimiento de aprendices por ficha, etapa y estado de inscripción.
+      summary: Seguimiento de aprendices por ficha, etapa y estado de inscripciÃ³n.
       description: >-
         Reporte propio del dominio de actores. Cruza `learner`, `learner_ficha_enrollment`
-        (inscripción vigente) y `productive_stage` (si el aprendiz está en etapa
-        productiva). Solo lectura. Inventario — Usuarios: coordinación académica,
+        (inscripciÃ³n vigente) y `productive_stage` (si el aprendiz estÃ¡ en etapa
+        productiva). Solo lectura. Inventario â€” Usuarios: coordinaciÃ³n acadÃ©mica,
         instructores de seguimiento; Frecuencia: on-demand; Formato: JSON; Fuente:
         `actors_parameterization.learner`, `learner_ficha_enrollment`, `productive_stage`.
       x-required-feature: ACT_REPORT_VIEW
@@ -1180,7 +1180,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: Página del reporte de seguimiento.
+          description: PÃ¡gina del reporte de seguimiento.
           content:
             application/json:
               schema:
@@ -1201,11 +1201,11 @@ paths:
       tags: [reports]
       summary: Capacidad y disponibilidad de instructores.
       description: >-
-        Reporte propio del dominio de actores. Cruza `instructor` (límite por defecto),
-        `instructor_contract` (límite vigente), `instructor_area`, `competency_assignment`
+        Reporte propio del dominio de actores. Cruza `instructor` (lÃ­mite por defecto),
+        `instructor_contract` (lÃ­mite vigente), `instructor_area`, `competency_assignment`
         y `instructor_availability_exception` en el rango consultado. No incluye horas
         efectivamente asignadas (eso vive en scheduling-service). Solo lectura.
-        Inventario — Usuarios: coordinación, scheduling-service (consumo batch);
+        Inventario â€” Usuarios: coordinaciÃ³n, scheduling-service (consumo batch);
         Frecuencia: on-demand; Formato: JSON; Fuente: `actors_parameterization.instructor`,
         `instructor_contract`, `instructor_area`, `competency_assignment`,
         `instructor_availability_exception`.
@@ -1217,7 +1217,7 @@ paths:
         - name: training_center_id
           in: query
           required: false
-          description: Filtra por centro de formación del contrato vigente.
+          description: Filtra por centro de formaciÃ³n del contrato vigente.
           schema: { type: string, format: uuid }
         - name: area
           in: query
@@ -1235,7 +1235,7 @@ paths:
           schema: { type: string, format: date-time }
       responses:
         '200':
-          description: Página del reporte de carga/disponibilidad.
+          description: PÃ¡gina del reporte de carga/disponibilidad.
           content:
             application/json:
               schema:
@@ -1249,6 +1249,55 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
+
+  /catalogs:
+    get:
+      operationId: listActorCatalogs
+      tags: [catalogs]
+      summary: Lista catalogos internos usados por el dominio de actores.
+      responses:
+        '200':
+          description: Catalogos disponibles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+  /catalogs/{catalog_id}/details:
+    get:
+      operationId: listActorCatalogDetails
+      tags: [catalogs]
+      summary: Lista detalles de un catalogo interno del dominio de actores.
+      parameters:
+        - name: catalog_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Detalles del catalogo.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+  /reports/active-catalog:
+    get:
+      operationId: reportActorActiveCatalog
+      tags: [reports]
+      summary: Reporte de catalogos activos usados por actores.
+      responses:
+        '200':
+          description: Reporte generado.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
 
 components:
   parameters:
@@ -1291,13 +1340,13 @@ components:
         economic_activity:
           type: [string, 'null']
           maxLength: 100
-          description: Actividad económica principal (CIIU).
+          description: Actividad econÃ³mica principal (CIIU).
         address:
           type: [string, 'null']
         city_id:
           type: [string, 'null']
           format: uuid
-          description: Referencia lógica a Municipality en reference-data-service (sin FK física).
+          description: Referencia lÃ³gica a Municipality en reference-data-service (sin FK fÃ­sica).
         contact_name:
           type: [string, 'null']
           maxLength: 200
@@ -1349,7 +1398,7 @@ components:
         user_id:
           type: string
           format: uuid
-          description: Referencia lógica a user.id en iam-service (sin FK física).
+          description: Referencia lÃ³gica a user.id en iam-service (sin FK fÃ­sica).
         document_type:
           type: string
           enum: [CC, CE, PA, PE]
@@ -1367,7 +1416,7 @@ components:
         default_max_hours_per_week:
           type: number
           minimum: 0
-          description: Carga máxima autorizada por defecto; el contrato vigente puede sobrescribirla.
+          description: Carga mÃ¡xima autorizada por defecto; el contrato vigente puede sobrescribirla.
         is_active: { type: boolean }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
@@ -1428,7 +1477,7 @@ components:
         contract_type:
           type: string
           enum: [STAFF, CONTRACTOR, HOURLY]
-          description: STAFF=planta, CONTRACTOR=OPS, HOURLY=hora-cátedra.
+          description: STAFF=planta, CONTRACTOR=OPS, HOURLY=hora-cÃ¡tedra.
         start_date: { type: string, format: date }
         end_date:
           type: [string, 'null']
@@ -1436,10 +1485,10 @@ components:
         training_center_id:
           type: string
           format: uuid
-          description: Referencia lógica a training_center.id en reference-data-service (sin FK física).
+          description: Referencia lÃ³gica a training_center.id en reference-data-service (sin FK fÃ­sica).
         weekly_hour_limit:
           type: [number, 'null']
-          description: Límite específico del contrato; fuente autoritativa del límite vigente.
+          description: LÃ­mite especÃ­fico del contrato; fuente autoritativa del lÃ­mite vigente.
         is_current: { type: boolean }
         notes:
           type: [string, 'null']
@@ -1476,7 +1525,7 @@ components:
         competency_id:
           type: string
           format: uuid
-          description: Referencia lógica a competency.id en academic-management-service (sin FK física).
+          description: Referencia lÃ³gica a competency.id en academic-management-service (sin FK fÃ­sica).
         certified_at: { type: string, format: date }
         certification_entity:
           type: [string, 'null']
@@ -1509,7 +1558,7 @@ components:
         approved_by:
           type: [string, 'null']
           format: uuid
-          description: Referencia lógica a user.id en iam-service (coordinador que aprobó).
+          description: Referencia lÃ³gica a user.id en iam-service (coordinador que aprobÃ³).
         created_at: { type: string, format: date-time }
 
     InstructorAvailabilityExceptionCreate:
@@ -1554,15 +1603,15 @@ components:
       type: object
       required: [id, user_id, document_type, document_number, first_name, last_name, email, created_at]
       description: >-
-        El estado de vinculación (enrollment_status_id) y la fecha de vinculación
-        (enrollment_date) NO viven en esta entidad — pertenecen a la inscripción
+        El estado de vinculaciÃ³n (enrollment_status_id) y la fecha de vinculaciÃ³n
+        (enrollment_date) NO viven en esta entidad â€” pertenecen a la inscripciÃ³n
         de ficha vigente; ver LearnerFichaEnrollment.
       properties:
         id: { type: string, format: uuid }
         user_id:
           type: string
           format: uuid
-          description: Referencia lógica a user.id en iam-service (sin FK física).
+          description: Referencia lÃ³gica a user.id en iam-service (sin FK fÃ­sica).
         document_type:
           type: string
           enum: [CC, CE, RC, TI]
@@ -1619,13 +1668,13 @@ components:
         ficha_id:
           type: string
           format: uuid
-          description: Referencia lógica a enrollment_ficha.id en academic-management-service (sin FK física).
+          description: Referencia lÃ³gica a enrollment_ficha.id en academic-management-service (sin FK fÃ­sica).
         enrollment_status_id:
           type: string
           format: uuid
           description: >-
             FK a actors_parameterization.status (status_category del dominio de
-            inscripción de aprendices). Reemplaza el enum plano legado.
+            inscripciÃ³n de aprendices). Reemplaza el enum plano legado.
         stage:
           type: string
           enum: [INDUCTION, LECTURE, PRODUCTIVE]
@@ -1633,10 +1682,10 @@ components:
         completion_date:
           type: [string, 'null']
           format: date
-          description: null = inscripción vigente.
+          description: null = inscripciÃ³n vigente.
         is_current:
           type: boolean
-          description: true = inscripción activa; solo una por aprendiz.
+          description: true = inscripciÃ³n activa; solo una por aprendiz.
         transfer_reason:
           type: [string, 'null']
         created_at: { type: string, format: date-time }
@@ -1711,7 +1760,7 @@ components:
         instructor_id: { type: string, format: uuid }
         visit_number:
           type: integer
-          description: Número de visita (1, 2, 3...).
+          description: NÃºmero de visita (1, 2, 3...).
         visit_date: { type: string, format: date }
         visit_type:
           type: string
@@ -1772,22 +1821,22 @@ components:
         instructor_id:
           type: [string, 'null']
           format: uuid
-          description: Arco exclusivo con learner_id — exactamente uno debe estar poblado.
+          description: Arco exclusivo con learner_id â€” exactamente uno debe estar poblado.
         learner_id:
           type: [string, 'null']
           format: uuid
-          description: Arco exclusivo con instructor_id — exactamente uno debe estar poblado.
+          description: Arco exclusivo con instructor_id â€” exactamente uno debe estar poblado.
         origin:
           type: string
           enum: [COMPANY_VISIT, PERFORMANCE_REVIEW, TRACKING_SESSION, DISCIPLINARY]
         origin_reference_id:
           type: [string, 'null']
           format: uuid
-          description: ID del company_visit o sesión de origen, si aplica.
+          description: ID del company_visit o sesiÃ³n de origen, si aplica.
         description: { type: string }
         specific_goals:
           type: string
-          description: Metas específicas y verificables.
+          description: Metas especÃ­ficas y verificables.
         due_date: { type: string, format: date }
         status_id:
           type: string
@@ -1796,7 +1845,7 @@ components:
         created_by:
           type: string
           format: uuid
-          description: Referencia lógica a user.id en iam-service (sin FK física).
+          description: Referencia lÃ³gica a user.id en iam-service (sin FK fÃ­sica).
         created_at: { type: string, format: date-time }
         completed_at:
           type: [string, 'null']
@@ -1806,7 +1855,7 @@ components:
       type: object
       required: [origin, description, specific_goals, due_date]
       description: >-
-        Debe incluir exactamente uno de instructor_id / learner_id; la violación
+        Debe incluir exactamente uno de instructor_id / learner_id; la violaciÃ³n
         del arco exclusivo responde 422.
       properties:
         instructor_id: { type: string, format: uuid }
@@ -1841,7 +1890,7 @@ components:
         ficha_id:
           type: string
           format: uuid
-          description: Referencia lógica a academic-management-service.
+          description: Referencia lÃ³gica a academic-management-service.
         stage:
           type: string
           enum: [INDUCTION, LECTURE, PRODUCTIVE]
@@ -1894,4 +1943,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+
+
+

@@ -1,26 +1,26 @@
-openapi: 3.1.0
+﻿openapi: 3.1.0
 info:
-  title: Academic Management Service API — Horarios SENA
+  title: Academic Management Service API â€” Horarios SENA
   version: 1.0.0
   description: >-
-    Jerarquía curricular (líneas tecnológicas, redes tecnológicas, redes de conocimiento,
-    programas de formación), competencias, resultados de aprendizaje y fichas de matrícula
+    JerarquÃ­a curricular (lÃ­neas tecnolÃ³gicas, redes tecnolÃ³gicas, redes de conocimiento,
+    programas de formaciÃ³n), competencias, resultados de aprendizaje y fichas de matrÃ­cula
     (oferta educativa). Fuente de verdad del contrato. Alineado con el modelo de datos de
-    academic-management-service y con 07-api/guidelines.md. La extensión `x-required-feature`
-    declara el feature RBAC que exige cada operación.
+    academic-management-service y con 07-api/guidelines.md. La extensiÃ³n `x-required-feature`
+    declara el feature RBAC que exige cada operaciÃ³n.
 servers:
   - url: /api/v1
 security:
   - bearerAuth: []
 tags:
   - name: curriculum
-    description: Jerarquía curricular — líneas tecnológicas, redes tecnológicas, redes de conocimiento y programas de formación.
+    description: JerarquÃ­a curricular â€” lÃ­neas tecnolÃ³gicas, redes tecnolÃ³gicas, redes de conocimiento y programas de formaciÃ³n.
   - name: competencies
     description: Competencias de un programa y sus resultados de aprendizaje.
   - name: fichas
-    description: Fichas de matrícula (oferta educativa) y su ciclo de vida.
+    description: Fichas de matrÃ­cula (oferta educativa) y su ciclo de vida.
   - name: reports
-    description: Reportes propios del dominio académico.
+    description: Reportes propios del dominio acadÃ©mico.
 
 paths:
   # ---------------------------------------------------------------- tech-lines
@@ -28,7 +28,7 @@ paths:
     get:
       operationId: listTechLines
       tags: [curriculum]
-      summary: Lista paginada de líneas tecnológicas.
+      summary: Lista paginada de lÃ­neas tecnolÃ³gicas.
       x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -41,7 +41,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de líneas tecnológicas.
+          description: PÃ¡gina de lÃ­neas tecnolÃ³gicas.
           content:
             application/json:
               schema:
@@ -57,7 +57,7 @@ paths:
     post:
       operationId: createTechLine
       tags: [curriculum]
-      summary: Crea una línea tecnológica.
+      summary: Crea una lÃ­nea tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
@@ -66,7 +66,7 @@ paths:
             schema: { $ref: '#/components/schemas/TechLineCreate' }
       responses:
         '201':
-          description: Línea tecnológica creada.
+          description: LÃ­nea tecnolÃ³gica creada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TechLine' }
@@ -82,11 +82,11 @@ paths:
     get:
       operationId: getTechLine
       tags: [curriculum]
-      summary: Detalle de una línea tecnológica.
+      summary: Detalle de una lÃ­nea tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
-          description: Línea tecnológica.
+          description: LÃ­nea tecnolÃ³gica.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TechLine' }
@@ -96,7 +96,7 @@ paths:
     put:
       operationId: updateTechLine
       tags: [curriculum]
-      summary: Reemplaza los datos de una línea tecnológica.
+      summary: Reemplaza los datos de una lÃ­nea tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
@@ -105,7 +105,7 @@ paths:
             schema: { $ref: '#/components/schemas/TechLineUpdate' }
       responses:
         '200':
-          description: Línea tecnológica actualizada.
+          description: LÃ­nea tecnolÃ³gica actualizada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TechLine' }
@@ -118,11 +118,11 @@ paths:
     delete:
       operationId: deleteTechLine
       tags: [curriculum]
-      summary: Baja lógica de una línea tecnológica (is_active = false).
+      summary: Baja lÃ³gica de una lÃ­nea tecnolÃ³gica (is_active = false).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
-          description: Línea tecnológica desactivada.
+          description: LÃ­nea tecnolÃ³gica desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -133,7 +133,7 @@ paths:
     get:
       operationId: listTechNetworks
       tags: [curriculum]
-      summary: Lista paginada de redes tecnológicas.
+      summary: Lista paginada de redes tecnolÃ³gicas.
       x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -142,7 +142,7 @@ paths:
         - name: tech_line_id
           in: query
           required: false
-          description: Filtra por línea tecnológica.
+          description: Filtra por lÃ­nea tecnolÃ³gica.
           schema: { type: string, format: uuid }
         - name: is_active
           in: query
@@ -150,7 +150,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de redes tecnológicas.
+          description: PÃ¡gina de redes tecnolÃ³gicas.
           content:
             application/json:
               schema:
@@ -166,7 +166,7 @@ paths:
     post:
       operationId: createTechNetwork
       tags: [curriculum]
-      summary: Crea una red tecnológica dentro de una línea tecnológica.
+      summary: Crea una red tecnolÃ³gica dentro de una lÃ­nea tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
@@ -175,7 +175,7 @@ paths:
             schema: { $ref: '#/components/schemas/TechNetworkCreate' }
       responses:
         '201':
-          description: Red tecnológica creada.
+          description: Red tecnolÃ³gica creada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TechNetwork' }
@@ -192,11 +192,11 @@ paths:
     get:
       operationId: getTechNetwork
       tags: [curriculum]
-      summary: Detalle de una red tecnológica.
+      summary: Detalle de una red tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
-          description: Red tecnológica.
+          description: Red tecnolÃ³gica.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TechNetwork' }
@@ -206,7 +206,7 @@ paths:
     put:
       operationId: updateTechNetwork
       tags: [curriculum]
-      summary: Reemplaza los datos de una red tecnológica.
+      summary: Reemplaza los datos de una red tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
@@ -215,7 +215,7 @@ paths:
             schema: { $ref: '#/components/schemas/TechNetworkUpdate' }
       responses:
         '200':
-          description: Red tecnológica actualizada.
+          description: Red tecnolÃ³gica actualizada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TechNetwork' }
@@ -228,11 +228,11 @@ paths:
     delete:
       operationId: deleteTechNetwork
       tags: [curriculum]
-      summary: Baja lógica de una red tecnológica (is_active = false).
+      summary: Baja lÃ³gica de una red tecnolÃ³gica (is_active = false).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
-          description: Red tecnológica desactivada.
+          description: Red tecnolÃ³gica desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -252,7 +252,7 @@ paths:
         - name: tech_network_id
           in: query
           required: false
-          description: Filtra por red tecnológica.
+          description: Filtra por red tecnolÃ³gica.
           schema: { type: string, format: uuid }
         - name: is_active
           in: query
@@ -260,7 +260,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de redes de conocimiento.
+          description: PÃ¡gina de redes de conocimiento.
           content:
             application/json:
               schema:
@@ -276,7 +276,7 @@ paths:
     post:
       operationId: createKnowledgeNetwork
       tags: [curriculum]
-      summary: Crea una red de conocimiento dentro de una red tecnológica.
+      summary: Crea una red de conocimiento dentro de una red tecnolÃ³gica.
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
@@ -338,7 +338,7 @@ paths:
     delete:
       operationId: deleteKnowledgeNetwork
       tags: [curriculum]
-      summary: Baja lógica de una red de conocimiento (is_active = false).
+      summary: Baja lÃ³gica de una red de conocimiento (is_active = false).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
@@ -353,7 +353,7 @@ paths:
     get:
       operationId: listTrainingPrograms
       tags: [curriculum]
-      summary: Lista paginada de programas de formación.
+      summary: Lista paginada de programas de formaciÃ³n.
       x-required-feature: ACADEMIC_PROGRAM_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -367,7 +367,7 @@ paths:
         - name: program_code
           in: query
           required: false
-          description: Filtra por código SENA del programa.
+          description: Filtra por cÃ³digo SENA del programa.
           schema: { type: string }
         - name: training_level
           in: query
@@ -381,7 +381,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de programas de formación.
+          description: PÃ¡gina de programas de formaciÃ³n.
           content:
             application/json:
               schema:
@@ -397,7 +397,7 @@ paths:
     post:
       operationId: createTrainingProgram
       tags: [curriculum]
-      summary: Crea un programa de formación (versión inicial = 1).
+      summary: Crea un programa de formaciÃ³n (versiÃ³n inicial = 1).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
         required: true
@@ -406,7 +406,7 @@ paths:
             schema: { $ref: '#/components/schemas/TrainingProgramCreate' }
       responses:
         '201':
-          description: Programa de formación creado.
+          description: Programa de formaciÃ³n creado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrainingProgram' }
@@ -423,11 +423,11 @@ paths:
     get:
       operationId: getTrainingProgram
       tags: [curriculum]
-      summary: Detalle de un programa de formación (incluye versión vigente).
+      summary: Detalle de un programa de formaciÃ³n (incluye versiÃ³n vigente).
       x-required-feature: ACADEMIC_PROGRAM_VIEW
       responses:
         '200':
-          description: Programa de formación.
+          description: Programa de formaciÃ³n.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrainingProgram' }
@@ -437,9 +437,9 @@ paths:
     put:
       operationId: updateTrainingProgram
       tags: [curriculum]
-      summary: Reemplaza los datos de un programa de formación.
+      summary: Reemplaza los datos de un programa de formaciÃ³n.
       description: >-
-        Actualizar `version` representa una nueva definición curricular vigente. Las fichas
+        Actualizar `version` representa una nueva definiciÃ³n curricular vigente. Las fichas
         ya abiertas conservan su `program_version` congelada y no se ven afectadas.
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       requestBody:
@@ -449,7 +449,7 @@ paths:
             schema: { $ref: '#/components/schemas/TrainingProgramUpdate' }
       responses:
         '200':
-          description: Programa de formación actualizado.
+          description: Programa de formaciÃ³n actualizado.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/TrainingProgram' }
@@ -462,11 +462,11 @@ paths:
     delete:
       operationId: deleteTrainingProgram
       tags: [curriculum]
-      summary: Baja lógica de un programa de formación (is_active = false).
+      summary: Baja lÃ³gica de un programa de formaciÃ³n (is_active = false).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
-          description: Programa de formación desactivado.
+          description: Programa de formaciÃ³n desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -478,7 +478,7 @@ paths:
       - name: program_id
         in: path
         required: true
-        description: UUID del programa de formación.
+        description: UUID del programa de formaciÃ³n.
         schema: { type: string, format: uuid }
     get:
       operationId: listProgramCompetencies
@@ -495,7 +495,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de competencias del programa.
+          description: PÃ¡gina de competencias del programa.
           content:
             application/json:
               schema:
@@ -574,7 +574,7 @@ paths:
     delete:
       operationId: deleteCompetency
       tags: [competencies]
-      summary: Baja lógica de una competencia (is_active = false).
+      summary: Baja lÃ³gica de una competencia (is_active = false).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
@@ -603,7 +603,7 @@ paths:
           schema: { type: boolean }
       responses:
         '200':
-          description: Página de resultados de aprendizaje.
+          description: PÃ¡gina de resultados de aprendizaje.
           content:
             application/json:
               schema:
@@ -682,7 +682,7 @@ paths:
     delete:
       operationId: deleteLearningOutcome
       tags: [competencies]
-      summary: Baja lógica de un resultado de aprendizaje (is_active = false).
+      summary: Baja lÃ³gica de un resultado de aprendizaje (is_active = false).
       x-required-feature: ACADEMIC_PROGRAM_MANAGE
       responses:
         '204':
@@ -697,7 +697,7 @@ paths:
     get:
       operationId: listFichas
       tags: [fichas]
-      summary: Lista paginada de fichas de matrícula.
+      summary: Lista paginada de fichas de matrÃ­cula.
       x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -706,7 +706,7 @@ paths:
         - name: program_id
           in: query
           required: false
-          description: Filtra por UUID del programa de formación.
+          description: Filtra por UUID del programa de formaciÃ³n.
           schema: { type: string, format: uuid }
         - name: status
           in: query
@@ -717,12 +717,12 @@ paths:
         - name: ficha_number
           in: query
           required: false
-          description: Filtra por número de ficha SENA, coincidencia exacta.
+          description: Filtra por nÃºmero de ficha SENA, coincidencia exacta.
           schema: { type: string }
         - name: training_center_id
           in: query
           required: false
-          description: Filtra por centro de formación (referencia a reference-data-service).
+          description: Filtra por centro de formaciÃ³n (referencia a reference-data-service).
           schema: { type: string, format: uuid }
         - name: from
           in: query
@@ -736,7 +736,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: Página de fichas.
+          description: PÃ¡gina de fichas.
           content:
             application/json:
               schema:
@@ -752,7 +752,7 @@ paths:
     post:
       operationId: createFicha
       tags: [fichas]
-      summary: Crea una ficha de matrícula en estado INDUCTION.
+      summary: Crea una ficha de matrÃ­cula en estado INDUCTION.
       description: >-
         `program_version` se calcula en el servidor como snapshot de `training_program.version`
         vigente al momento de abrir la ficha; no se recibe en el request.
@@ -781,7 +781,7 @@ paths:
     get:
       operationId: getFicha
       tags: [fichas]
-      summary: Detalle de una ficha de matrícula.
+      summary: Detalle de una ficha de matrÃ­cula.
       x-required-feature: ACADEMIC_FICHA_VIEW
       responses:
         '200':
@@ -797,8 +797,8 @@ paths:
       tags: [fichas]
       summary: Actualiza los datos operativos de la ficha (no el estado).
       description: >-
-        No modifica `status`; los cambios de estado se realizan vía
-        `PATCH /fichas/{id}/status` respetando la máquina de estados.
+        No modifica `status`; los cambios de estado se realizan vÃ­a
+        `PATCH /fichas/{id}/status` respetando la mÃ¡quina de estados.
       x-required-feature: ACADEMIC_FICHA_MANAGE
       requestBody:
         required: true
@@ -820,10 +820,10 @@ paths:
     delete:
       operationId: deleteFicha
       tags: [fichas]
-      summary: Baja lógica de la ficha (transición a CANCELLED).
+      summary: Baja lÃ³gica de la ficha (transiciÃ³n a CANCELLED).
       description: >-
-        No elimina físicamente el registro. Aplica la transición de estado a `CANCELLED`
-        (guidelines ADR-004); falla con 409 si la ficha ya está en un estado terminal.
+        No elimina fÃ­sicamente el registro. Aplica la transiciÃ³n de estado a `CANCELLED`
+        (guidelines ADR-004); falla con 409 si la ficha ya estÃ¡ en un estado terminal.
       x-required-feature: ACADEMIC_FICHA_STATUS
       responses:
         '204':
@@ -839,10 +839,10 @@ paths:
     patch:
       operationId: changeFichaStatus
       tags: [fichas]
-      summary: Transiciona el estado de la ficha según su máquina de estados.
+      summary: Transiciona el estado de la ficha segÃºn su mÃ¡quina de estados.
       description: >-
-        Transiciones válidas: INDUCTION → EXECUTION|CANCELLED; EXECUTION → PRODUCTIVE_STAGE|CANCELLED;
-        PRODUCTIVE_STAGE → COMPLETED|CANCELLED. COMPLETED y CANCELLED son terminales.
+        Transiciones vÃ¡lidas: INDUCTION â†’ EXECUTION|CANCELLED; EXECUTION â†’ PRODUCTIVE_STAGE|CANCELLED;
+        PRODUCTIVE_STAGE â†’ COMPLETED|CANCELLED. COMPLETED y CANCELLED son terminales.
       x-required-feature: ACADEMIC_FICHA_STATUS
       requestBody:
         required: true
@@ -869,9 +869,9 @@ paths:
       tags: [reports]
       summary: Capacidad y estado de oferta por ficha.
       description: >-
-        Reporte propio del dominio académico sobre la tabla `enrollment_ficha` (con datos
-        derivados de `training_program`). Solo lectura. Inventario — Usuarios: coordinadores
-        académicos y dashboards de centro; Frecuencia: on-demand/diaria; Formato: JSON;
+        Reporte propio del dominio acadÃ©mico sobre la tabla `enrollment_ficha` (con datos
+        derivados de `training_program`). Solo lectura. Inventario â€” Usuarios: coordinadores
+        acadÃ©micos y dashboards de centro; Frecuencia: on-demand/diaria; Formato: JSON;
         Fuente: `enrollment_ficha` + `training_program`.
       x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
@@ -885,7 +885,7 @@ paths:
         - name: program_id
           in: query
           required: false
-          description: Filtra por UUID del programa de formación.
+          description: Filtra por UUID del programa de formaciÃ³n.
           schema: { type: string, format: uuid }
         - name: status
           in: query
@@ -905,7 +905,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: Página del reporte de capacidad/estado por ficha.
+          description: PÃ¡gina del reporte de capacidad/estado por ficha.
           content:
             application/json:
               schema:
@@ -923,11 +923,11 @@ paths:
     get:
       operationId: reportFichaProgress
       tags: [reports]
-      summary: Avance temporal de fichas (días transcurridos y atraso frente a la fecha esperada).
+      summary: Avance temporal de fichas (dÃ­as transcurridos y atraso frente a la fecha esperada).
       description: >-
-        Reporte propio del dominio académico sobre la tabla `enrollment_ficha`. Calcula el avance
+        Reporte propio del dominio acadÃ©mico sobre la tabla `enrollment_ficha`. Calcula el avance
         temporal a partir de `start_date`, `expected_end_date` y `actual_end_date`. Solo lectura.
-        Inventario — Usuarios: coordinadores académicos y subdirectores de centro; Frecuencia:
+        Inventario â€” Usuarios: coordinadores acadÃ©micos y subdirectores de centro; Frecuencia:
         on-demand/semanal; Formato: JSON; Fuente: `enrollment_ficha`.
       x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
@@ -941,7 +941,7 @@ paths:
         - name: program_id
           in: query
           required: false
-          description: Filtra por UUID del programa de formación.
+          description: Filtra por UUID del programa de formaciÃ³n.
           schema: { type: string, format: uuid }
         - name: status
           in: query
@@ -961,7 +961,7 @@ paths:
           schema: { type: string, format: date }
       responses:
         '200':
-          description: Página del reporte de avance de fichas.
+          description: PÃ¡gina del reporte de avance de fichas.
           content:
             application/json:
               schema:
@@ -981,13 +981,13 @@ components:
       name: id
       in: path
       required: true
-      description: UUID de la línea tecnológica.
+      description: UUID de la lÃ­nea tecnolÃ³gica.
       schema: { type: string, format: uuid }
     TechNetworkId:
       name: id
       in: path
       required: true
-      description: UUID de la red tecnológica.
+      description: UUID de la red tecnolÃ³gica.
       schema: { type: string, format: uuid }
     KnowledgeNetworkId:
       name: id
@@ -999,7 +999,7 @@ components:
       name: id
       in: path
       required: true
-      description: UUID del programa de formación.
+      description: UUID del programa de formaciÃ³n.
       schema: { type: string, format: uuid }
     CompetencyId:
       name: id
@@ -1017,7 +1017,7 @@ components:
       name: id
       in: path
       required: true
-      description: UUID de la ficha de matrícula.
+      description: UUID de la ficha de matrÃ­cula.
       schema: { type: string, format: uuid }
 
   schemas:
@@ -1108,13 +1108,13 @@ components:
       properties:
         id: { type: string, format: uuid }
         knowledge_network_id: { type: string, format: uuid }
-        program_code: { type: string, maxLength: 20, description: Código SENA del programa. }
+        program_code: { type: string, maxLength: 20, description: CÃ³digo SENA del programa. }
         name: { type: string, maxLength: 200 }
         training_level:
           type: string
           enum: [AUXILIARY, OPERATOR, TECHNICIAN, TECHNOLOGIST]
-        total_hours: { type: integer, minimum: 0, description: Duración total en horas. }
-        version: { type: integer, description: Versión vigente de la definición curricular. }
+        total_hours: { type: integer, minimum: 0, description: DuraciÃ³n total en horas. }
+        version: { type: integer, description: VersiÃ³n vigente de la definiciÃ³n curricular. }
         is_active: { type: boolean }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
@@ -1144,7 +1144,7 @@ components:
         total_hours: { type: integer, minimum: 0 }
         version:
           type: integer
-          description: Incrementar representa una nueva definición curricular vigente.
+          description: Incrementar representa una nueva definiciÃ³n curricular vigente.
         is_active: { type: boolean }
 
     Competency:
@@ -1207,7 +1207,7 @@ components:
       required: [id, ficha_number, program_id, program_version, training_center_id, status, start_date, training_shift, training_modality, max_capacity, created_at, updated_at]
       properties:
         id: { type: string, format: uuid }
-        ficha_number: { type: string, maxLength: 20, description: Número de ficha SENA; único. }
+        ficha_number: { type: string, maxLength: 20, description: NÃºmero de ficha SENA; Ãºnico. }
         program_id: { type: string, format: uuid }
         program_version:
           type: integer
@@ -1216,7 +1216,7 @@ components:
         training_center_id:
           type: string
           format: uuid
-          description: Referencia lógica a `training_center.id` en reference-data-service (sin FK física, sin endpoint de join).
+          description: Referencia lÃ³gica a `training_center.id` en reference-data-service (sin FK fÃ­sica, sin endpoint de join).
         status:
           type: string
           enum: [INDUCTION, EXECUTION, PRODUCTIVE_STAGE, COMPLETED, CANCELLED]
@@ -1234,7 +1234,7 @@ components:
         training_modality:
           type: string
           enum: [IN_PERSON, VIRTUAL, HYBRID]
-        max_capacity: { type: integer, minimum: 1, description: Número máximo de aprendices. }
+        max_capacity: { type: integer, minimum: 1, description: NÃºmero mÃ¡ximo de aprendices. }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
 
@@ -1281,7 +1281,7 @@ components:
         status:
           type: string
           enum: [INDUCTION, EXECUTION, PRODUCTIVE_STAGE, COMPLETED, CANCELLED]
-          description: Estado destino; debe ser una transición válida desde el estado actual.
+          description: Estado destino; debe ser una transiciÃ³n vÃ¡lida desde el estado actual.
         actual_end_date:
           type: [string, 'null']
           format: date
@@ -1327,17 +1327,19 @@ components:
           format: date
         days_elapsed:
           type: integer
-          description: Días transcurridos desde `start_date`.
+          description: DÃ­as transcurridos desde `start_date`.
         days_remaining:
           type: [integer, 'null']
-          description: Días restantes hasta `expected_end_date`; null si no tiene fecha esperada o ya cerró.
+          description: DÃ­as restantes hasta `expected_end_date`; null si no tiene fecha esperada o ya cerrÃ³.
         is_delayed:
           type: boolean
-          description: true si superó `expected_end_date` sin llegar a estado terminal.
+          description: true si superÃ³ `expected_end_date` sin llegar a estado terminal.
 
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+      description: JWT RS256 emitido por iam-service; verificado localmente vÃ­a JWKS.
+
+
