@@ -331,6 +331,21 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
 components:
   parameters:
     DocumentId:
@@ -533,3 +548,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+
+

@@ -922,6 +922,42 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
 
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /ready:
+    get:
+      operationId: ready
+      tags: [health]
+      summary: Readiness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Dependencias listas.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '503':
+          description: Alguna dependencia no está lista.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
 components:
   parameters:
     ScheduleId:
@@ -1237,3 +1273,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+
+

@@ -11,7 +11,7 @@ info:
     `x-required-feature-any: [A, B]` cuando acepta cualquiera de varios, p. ej.
     `MON_DASHBOARD_FULL` o `MON_DASHBOARD_OWN`) (ver
     rbac-design.md, módulo `MOD_MONITORING`). Reportes descentralizados: este servicio
-    sólo publica los KPIs/indicadores de su propio dominio (guidelines §11).
+    sólo pública los KPIs/indicadores de su propio dominio (guidelines §11).
 servers:
   - url: /api/v1
 security:
@@ -444,8 +444,9 @@ paths:
       tags: [kpis]
       summary: Mediciones de KPI (paginación por cursor; colección de crecimiento continuo).
       description: >-
-        Solo lectura: `kpi_tracking` se produce por el `alert-worker` a partir de
-        eventos de dominio; no se crea por REST. Particionada por `measured_at`.
+        `kpi_tracking` se produce por el `alert-worker` a partir de eventos de dominio
+        y también puede registrarse por REST mediante `POST /kpi-trackings` para
+        conciliación con el endpoint implementado RecordKpi. Particionada por `measured_at`.
       x-required-feature: MON_KPI_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/cursor'
@@ -489,6 +490,31 @@ paths:
                   pagination: { $ref: '_shared.yaml#/components/schemas/CursorPagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+    post:
+      operationId: recordKpi
+      tags: [kpis]
+      summary: Registra una medición KPI.
+      description: >-
+        Endpoint de escritura rastreado como RecordKpi en el servicio. Crea una medición
+        `kpi_tracking` y deja al ciclo de vida de alertas/estado a cargo del
+        `alert-worker`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Medición de KPI registrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KpiTracking' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
   /kpi-trackings/{id}:
     parameters:
@@ -828,6 +854,20 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
 
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
 components:
   parameters:
     KpiTypeId:
@@ -1214,3 +1254,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+
+

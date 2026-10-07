@@ -1,7 +1,7 @@
 # DevOps
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-28
-> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 Índice de la sección de DevOps del sistema de Gestión de Horarios SENA. Cubre cómo se levanta el entorno local, cómo se validan y promueven los cambios, y qué ambientes existen.
 
@@ -21,6 +21,7 @@ Las páginas marcan lo implementado frente a lo previsto, distinguiendo por ambi
 | [local-setup.md](./local-setup.md) | Levantar Postgres, aplicar changelogs por módulo y hacer bring-up de los perfiles de aplicación (`iam`, `notification`) + observabilidad en local | 🟡 |
 | [ci-cd.md](./ci-cd.md) | Pipeline previsto: validación de changelogs, PR checks, Conventional Commits y promoción por ramas (implementado vs pendiente) | 🟡 |
 | [environments.md](./environments.md) | Los 4 ambientes (`develop`/`qa`/`staging`/`main`), variables por `.env.<ambiente>` y advertencia de secretos | 🟡 |
+| [runtime-configuration-map.md](./runtime-configuration-map.md) | Mapa de variables de configuración runtime detectadas por repositorio | 🟡 |
 
 ## Plantillas
 

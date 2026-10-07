@@ -1085,6 +1085,56 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 
+  /health/live:
+    get:
+      operationId: live
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Alias de liveness probe.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /health/ready:
+    get:
+      operationId: ready
+      tags: [health]
+      summary: Readiness probe con verificación de dependencias.
+      security: []
+      responses:
+        '200':
+          description: Dependencias listas.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '503':
+          description: Alguna dependencia no está lista.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
 components:
   parameters:
     MacroregionId:
@@ -1449,3 +1499,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+
+

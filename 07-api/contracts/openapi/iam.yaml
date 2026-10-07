@@ -17,6 +17,8 @@ tags:
     description: Autenticación y sesión.
   - name: users
     description: Gestión de cuentas de usuario.
+  - name: sessions
+    description: Sesiones activas de usuario (tokens de refresco vigentes).
   - name: roles
     description: Roles, features y asignaciones.
   - name: modules
@@ -245,7 +247,7 @@ paths:
       - $ref: '#/components/parameters/UserId'
     get:
       operationId: listUserSessions
-      tags: [users]
+      tags: [sessions]
       summary: Sesiones activas (refresh tokens vigentes) del usuario.
       x-required-feature: IDENTITY_USER_VIEW
       responses:
@@ -269,7 +271,7 @@ paths:
         schema: { type: string, format: uuid }
     delete:
       operationId: revokeUserSession
-      tags: [users]
+      tags: [sessions]
       summary: Revoca una sesión específica del usuario.
       x-required-feature: IDENTITY_USER_VIEW
       responses:
@@ -496,6 +498,56 @@ paths:
                   pagination: { $ref: '_shared.yaml#/components/schemas/CursorPagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /ready:
+    get:
+      operationId: ready
+      tags: [health]
+      summary: Readiness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Dependencias listas.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '503':
+          description: Alguna dependencia no está lista.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /auth/.well-known/jwks.json:
+    get:
+      operationId: getJwks
+      tags: [auth]
+      summary: Publica el JWKS vigente para validar access tokens emitidos por IAM.
+      security: []
+      responses:
+        '200':
+          description: Conjunto de llaves públicas JSON Web Key Set.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
 
 components:
   parameters:
@@ -744,17 +796,23 @@ components:
           type: [string, 'null']
         features:
           type: array
-          items: { $ref: '#/components/schemas/FeatureBrief' }
+          items: { $ref: '#/components/schemas/Feature' }
 
-    FeatureBrief:
+    Feature:
       type: object
-      required: [code, name, action_level]
+      description: Feature RBAC de un módulo (vista completa).
+      required: [code, name, action_level, scope_type]
       properties:
         code: { type: string, maxLength: 60 }
         name: { type: string, maxLength: 120 }
         action_level:
           type: string
           enum: [READ, WRITE, DELETE, PUBLISH, APPROVE]
+        scope_type:
+          type: string
+          enum: [GLOBAL, TRAINING_CENTER, AREA, OWN_FICHAS, OWN_SCHEDULE, OWN_PROFILE, OWN_FICHA_AS_LEARNER]
+        description:
+          type: [string, 'null']
 
     ScopeOverride:
       type: object
@@ -814,3 +872,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+
+

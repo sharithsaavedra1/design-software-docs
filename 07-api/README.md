@@ -1,7 +1,7 @@
 # API
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
-> Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
+> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 ## Contenido
 
@@ -15,6 +15,8 @@ Define lineamientos de API, autenticación y ubicación de contratos OpenAPI.
 |---------|-------------|--------|
 | [guidelines.md](./guidelines.md) | Convenciones de diseño de APIs | 🟡 |
 | [authentication.md](./authentication.md) | Estrategia de autenticación y autorización | 🟡 |
+| [api-surface-map.md](./api-surface-map.md) | Inventario de endpoints detectados por servicio | 🟡 |
+| [openapi-contract-review.md](./openapi-contract-review.md) | Revisión de cobertura entre código y contratos OpenAPI | 🟡 |
 | [contracts/openapi/](./contracts/openapi/) | Contratos OpenAPI validados y publicables | 🔴 |
 
 ## Dónde va cada contrato

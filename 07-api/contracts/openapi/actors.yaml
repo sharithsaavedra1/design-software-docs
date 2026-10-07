@@ -816,7 +816,7 @@ paths:
       description: >-
         Endpoint interno servicio-a-servicio consumido por academic-management-service
         para validar reducciones de cupo sin acceder directamente a la base de datos
-        de actors-service. La operacion es de solo lectura.
+        de actors-service. La operación es de solo lectura.
       x-required-feature: ACT_INTERNAL_FICHA_LEARNER_COUNT
       parameters:
         - name: ficha_id
@@ -1249,6 +1249,55 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
+
+  /catalogs:
+    get:
+      operationId: listActorCatalogs
+      tags: [catalogs]
+      summary: Lista catálogos internos usados por el dominio de actores.
+      responses:
+        '200':
+          description: Catálogos disponibles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+  /catalogs/{catalog_id}/details:
+    get:
+      operationId: listActorCatalogDetails
+      tags: [catalogs]
+      summary: Lista detalles de un catálogo interno del dominio de actores.
+      parameters:
+        - name: catalog_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Detalles del catálogo.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+  /reports/active-catalog:
+    get:
+      operationId: reportActorActiveCatalog
+      tags: [reports]
+      summary: Reporte de catálogos activos usados por actores.
+      responses:
+        '200':
+          description: Reporte generado.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
 
 components:
   parameters:
@@ -1895,3 +1944,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+
+

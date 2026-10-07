@@ -192,7 +192,7 @@ paths:
         con `document` (mismo servicio document-service, mismo bounded
         context; no cruza límites de servicio) agrupando por template_id.
         Solo lectura. Inventario — Consumidores: coordinadores/admin (panel de
-        documentos), monitoring-service (si publica un KPI propio derivado);
+        documentos), monitoring-service (si pública un KPI propio derivado);
         Frecuencia: on-demand; Formato: JSON; Fuente: `document_template` +
         `document` (agregación por template_id, filtrable por rango de
         `document.created_at`).
@@ -377,3 +377,5 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+
+

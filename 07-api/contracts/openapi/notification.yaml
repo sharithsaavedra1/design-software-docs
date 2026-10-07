@@ -1,4 +1,4 @@
-openapi: 3.1.0
+﻿openapi: 3.1.0
 info:
   title: Notification Service API - Horarios SENA
   version: 0.1.0
@@ -20,7 +20,7 @@ paths:
     post:
       operationId: createManualNotification
       tags: [notifications]
-      summary: Solicita una notificacion manual.
+      summary: Solicita una notificación manual.
       x-required-feature: NOTIFICATION_SEND
       requestBody:
         required: true
@@ -46,11 +46,11 @@ paths:
     get:
       operationId: getNotification
       tags: [notifications]
-      summary: Consulta una notificacion por UUID.
+      summary: Consulta una notificación por UUID.
       x-required-feature: NOTIFICATION_VIEW
       responses:
         '200':
-          description: Notificacion enviada.
+          description: Notificación enviada.
           content:
             application/json:
               schema:
@@ -90,7 +90,7 @@ components:
       name: id
       in: path
       required: true
-      description: UUID de la notificacion enviada.
+      description: UUID de la notificación enviada.
       schema: { type: string, format: uuid }
   schemas:
     SentNotification:
@@ -120,3 +120,5 @@ components:
         template_code: { type: string }
         source_service: { type: string }
         source_event_id: { type: string, format: uuid }
+
+

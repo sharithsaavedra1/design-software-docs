@@ -1,80 +1,22 @@
-# Matriz de propiedad de datos
+﻿# Matriz actualizada de propiedad de datos
 
-> Estado: 🟡 Revisión | Última actualización: 2026-08-26
-> Naming: nombres de entidades en inglés (HALT-DB-NAMING)
+> Estado: actualizado desde repos locales el 2026-10-07.
 
-Define qué microservicio es el único propietario (escritor) de cada entidad de dominio.
-Solo el servicio propietario puede mutar los datos; otros servicios los consumen vía API o eventos.
+| Microservicio propietario | Repo DB | Entidades/tablas owned |
+|---|---|---|
+| `iam-service` | `design-software-iam-db` | identity.outbox, identity.user, identity_audit.audit_login, rbac.role, rbac.role_feature, rbac.user_role, rbac.user_scope_override, rbac_catalog.feature, rbac_catalog.module, session.password_reset_request, session.refresh_token |
+| `reference-data-service` | `design-software-reference-data-db` | institutional_structure.department, institutional_structure.institutional_unit, institutional_structure.macroregion, institutional_structure.microregion, institutional_structure.municipality, institutional_structure.training_center, parameterization.catalog, parameterization.catalog_detail, parameterization.parameter |
+| `academic-management-service` | `design-software-academic-management-db` | academic_management.competency, academic_management.enrollment_ficha, academic_management.knowledge_network, academic_management.learning_outcome, academic_management.tech_line, academic_management.tech_network, academic_management.training_program |
+| `training-environment-service` | `design-software-training-environment-db` | training_environment.availability_rule, training_environment.environment, training_environment.environment_type, training_environment.inventory_item, training_environment.item_type, training_environment.maintenance, training_environment.reservation |
+| `scheduling-service` | `design-software-scheduling-db` | scheduling.class_session, scheduling.environment_availability_projection, scheduling.instructor_availability_projection, scheduling.outbox, scheduling.schedule, scheduling.scheduling_conflict, scheduling.site_travel_time, scheduling.time_slot |
+| `actors-service` | `design-software-actors-db` | actors_companies.company, actors_companies.company_visit, actors_companies.productive_stage, actors_instructors.competency_assignment, actors_instructors.instructor, actors_instructors.instructor_area, actors_instructors.instructor_availability_exception, actors_instructors.instructor_contract, actors_learners.learner, actors_learners.learner_ficha_enrollment, actors_parameterization.status, actors_parameterization.status_category, actors_parameterization.status_transition, actors_tracking.activity_log, actors_tracking.actor_improvement_plan |
+| `document-service` | `design-software-document-db` | document.document, document.document_template, document.document_template_variable, document.document_template_version, document.document_version |
+| `monitoring-service` | `design-software-monitoring-db` | monitoring.alert_type, monitoring.ficha_tracking, monitoring.generated_alert, monitoring.improvement_plan, monitoring.kpi_status, monitoring.kpi_tracking, monitoring.kpi_tracking_2026_08, monitoring.kpi_tracking_default, monitoring.kpi_type, monitoring.outbox, monitoring.risk_level, monitoring.sent_notification, monitoring.tracking_session |
+| `audit-service` | `design-software-audit-db` | audit.audit_event_seen, audit.audit_record, audit.audit_record_2026_08, audit.audit_record_default |
+| `notification-service` | `design-software-notification-db` | notification.notification_template, notification.outbox, notification.sent_notification |
 
-## Regla
+## Excepciones y advertencias
 
-> Si dos servicios necesitan escribir en la misma entidad, el bounded context está mal definido.
-> Resolver con un evento o con una entidad local de proyección.
-
-## Matriz
-
-| Entidad | Servicio propietario | BD | Módulo de origen |
-|---------|---------------------|----|-----------------|
-| `User` | `iam-service` | `iam_db` | M1 |
-| `Module` | `iam-service` | `iam_db` | M1 |
-| `Feature` | `iam-service` | `iam_db` | M1 |
-| `Role` | `iam-service` | `iam_db` | M1 |
-| `RoleFeature` | `iam-service` | `iam_db` | M1 |
-| `UserRole` | `iam-service` | `iam_db` | M1 |
-| `UserScopeOverride` | `iam-service` | `iam_db` | M1 |
-| `RefreshToken` | `iam-service` | `iam_db` | M1 |
-| `PasswordResetRequest` | `iam-service` | `iam_db` | M1 |
-| `AuditLogin` | `iam-service` | `iam_db` | M1 |
-| `Macroregion` | `reference-data-service` | `ref_db` | M2 |
-| `Microregion` | `reference-data-service` | `ref_db` | M2 |
-| `Department` | `reference-data-service` | `ref_db` | M2 |
-| `Municipality` | `reference-data-service` | `ref_db` | M2 |
-| `TrainingCenter` | `reference-data-service` | `ref_db` | M2 |
-| `InstitutionalUnit` | `reference-data-service` | `ref_db` | M2 |
-| `Catalog` | `reference-data-service` | `ref_db` | M4 |
-| `CatalogDetail` | `reference-data-service` | `ref_db` | M4 |
-| `Parameter` | `reference-data-service` | `ref_db` | M4 |
-| `TechLine` | `academic-management-service` | `academic_db` | M5 |
-| `TechNetwork` | `academic-management-service` | `academic_db` | M5 |
-| `KnowledgeNetwork` | `academic-management-service` | `academic_db` | M5 |
-| `TrainingProgram` | `academic-management-service` | `academic_db` | M5 |
-| `Competency` | `academic-management-service` | `academic_db` | M5 |
-| `LearningOutcome` | `academic-management-service` | `academic_db` | M5 |
-| `EnrollmentFicha` | `academic-management-service` | `academic_db` | M6 |
-| `Environment` | `training-environment-service` | `env_db` | M3 |
-| `EnvironmentType` | `training-environment-service` | `env_db` | M3 |
-| `InventoryItem` | `training-environment-service` | `env_db` | M3 |
-| `Maintenance` | `training-environment-service` | `env_db` | M3 |
-| `Reservation` | `training-environment-service` | `env_db` | M3 |
-| `AvailabilityRule` | `training-environment-service` | `env_db` | M3 |
-| `Schedule` | `scheduling-service` | `scheduling_db` | M8 |
-| `ClassSession` | `scheduling-service` | `scheduling_db` | M8 |
-| `TimeSlot` | `scheduling-service` | `scheduling_db` | M8 |
-| `InstructorScheduleAssignment` | `scheduling-service` | `scheduling_db` | M8 |
-| `SchedulingConflict` | `scheduling-service` | `scheduling_db` | M8 |
-| `Instructor` | `actors-service` | `actors_db` | M7 |
-| `Learner` | `actors-service` | `actors_db` | M7 |
-| `Company` | `actors-service` | `actors_db` | M7 |
-| `InstructorContract` | `actors-service` | `actors_db` | M7 |
-| `CompetencyAssignment` | `actors-service` | `actors_db` | M7 |
-| `InstructorAvailabilityException` | `actors-service` | `actors_db` | M7 |
-| `ProductiveStage` | `actors-service` | `actors_db` | M7 |
-| `CompanyVisit` | `actors-service` | `actors_db` | M7 |
-| `ActorImprovementPlan` | `actors-service` | `actors_db` | M7 |
-| `ActivityLog` | `actors-service` | `actors_db` | M7 |
-| `Document` | `document-service` | `document_db` | transversal |
-| `DocumentVersion` | `document-service` | `document_db` | transversal |
-| `DocumentTemplate` | `document-service` | `document_db` | transversal |
-| `AlertType` | `monitoring-service` | `monitoring_db` | M9 |
-| `RiskLevel` | `monitoring-service` | `monitoring_db` | M9 |
-| `KpiStatus` | `monitoring-service` | `monitoring_db` | M9 |
-| `FichaTracking` | `monitoring-service` | `monitoring_db` | M9 |
-| `KpiTracking` | `monitoring-service` | `monitoring_db` | M9 |
-| `TrackingSession` | `monitoring-service` | `monitoring_db` | M9 |
-| `GeneratedAlert` | `monitoring-service` | `monitoring_db` | M9 |
-| `ImprovementPlan` | `monitoring-service` | `monitoring_db` | M9 |
-| `AuditRecord` | `audit-service` | `audit_db` | transversal |
-| `SentNotification` | `notification-service` | `notification_db` | transversal |
-| `NotificationTemplate` | `notification-service` | `notification_db` | transversal |
-| `NotificationPreference` | `notification-service` | `notification_db` | transversal |
-| `OutboxEvent` | `notification-service` | `notification_db` | transversal |
+- `audit-service` es append-only; los demas servicios publican eventos, no escriben directo en `audit-db`.
+- `notification-service` es el owner de entrega. `monitoring-service` solo genera alertas y solicitudes/eventos.
+- Las proyecciones de `scheduling-service` (`environment_availability_projection`, `instructor_availability_projection`) son read models locales, no ownership de datos maestros.
