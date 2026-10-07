@@ -34,9 +34,17 @@ Emitido inmediatamente después de que un nuevo usuario es creado y persistido e
     "email": "carlos.moreno@sena.edu.co",
     "first_name": "Carlos",
     "last_name": "Moreno",
-    "actor_type": "instructor",
+    "document_type": "CC",
+    "document_number": "1234567890",
+    "default_max_hours_per_week": 40.0,
+    "actor_type": "INSTRUCTOR",
     "actor_id": "act_1a2b3c4d-5e6f-7890-abcd-ef1234567890",
-    "roles": ["instructor", "evaluator"],
+    "roles": [
+      {
+        "role_name": "INSTRUCTOR",
+        "training_center_id": "33333333-3333-4333-8333-333333333333"
+      }
+    ],
     "created_at": "2026-06-20T10:30:00Z"
   }
 }
@@ -50,9 +58,12 @@ Emitido inmediatamente después de que un nuevo usuario es creado y persistido e
 | `email` | `string` | Correo electrónico institucional del usuario |
 | `first_name` | `string` | Nombre(s) del usuario |
 | `last_name` | `string` | Apellido(s) del usuario |
-| `actor_type` | `string` | Tipo de actor: `instructor`, `trainee`, `admin`, `coordinator` |
+| `document_type` | `string \| null` | Tipo de documento requerido para aprovisionar perfiles `INSTRUCTOR`/`LEARNER` en actors-service |
+| `document_number` | `string \| null` | Número de documento requerido para aprovisionar perfiles `INSTRUCTOR`/`LEARNER` en actors-service |
+| `default_max_hours_per_week` | `number \| null` | Tope semanal por defecto requerido cuando `actor_type=INSTRUCTOR` |
+| `actor_type` | `string` | Tipo de actor: `INSTRUCTOR`, `LEARNER`, `USER` |
 | `actor_id` | `string (UUID)` | Identificador del actor correspondiente en actors-service |
-| `roles` | `string[]` | Lista de roles iniciales asignados al momento de la creación |
+| `roles` | `object[]` | Lista de roles iniciales asignados al momento de la creación (`role_name`, `training_center_id`) |
 | `created_at` | `string (ISO 8601)` | Fecha y hora de creación del usuario |
 
 ---
@@ -188,9 +199,17 @@ Todos los eventos publicados por iam-service siguen el mismo envelope estándar:
     "email": "carlos.moreno@sena.edu.co",
     "first_name": "Carlos",
     "last_name": "Moreno",
-    "actor_type": "instructor",
+    "document_type": "CC",
+    "document_number": "1234567890",
+    "default_max_hours_per_week": 40.0,
+    "actor_type": "INSTRUCTOR",
     "actor_id": "act_1a2b3c4d-5e6f-7890-abcd-ef1234567890",
-    "roles": ["instructor"],
+    "roles": [
+      {
+        "role_name": "INSTRUCTOR",
+        "training_center_id": "33333333-3333-4333-8333-333333333333"
+      }
+    ],
     "created_at": "2026-06-20T10:30:00Z"
   }
 }
