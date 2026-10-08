@@ -63,7 +63,7 @@ Si falta el feature requerido → `403 FORBIDDEN`. Si el token es inválido o ex
 |--------|------|-------------|-------------------|
 | `GET` | `/schedules` | Listar horarios (paginado, filtros) | `SCH_VIEW_ALL` / `SCH_VIEW_OWN` |
 | `POST` | `/schedules` | Crear borrador (`DRAFT`) para una ficha y período | `SCH_CREATE` |
-| `GET` | `/schedules/{id}` | Obtener un horario con sus sesiones | `SCH_VIEW_ALL` / `SCH_VIEW_OWN` / `SCH_VIEW_FICHA` |
+| `GET` | `/schedules/{id}` | Obtener un horario con sus sesiones | `SCH_VIEW_ALL` / `SCH_VIEW_OWN` |
 | `PUT` | `/schedules/{id}` | Editar metadatos del borrador (`name`) | `SCH_EDIT` |
 | `DELETE` | `/schedules/{id}` | Eliminar borrador (solo `DRAFT`) | `SCH_DELETE_DRAFT` |
 | `POST` | `/schedules/{id}/validate` | Validar (verificación síncrona final) y pasar a `UNDER_REVIEW` | `SCH_EDIT` |
