@@ -39,7 +39,7 @@ Authorization: Bearer <token>
 
 Autorización RBAC por `feature` (módulo `MOD_DOCUMENTS`, ver `rbac-design.md`), alineada al
 esquema granular del módulo (como `document.yaml`): lectura de plantillas (listar/detalle) con
-`DOC_TEMPLATE_VIEW`, escritura y previsualización con `DOC_TEMPLATE_MANAGE`, y el reporte de uso
+`DOC_VIEW`, escritura y previsualización con `DOC_TEMPLATE_MANAGE`, y el reporte de uso
 con `DOC_REPORT_VIEW`.
 
 ## Entidad del contrato
