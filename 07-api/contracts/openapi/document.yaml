@@ -1,553 +1,554 @@
 openapi: 3.1.0
 info:
-  title: Document Service API — Horarios SENA
+  title: Document Template API — Horarios SENA
   version: 1.0.0
-  description: >-
-    Ciclo de vida de documentos generados/almacenados por la plataforma (agregados
-    `document` + `document_version`). Generación asíncrona a partir de plantillas,
-    registro manual de documentos ya subidos a object storage, carga de nuevas
-    versiones vía `multipart/form-data` y descarga por URL firmada (el binario
-    nunca se sirve ni se persiste en este servicio; ver ADR-003). Alineado con el
-    modelo de datos de document-service y con 07-api/guidelines.md. La extensión
-    `x-required-feature` declara el feature RBAC que exige cada operación.
+  description: 'Plantillas de generación de documentos (HTML/Handlebars) usadas por el document-service para
+    producir PDF/EXCEL/WORD: CRUD de `document_template`, resolución por `code` (consumida por workers), previsualización
+    de renderizado y reporte de uso de plantillas. Fuente de verdad del contrato. Alineado con el modelo de
+    datos de document-service y con 07-api/guidelines.md. La extensión `x-required-feature` declara el feature
+    RBAC que exige cada operación (ver rbac-design.md, módulo `MOD_DOCUMENTS`). Reglas precisadas: PUT de reemplazo
+    completo, entradas estrictas, preview HTML intermedio y rango temporal semiabierto. Las reglas nuevas requieren
+    confirmación contra la implementación.'
 servers:
-  - url: /api/v1
+- url: /api/v1
 security:
-  - bearerAuth: []
+- bearerAuth: []
 tags:
-  - name: documents
-    description: Documentos generados o registrados en la plataforma.
-  - name: versions
-    description: Historial de versiones de un documento.
-  - name: reports
-    description: Reportes propios del dominio document-service.
-
+- name: templates
+  description: Plantillas de documentos (document_template).
+- name: reports
+  description: Reportes propios del dominio de plantillas.
 paths:
-  # ---------------------------------------------------------------- documents
-  /documents:
+  /document-templates:
     get:
-      operationId: listDocuments
-      tags: [documents]
-      summary: Lista paginada de documentos.
+      operationId: listDocumentTemplates
+      tags:
+      - templates
+      summary: Lista paginada de plantillas (sin template_body).
+      description: 'Retorna una colección paginada con el envelope estándar `{ data, pagination }`, donde `pagination`
+        contiene `page`, `page_size`, `total_items` y `total_pages`. El parámetro `sort` acepta únicamente
+        estos campos: `code`, `name`, `output_type`, `version`, `is_active`, `created_at`, `updated_at`, con
+        formato `campo:asc` o `campo:desc`.'
       x-required-feature: DOC_VIEW
       parameters:
-        - $ref: '_shared.yaml#/components/parameters/page'
-        - $ref: '_shared.yaml#/components/parameters/page_size'
-        - $ref: '_shared.yaml#/components/parameters/sort'
-        - name: domain
-          in: query
-          required: false
-          description: Filtra por dominio/tipo de documento.
-          schema: { $ref: '#/components/schemas/DocumentDomain' }
-        - name: status
-          in: query
-          required: false
-          description: Filtra por estado del documento.
-          schema: { $ref: '#/components/schemas/DocumentStatus' }
-        - name: owner_service
-          in: query
-          required: false
-          description: Filtra por servicio propietario que originó el documento.
-          schema: { type: string, maxLength: 50 }
-        - name: owner_entity_id
-          in: query
-          required: false
-          description: Filtra por el UUID de la entidad de negocio propietaria (en el servicio `owner_service`).
-          schema: { type: string, format: uuid }
+      - $ref: _shared.yaml#/components/parameters/page
+      - $ref: _shared.yaml#/components/parameters/page_size
+      - name: sort
+        in: query
+        required: false
+        description: Campo permitido seguido de :asc o :desc.
+        schema:
+          type: string
+          pattern: ^(code|name|output_type|version|is_active|created_at|updated_at):(asc|desc)$
+          default: created_at:desc
+      - name: output_type
+        in: query
+        required: false
+        description: Filtra por tipo de salida de la plantilla.
+        schema:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+      - name: code
+        in: query
+        required: false
+        description: Filtra por código exacto (ej. SCHEDULE_CERTIFICATE).
+        schema:
+          type: string
+          maxLength: 50
+      - name: is_active
+        in: query
+        required: false
+        schema:
+          type: boolean
       responses:
         '200':
-          description: Página de documentos.
+          description: Página de plantillas.
           content:
             application/json:
               schema:
                 type: object
-                required: [data, pagination]
+                required:
+                - data
+                - pagination
                 properties:
                   data:
                     type: array
-                    items: { $ref: '#/components/schemas/Document' }
-                  pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+                    items:
+                      $ref: '#/components/schemas/DocumentTemplateListItem'
+                  pagination:
+                    $ref: _shared.yaml#/components/schemas/Pagination
+        '400':
+          $ref: _shared.yaml#/components/responses/BadRequest
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
     post:
-      operationId: createDocument
-      tags: [documents]
-      summary: Registra un documento cuyo binario ya fue subido al object storage.
-      description: >-
-        Uso típico: integración servicio-a-servicio que ya escribió el archivo en
-        MinIO/S3 (p. ej. mediante una URL de subida firmada emitida fuera de esta
-        API) y solo necesita registrar los metadatos. `storage_key` es de solo
-        escritura: nunca se retorna en las respuestas (ver `GET /documents/{id}/download-url`).
-      x-required-feature: DOC_CREATE
+      operationId: createDocumentTemplate
+      tags:
+      - templates
+      summary: Crea una plantilla de documento (version = 1, is_active = true).
+      x-required-feature: DOC_TEMPLATE_MANAGE
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/DocumentCreate' }
+            schema:
+              $ref: '#/components/schemas/DocumentTemplateCreate'
       responses:
         '201':
-          description: Documento registrado.
+          description: Plantilla creada.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Document' }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-
-  /documents/generate:
-    post:
-      operationId: generateDocument
-      tags: [documents]
-      summary: Solicita la generación asíncrona de un documento a partir de una plantilla.
-      description: >-
-        Crea el registro `document` en `status = GENERATING`, encola la solicitud
-        en `document-generation-queue` para el pdf-renderer-worker y retorna de
-        inmediato. El cliente debe sondear `GET /documents/{id}` hasta observar
-        `status = AVAILABLE` o `GENERATION_FAILED` (decisión 02 de decisions.md).
-        La generación es siempre asíncrona; no existe variante síncrona.
-      x-required-feature: DOC_CREATE
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/GenerateDocumentRequest' }
-      responses:
-        '202':
-          description: Solicitud aceptada; el documento queda en GENERATING.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/GenerateDocumentResponse' }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-
-  /documents/{id}:
-    parameters:
-      - $ref: '#/components/parameters/DocumentId'
+              schema:
+                $ref: '#/components/schemas/DocumentTemplate'
+        '400':
+          $ref: _shared.yaml#/components/responses/BadRequest
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
+        '409':
+          $ref: _shared.yaml#/components/responses/Conflict
+        '422':
+          $ref: _shared.yaml#/components/responses/UnprocessableEntity
+  /document-templates/{id}:
     get:
-      operationId: getDocument
-      tags: [documents]
-      summary: Detalle de un documento.
+      operationId: getDocumentTemplate
+      tags:
+      - templates
+      summary: Detalle de una plantilla por id o code, incluye template_body.
+      description: '`id` acepta el UUID de la plantilla o su `code` único (ej. SCHEDULE_CERTIFICATE, ENROLLMENT_RECORD);
+        esto permite a los workers de renderizado resolver la plantilla por code sin una ruta adicional. Las
+        plantillas inactivas siguen siendo consultables por usuarios autorizados; los workers deben comprobar
+        is_active antes de generar.'
       x-required-feature: DOC_VIEW
+      parameters:
+      - $ref: '#/components/parameters/DocumentTemplateIdOrCode'
       responses:
         '200':
-          description: Documento.
+          description: Plantilla.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Document' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-    patch:
-      operationId: updateDocument
-      tags: [documents]
-      summary: Actualiza metadatos del documento (título, dominio).
-      description: >-
-        Actualización parcial. `row_version` es obligatorio para bloqueo optimista;
-        si no coincide con el valor actual del recurso, responde `409 Conflict`.
-      x-required-feature: DOC_CREATE
+              schema:
+                $ref: '#/components/schemas/DocumentTemplate'
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
+        '404':
+          $ref: _shared.yaml#/components/responses/NotFound
+        '400':
+          $ref: _shared.yaml#/components/responses/BadRequest
+    put:
+      operationId: updateDocumentTemplate
+      tags:
+      - templates
+      summary: Actualiza una plantilla; incrementa document_template.version.
+      description: 'El versionado de la plantilla es independiente del historial de `document_version`: los
+        documentos ya generados conservan su binario; solo las generaciones posteriores usan la nueva versión.
+        PUT reemplaza todos los campos editables: name, template_body, output_type e is_active; ninguno puede
+        omitirse. El code no cambia. No se declara control de concurrencia obligatorio sin confirmar soporte
+        en la implementación.'
+      x-required-feature: DOC_TEMPLATE_MANAGE
+      parameters:
+      - $ref: '#/components/parameters/DocumentTemplateId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/DocumentUpdate' }
+            schema:
+              $ref: '#/components/schemas/DocumentTemplateUpdate'
       responses:
         '200':
-          description: Documento actualizado.
+          description: Plantilla actualizada.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Document' }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+              schema:
+                $ref: '#/components/schemas/DocumentTemplate'
+        '400':
+          $ref: _shared.yaml#/components/responses/BadRequest
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
+        '404':
+          $ref: _shared.yaml#/components/responses/NotFound
+        '422':
+          $ref: _shared.yaml#/components/responses/UnprocessableEntity
     delete:
-      operationId: archiveDocument
-      tags: [documents]
-      summary: Archiva el documento (soft delete; status = ARCHIVED).
-      x-required-feature: DOC_ARCHIVE
+      operationId: deleteDocumentTemplate
+      tags:
+      - templates
+      summary: Desactiva una plantilla (soft delete vía is_active).
+      x-required-feature: DOC_TEMPLATE_MANAGE
+      parameters:
+      - $ref: '#/components/parameters/DocumentTemplateId'
       responses:
         '204':
-          description: Documento archivado.
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-
-  /documents/{id}/download-url:
-    parameters:
-      - $ref: '#/components/parameters/DocumentId'
-    get:
-      operationId: getDocumentDownloadUrl
-      tags: [documents]
-      summary: Genera una URL firmada de descarga de la versión vigente.
-      description: >-
-        La URL firmada se emite solo tras validar el scope del usuario sobre la
-        entidad propietaria; TTL por defecto 300 s (ADR-003). El binario nunca se
-        proxya a través de esta API y `storage_key` nunca se expone al cliente;
-        el consumidor descarga directamente desde el object storage con la URL
-        devuelta. Requiere `status = AVAILABLE`.
-      x-required-feature: DOC_DOWNLOAD
-      responses:
-        '200':
-          description: URL firmada de descarga.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/DownloadUrlResponse' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
-
-  # ---------------------------------------------------------------- versions
-  /documents/{id}/versions:
-    parameters:
-      - $ref: '#/components/parameters/DocumentId'
-    get:
-      operationId: listDocumentVersions
-      tags: [versions]
-      summary: Historial de versiones del documento.
-      x-required-feature: DOC_VIEW
-      responses:
-        '200':
-          description: Lista de versiones, orden descendente por `version_number`.
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/DocumentVersion' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+          description: Plantilla desactivada.
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
+        '404':
+          $ref: _shared.yaml#/components/responses/NotFound
+        '409':
+          $ref: _shared.yaml#/components/responses/Conflict
+  /document-templates/{id}/preview:
     post:
-      operationId: uploadDocumentVersion
-      tags: [versions]
-      summary: Sube el binario de una nueva versión del documento.
-      description: >-
-        Carga directa vía `multipart/form-data` (guidelines §1): el binario viaja
-        en la parte `file`. El servicio lo escribe en object storage, crea el
-        `document_version` con `version_number` autoincremental y actualiza
-        `document.storage_key`/`status = AVAILABLE` para apuntar a esta versión
-        (desnormalización intencional, ver data-model.md).
-      x-required-feature: DOC_CREATE
+      operationId: previewDocumentTemplate
+      tags:
+      - templates
+      summary: Renderiza template_body con datos de muestra sin generar ni persistir un documento.
+      description: Acción de sub-recurso (no CRUD) para validar una plantilla durante su edición. Resuelve
+        el Handlebars de `template_body` contra `sample_data` y devuelve el HTML resultante. No crea filas
+        en `document` ni `document_version` (eso pertenece al dominio de document-api); la conversión final
+        a PDF/EXCEL/WORD la realiza el pdf-renderer-worker al generar un documento real. La respuesta siempre
+        contiene HTML intermedio, incluso para output_type EXCEL o WORD; no garantiza fidelidad de maquetación
+        del archivo final. El servidor debe escapar contenido no confiable y restringir helpers inseguros.
+      x-required-feature: DOC_TEMPLATE_MANAGE
+      parameters:
+      - $ref: '#/components/parameters/DocumentTemplateId'
       requestBody:
         required: true
         content:
-          multipart/form-data:
-            schema: { $ref: '#/components/schemas/DocumentVersionUpload' }
-            encoding:
-              file:
-                contentType: application/octet-stream, application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-      responses:
-        '201':
-          description: Versión creada.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/DocumentVersion' }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-
-  /documents/{id}/versions/{version_id}:
-    parameters:
-      - $ref: '#/components/parameters/DocumentId'
-      - $ref: '#/components/parameters/VersionId'
-    get:
-      operationId: getDocumentVersion
-      tags: [versions]
-      summary: Detalle de una versión específica del documento.
-      x-required-feature: DOC_VIEW
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentTemplatePreviewRequest'
       responses:
         '200':
-          description: Versión del documento.
+          description: Resultado del renderizado de previsualización.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/DocumentVersion' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-
-  # ---------------------------------------------------------------- reports (own domain)
-  /reports/document-status:
+              schema:
+                $ref: '#/components/schemas/DocumentTemplatePreviewResponse'
+        '400':
+          $ref: _shared.yaml#/components/responses/BadRequest
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
+        '404':
+          $ref: _shared.yaml#/components/responses/NotFound
+        '422':
+          $ref: _shared.yaml#/components/responses/UnprocessableEntity
+  /reports/template-usage:
     get:
-      operationId: reportDocumentStatus
-      tags: [reports]
-      summary: Inventario de documentos por entidad propietaria, dominio y estado.
-      description: >-
-        Reporte propio del dominio document-service sobre `document`. Solo lectura;
-        no muta estado. Paginación por offset (guidelines §6) por tratarse de un
-        inventario acotado, no de un log continuo. Inventario — Usuarios: servicios
-        propietarios (SCHEDULE, FICHA, CERTIFICATE, ACTOR, REPORT) y coordinadores/
-        administradores; Frecuencia: on-demand; Formato: JSON; Fuente: `document`.
+      operationId: reportTemplateUsage
+      tags:
+      - reports
+      summary: Inventario de uso de plantillas (documentos generados por plantilla).
+      description: 'Reporte propio del dominio de plantillas: agrega `document_template` con `document` (mismo
+        servicio document-service, mismo bounded context; no cruza límites de servicio) agrupando por template_id.
+        Solo lectura. Inventario — Consumidores: coordinadores/admin (panel de documentos), monitoring-service
+        (si pública un KPI propio derivado); Frecuencia: on-demand; Formato: JSON; Fuente: `document_template`
+        + `document` (agregación por template_id, filtrable por rango de `document.created_at`). Se cuentan
+        filas de document, no filas de document_version; una plantilla sin documentos aparece con total_documents=0.
+        El contrato no presume eliminación lógica ni física de documentos: si existe, el criterio de exclusión
+        debe verificarse contra el modelo real.'
       x-required-feature: DOC_REPORT_VIEW
       parameters:
-        - $ref: '_shared.yaml#/components/parameters/page'
-        - $ref: '_shared.yaml#/components/parameters/page_size'
-        - name: domain
-          in: query
-          required: false
-          schema: { $ref: '#/components/schemas/DocumentDomain' }
-        - name: status
-          in: query
-          required: false
-          schema: { $ref: '#/components/schemas/DocumentStatus' }
-        - name: owner_service
-          in: query
-          required: false
-          schema: { type: string, maxLength: 50 }
-        - name: owner_entity_id
-          in: query
-          required: false
-          schema: { type: string, format: uuid }
-        - name: from
-          in: query
-          required: false
-          description: Inicio del rango de `created_at` (inclusive).
-          schema: { type: string, format: date-time }
-        - name: to
-          in: query
-          required: false
-          description: Fin del rango de `created_at` (exclusive).
-          schema: { type: string, format: date-time }
+      - $ref: _shared.yaml#/components/parameters/page
+      - $ref: _shared.yaml#/components/parameters/page_size
+      - name: template_id
+        in: query
+        required: false
+        description: Limita el reporte a una única plantilla.
+        schema:
+          type: string
+          format: uuid
+      - name: output_type
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+      - name: from
+        in: query
+        required: false
+        description: Inicio inclusivo. Si se especifican ambos extremos, from debe ser anterior a to; de lo
+          contrario 400.
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        required: false
+        description: Fin exclusivo. Si se especifican ambos extremos, from debe ser anterior a to; de lo contrario
+          400.
+        schema:
+          type: string
+          format: date-time
       responses:
         '200':
-          description: Página del inventario de documentos.
+          description: Página de estadísticas de uso por plantilla.
           content:
             application/json:
               schema:
                 type: object
-                required: [data, pagination]
+                required:
+                - data
+                - pagination
                 properties:
                   data:
                     type: array
-                    items: { $ref: '#/components/schemas/DocumentStatusEntry' }
-                  pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-
-  /health:
-    get:
-      operationId: health
-      tags: [health]
-      summary: Liveness probe del servicio.
-      security: []
-      responses:
-        '200':
-          description: Servicio vivo.
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-
+                    items:
+                      $ref: '#/components/schemas/TemplateUsageReportEntry'
+                  pagination:
+                    $ref: _shared.yaml#/components/schemas/Pagination
+        '400':
+          $ref: _shared.yaml#/components/responses/BadRequest
+        '401':
+          $ref: _shared.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: _shared.yaml#/components/responses/Forbidden
 components:
   parameters:
-    DocumentId:
+    DocumentTemplateIdOrCode:
       name: id
       in: path
       required: true
-      description: UUID del documento.
-      schema: { type: string, format: uuid }
-    VersionId:
-      name: version_id
+      description: UUID de la plantilla o su code único (ej. SCHEDULE_CERTIFICATE). Solo GET /document-templates/{id}
+        acepta ambos formatos.
+      schema:
+        type: string
+        maxLength: 50
+    DocumentTemplateId:
+      name: id
       in: path
       required: true
-      description: UUID de la versión del documento.
-      schema: { type: string, format: uuid }
-
+      description: UUID de la plantilla. PUT, DELETE y preview operan solo por UUID (no aceptan code).
+      schema:
+        type: string
+        format: uuid
   schemas:
-    DocumentDomain:
-      type: string
-      description: Contexto de negocio que originó el documento.
-      enum: [SCHEDULE, FICHA, CERTIFICATE, ACTOR, REPORT]
-
-    DocumentStatus:
-      type: string
-      enum: [GENERATING, AVAILABLE, ARCHIVED, EXPIRED, GENERATION_FAILED]
-
-    Document:
+    DocumentTemplateListItem:
+      type: object
+      description: Representación de lista; excluye template_body (puede ser TEXT extenso).
+      required:
+      - id
+      - code
+      - name
+      - output_type
+      - version
+      - is_active
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 50
+          description: 'UNIQUE (ej: SCHEDULE_CERTIFICATE, ENROLLMENT_RECORD).'
+        name:
+          type: string
+          maxLength: 200
+        output_type:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+        version:
+          type: integer
+          description: Versión de la plantilla; se incrementa en cada PUT.
+          minimum: 1
+        is_active:
+          type: boolean
+    DocumentTemplate:
+      type: object
+      description: Representación de detalle; incluye template_body.
+      required:
+      - id
+      - code
+      - name
+      - template_body
+      - output_type
+      - version
+      - is_active
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 50
+          description: 'UNIQUE (ej: SCHEDULE_CERTIFICATE, ENROLLMENT_RECORD).'
+        name:
+          type: string
+          maxLength: 200
+        template_body:
+          type: string
+          description: Cuerpo de la plantilla en HTML/Handlebars.
+        output_type:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+        version:
+          type: integer
+          description: Versión de la plantilla; se incrementa en cada PUT.
+          minimum: 1
+        is_active:
+          type: boolean
+    DocumentTemplateCreate:
       type: object
       required:
-        - id
-        - title
-        - domain
-        - owner_service
-        - owner_entity_id
-        - mime_type
-        - status
-        - row_version
-        - created_by
-        - created_at
-        - updated_at
+      - code
+      - name
+      - template_body
+      - output_type
       properties:
-        id: { type: string, format: uuid }
+        code:
+          type: string
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Z][A-Z0-9_]*$
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+        template_body:
+          type: string
+          minLength: 1
+          description: Plantilla HTML/Handlebars. Debe validarse sintaxis y restringirse HTML/helpers peligrosos
+            en servidor.
+        output_type:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+        is_active:
+          type: boolean
+          default: true
+      additionalProperties: false
+    DocumentTemplateUpdate:
+      type: object
+      description: Reemplazo completo de los campos editables. code es inmutable. Los cuatro campos son obligatorios;
+        version se incrementa al actualizar.
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+        template_body:
+          type: string
+          minLength: 1
+          description: Plantilla HTML/Handlebars. Debe validarse sintaxis y restringirse HTML/helpers peligrosos
+            en servidor.
+        output_type:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+        is_active:
+          type: boolean
+      additionalProperties: false
+      required:
+      - name
+      - template_body
+      - output_type
+      - is_active
+    DocumentTemplatePreviewRequest:
+      type: object
+      required:
+      - sample_data
+      properties:
+        sample_data:
+          type: object
+          description: Objeto JSON de muestra para Handlebars. No debe contener datos sensibles ni ejecutarse
+            como código.
+          additionalProperties: true
+      additionalProperties: false
+    DocumentTemplatePreviewResponse:
+      type: object
+      required:
+      - output_type
+      - rendered_html
+      properties:
+        output_type:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+        rendered_html:
+          type: string
+          description: HTML intermedio renderizado para previsualización; no representa un archivo PDF, EXCEL
+            o WORD.
+        missing_placeholders:
+          type: array
+          description: Placeholders referenciados en template_body sin valor en sample_data.
+          items:
+            type: string
+      description: La vista previa es HTML para los tres output_type. No genera binarios, ni filas document/document_version.
+    TemplateUsageReportEntry:
+      type: object
+      required:
+      - template_id
+      - template_code
+      - template_name
+      - output_type
+      - total_documents
+      properties:
         template_id:
-          type: [string, 'null']
-          format: uuid
-          description: FK a `document_template`; null si es un documento libre (no generado desde plantilla).
-        title: { type: string, maxLength: 300 }
-        domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service:
-          type: string
-          maxLength: 100
-          description: Servicio que solicitó/originó el documento.
-        owner_entity_id:
           type: string
           format: uuid
-          description: >-
-            UUID de la entidad de negocio propietaria en `owner_service` (p. ej.
-            un `schedule_id` en scheduling-service). Referencia lógica cross-service,
-            sin FK física ni endpoint de join.
-        mime_type: { type: string, maxLength: 100, example: application/pdf }
-        size_bytes:
-          type: [integer, 'null']
-          format: int64
-          minimum: 0
-        status: { $ref: '#/components/schemas/DocumentStatus' }
-        row_version:
-          type: integer
-          readOnly: true
-          description: Bloqueo optimista; requerido en `PATCH` para detectar escritura concurrente.
-        created_by:
-          type: string
-          format: uuid
-          description: ID de usuario (iam-service); referencia lógica sin FK física.
-        created_at: { type: string, format: date-time }
-        updated_at: { type: string, format: date-time }
-
-    DocumentCreate:
-      type: object
-      required: [title, domain, owner_service, owner_entity_id, storage_key, mime_type]
-      properties:
-        template_id:
-          type: [string, 'null']
-          format: uuid
-        title: { type: string, maxLength: 300 }
-        domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service: { type: string, maxLength: 100 }
-        owner_entity_id: { type: string, format: uuid }
-        storage_key:
-          type: string
-          writeOnly: true
-          description: >-
-            Clave del objeto ya subido a object storage (fuera de esta API).
-            Nunca se retorna en las respuestas; la descarga se resuelve vía
-            `GET /documents/{id}/download-url`.
-        mime_type: { type: string, maxLength: 100 }
-        size_bytes:
-          type: [integer, 'null']
-          format: int64
-          minimum: 0
-
-    DocumentUpdate:
-      type: object
-      required: [row_version]
-      properties:
-        title: { type: string, maxLength: 300 }
-        domain: { $ref: '#/components/schemas/DocumentDomain' }
-        row_version:
-          type: integer
-          description: Valor de `row_version` leído por el cliente; debe coincidir con el actual o responde 409.
-
-    GenerateDocumentRequest:
-      type: object
-      required: [template_code, domain, owner_service, owner_entity_id, title]
-      properties:
         template_code:
           type: string
           maxLength: 50
-          description: Referencia a `document_template.code`.
-          example: SCHEDULE_CERTIFICATE
-        domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service: { type: string, maxLength: 100 }
-        owner_entity_id: { type: string, format: uuid }
-        title: { type: string, maxLength: 300 }
-        data:
-          type: object
-          description: Contexto que el pdf-renderer-worker combina con la plantilla.
-          additionalProperties: true
-
-    GenerateDocumentResponse:
-      type: object
-      required: [document_id, status]
-      properties:
-        document_id: { type: string, format: uuid }
-        status:
+        template_name:
           type: string
-          const: GENERATING
-
-    DocumentVersion:
-      type: object
-      required: [id, document_id, version_number, created_by, created_at]
-      properties:
-        id: { type: string, format: uuid }
-        document_id: { type: string, format: uuid }
-        version_number:
+          maxLength: 200
+        output_type:
+          type: string
+          enum:
+          - PDF
+          - EXCEL
+          - WORD
+        total_documents:
           type: integer
-          minimum: 1
-          description: Autoincremental por documento.
-        created_by:
-          type: string
-          format: uuid
-          description: ID de usuario (iam-service); referencia lógica sin FK física.
-        created_at: { type: string, format: date-time }
-        notes:
-          type: [string, 'null']
-          description: Observaciones sobre esta versión.
-
-    DocumentVersionUpload:
-      type: object
-      required: [file]
-      properties:
-        file:
-          type: string
-          format: binary
-          description: Binario de la nueva versión del documento.
-        notes:
-          type: string
-          description: Observaciones sobre esta versión.
-
-    DownloadUrlResponse:
-      type: object
-      required: [document_id, url, expires_in]
-      properties:
-        document_id: { type: string, format: uuid }
-        url:
-          type: string
-          format: uri
-          description: URL firmada de un solo uso hacia el object storage.
-        expires_in:
-          type: integer
-          description: Segundos de vigencia de la URL.
-          example: 300
-
-    DocumentStatusEntry:
-      type: object
-      required: [id, title, domain, owner_service, owner_entity_id, status, updated_at]
-      properties:
-        id: { type: string, format: uuid }
-        title: { type: string, maxLength: 300 }
-        domain: { $ref: '#/components/schemas/DocumentDomain' }
-        owner_service: { type: string, maxLength: 100 }
-        owner_entity_id: { type: string, format: uuid }
-        status: { $ref: '#/components/schemas/DocumentStatus' }
-        current_version_number:
-          type: [integer, 'null']
-          description: Número de la versión vigente (`document_version.version_number`); null si aún no tiene versiones.
-        updated_at: { type: string, format: date-time }
-
+          description: Conteo de filas en document con template_id = este template, dentro del rango filtrado.
+          minimum: 0
+        last_generated_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: MAX(document.created_at) para esta plantilla; null si nunca se ha generado.
+        status_breakdown:
+          type: array
+          description: Conteo de documentos por document.status.
+          items:
+            type: object
+            required:
+            - status
+            - count
+            properties:
+              status:
+                type: string
+                enum:
+                - GENERATING
+                - AVAILABLE
+                - ARCHIVED
+                - EXPIRED
+                - GENERATION_FAILED
+              count:
+                type: integer
+                minimum: 0
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
-
-
-

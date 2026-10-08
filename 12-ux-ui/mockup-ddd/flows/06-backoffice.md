@@ -158,10 +158,10 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 - **Ruta:** `/backoffice/documentos/plantillas` · **Rol:** `ADMIN_STAFF`/`SYSTEM_ADMIN` ·
   **MFE:** `document-mfe` · **HU:** pendiente
 - **Endpoints:**
-  - `GET /api/v1/document-templates` (`DOC_TEMPLATE_VIEW`) — lista paginada (sin `template_body`).
+  - `GET /api/v1/document-templates` (`DOC_VIEW`) — lista paginada (sin `template_body`).
     Filtros: `output_type`, `code`, `is_active`.
   - `POST /api/v1/document-templates` (`DOC_TEMPLATE_MANAGE`) — crea (`version = 1`, `is_active = true`).
-  - `GET /api/v1/document-templates/{id}` (`DOC_TEMPLATE_VIEW`) — detalle, incluye `template_body`
+  - `GET /api/v1/document-templates/{id}` (`DOC_VIEW`) — detalle, incluye `template_body`
     (acepta `id` o `code`).
   - `PUT /api/v1/document-templates/{id}` (`DOC_TEMPLATE_MANAGE`) — actualiza; incrementa `version`.
   - `DELETE /api/v1/document-templates/{id}` (`DOC_TEMPLATE_MANAGE`) — desactiva (`is_active = false`).
@@ -499,7 +499,7 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 - **Endpoint:** `POST /api/v1/documents/generate` (`DOC_DOCUMENT_GENERATE`) — genera el documento
   de forma asíncrona a partir de una plantilla; encola en `document-generation-queue` para el
   pdf-renderer-worker. Alimenta el select de plantillas: `GET /api/v1/document-templates?is_active=true`
-  (`DOC_TEMPLATE_VIEW`).
+  (`DOC_VIEW`).
 - **Campos reales (`GenerateDocumentRequest`):** `template_code` (referencia a
   `document_template.code`, ej. `SCHEDULE_CERTIFICATE`), `domain` (`SCHEDULE`/`FICHA`/
   `CERTIFICATE`/`ACTOR`/`REPORT`), `owner_service`, `owner_entity_id` (UUID), `title`, `data`
@@ -559,7 +559,7 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
   `/backoffice/documentos/plantillas/nueva` (creación) · **Rol:** `ADMIN_STAFF`/`SYSTEM_ADMIN` ·
   **MFE:** `document-mfe` · **HU:** pendiente
 - **Endpoints:**
-  - `GET /api/v1/document-templates/{id}` (`DOC_TEMPLATE_VIEW`) — carga la plantilla a editar
+  - `GET /api/v1/document-templates/{id}` (`DOC_VIEW`) — carga la plantilla a editar
     (acepta `id` o `code`); incluye `template_body`.
   - `POST /api/v1/document-templates` (`DOC_TEMPLATE_MANAGE`) — crea (`version = 1`,
     `is_active = true`).
