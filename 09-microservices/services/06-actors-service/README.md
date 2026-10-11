@@ -75,6 +75,7 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 | GET | `/api/v1/reports/instructor-load` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
 | GET | `/api/v1/reports/learner-tracking` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
 | GET | `/internal/fichas/{fichaId}/active-learners/count` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalFichaLearnerController.java` |
+| GET | `/internal/learners/by-user/{userId}/active-ficha` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalLearnerFichaController.java` |
 
 ## Configuración
 
