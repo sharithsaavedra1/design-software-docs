@@ -37,12 +37,15 @@ Ninguno. El `audit-worker` es un **consumidor terminal** (sink): solo consume y 
   "actor_id": "uuid",
   "entity_type": "class_session",
   "entity_id": "uuid",
+  "training_center_id": "uuid | null",
   "payload": { }
 }
 ```
 
 ## Efecto (persistencia)
 Inserta un `audit_record` extrayendo `event_type`, `source_service`, `actor_id`, `entity_type`, `entity_id` y `timestamp` para indexar, y conserva el `payload` completo como `JSONB` (schema-on-read).
+
+`training_center_id` es nullable y se proyecta únicamente para seguridad de scope y consulta: eventos GLOBAL o sin centro se persisten con `null`. Si el campo está presente debe ser UUID válido; un valor inválido se rechaza antes de reservar `audit_event_seen` o insertar `audit_record`. El worker no infiere el centro consultando otros servicios o bases de datos.
 
 ## Reglas
 - **Append-only:** solo `INSERT`. Sin `UPDATE`/`DELETE` ni endpoint de escritura externo.
