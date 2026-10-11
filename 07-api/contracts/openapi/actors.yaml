@@ -861,11 +861,13 @@ paths:
       tags: [learners]
       summary: Consulta la ficha activa de un aprendiz por user_id de IAM.
       description: >-
-        Endpoint interno servicio-a-servicio consumido por iam-service y
-        scheduling-service para resolver la ficha activa de un aprendiz sin
-        acceder directamente a la base de datos de actors-service. La operación
-        es de solo lectura y debe protegerse exclusivamente con mTLS entre
-        servicios; no usa Bearer JWT ni features RBAC.
+        Endpoint interno servicio-a-servicio consumido exclusivamente por
+        iam-service para resolver la ficha activa de un aprendiz sin acceder
+        directamente a la base de datos de actors-service. El flujo posterior
+        hacia scheduling-service usa el JWT emitido por IAM y su claim
+        ficha_id; scheduling-service no consume este endpoint directamente.
+        La operación es de solo lectura y debe protegerse exclusivamente con
+        mTLS entre servicios; no usa Bearer JWT ni features RBAC.
       security:
         - mutualTLS: []
       x-internal: true
