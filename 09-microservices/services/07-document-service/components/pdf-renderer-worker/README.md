@@ -3,7 +3,7 @@
 > Estado: 🟡 En progreso | Última actualización: 2026-08-01
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-> **Diseño previsto — no implementado.** Agnóstico de lenguaje.
+> **Implementado** en `design-software-document-service` (`apps/pdf_renderer_worker`, HU-DOC-004). Este documento describe el worker tal como está implementado.
 
 ## Tipo de componente
 `-worker` — consumidor de eventos.

@@ -100,6 +100,8 @@ El `pdf-renderer-worker` consume este mensaje, renderiza el PDF, lo sube a MinIO
 
 ### `scheduling.schedule.published`
 
+> Previsto, no implementado: este evento lo atenderia el `document-lifecycle-worker`.
+
 **Origen:** `scheduling-service`  
 **Topic:** `scheduling-events`
 
@@ -119,6 +121,8 @@ Cuando el horario academico de un periodo es publicado y queda en estado definit
 ---
 
 ### `academic.ficha.opened`
+
+> Previsto, no implementado: este evento lo atenderia el `document-lifecycle-worker`.
 
 **Origen:** `academic-service`  
 **Topic:** `academic-events`
@@ -221,17 +225,15 @@ Intento 4 → falla → marcar documento status=GENERATION_FAILED
 
 El `document-service` nunca genera documentos de forma sincrona. Todo flujo de generacion pasa por el `pdf-renderer-worker` via cola interna.
 
+### Flujo implementado (HU-DOC-002 y HU-DOC-004)
+
 ```
-Evento entrante (p.ej. scheduling.schedule.published)
-        |
+Cliente o servicio autorizado
+        |  POST /documents/generate
         v
-[document-lifecycle-worker] recibe el evento del topic externo
-        |
-        v
-[document-api / base de datos] crea registro de documento
+[document-api] crea el registro del documento
         status = GENERATING
         document_id asignado
-        template_code resuelto segun tipo de evento
         |
         v
 Mensaje encolado en `document-generation-queue`
@@ -247,30 +249,48 @@ Mensaje encolado en `document-generation-queue`
         └── sube el binario a MinIO/S3
         |
         v
-[pdf-renderer-worker] actualiza el registro del documento
+[pdf-renderer-worker] registra el document_version y actualiza el documento
         status = AVAILABLE
         storage_key = ruta definitiva en MinIO/S3
         size_bytes, mime_type registrados
         |
         v
-[document-lifecycle-worker] publica evento de salida
-        document.document.generated → topic: document-events
+[pdf-renderer-worker] publica los eventos de salida → topic: document-events
+        document.document.generated (primera version)
+        document.version.created    (cada version)
 ```
+
+### Flujo previsto, no implementado: generacion disparada por eventos de otros servicios
+
+```
+Evento entrante (p.ej. scheduling.schedule.published)
+        |
+        v
+[document-lifecycle-worker] recibe el evento del topic externo,
+        resuelve el template_code segun el tipo de evento, crea el documento (GENERATING)
+        y encola el mensaje en `document-generation-queue`
+        |
+        v
+continua con el flujo implementado (pdf-renderer-worker)
+```
+
+El `document-lifecycle-worker` no publica `document.document.generated` ni `document.version.created`: esos eventos los publica el `pdf-renderer-worker`.
 
 **Componentes involucrados:**
 
 | Componente | Puerto / Rol | Responsabilidad en el flujo |
 |---|---|---|
-| `document-api` | 8007 | Expone REST para consulta de documentos y metadatos |
+| `document-api` | 8007 | Expone REST: solicitud de generacion (`POST /documents/generate`), consulta de documentos, versiones y URL firmada de descarga |
 | `template-api` | 8007 (sub-ruta `/templates`) | Administra plantillas HTML/Handlebars |
-| `document-lifecycle-worker` | worker interno | Consume eventos externos; orquesta ciclo de vida del documento |
-| `pdf-renderer-worker` | worker interno | Renderiza plantillas y sube binarios a MinIO/S3 |
+| `pdf-renderer-worker` | worker interno | Consume `document-generation-queue`, renderiza, sube binarios a MinIO/S3, registra versiones y publica `document.document.generated` y `document.version.created` |
+| `document-lifecycle-worker` | worker interno (previsto, no implementado) | Consumira eventos externos para disparar la generacion y orquestara el ciclo de vida (archivado y expiracion) |
 
-**Estados del ciclo de vida del documento:**
+**Estados del ciclo de vida del documento** (los de `document.status`, ver [data-model.md](./data-model.md)):
 
 | Estado | Descripcion |
 |---|---|
-| `GENERATING` | Registro creado, renderizado en progreso |
+| `GENERATING` | Registro creado, renderizado en progreso; aun no hay archivo |
 | `AVAILABLE` | PDF generado y disponible en almacenamiento |
-| `GENERATION_FAILED` | Todos los reintentos agotados; requiere intervencion manual |
-| `SUPERSEDED` | Version mas reciente disponible; esta version es historica |
+| `GENERATION_FAILED` | Todos los reintentos agotados; el mensaje queda en la DLQ y requiere intervencion manual |
+| `ARCHIVED` | Documento archivado |
+| `EXPIRED` | Documento vencido por la politica de retencion |

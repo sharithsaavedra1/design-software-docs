@@ -7,7 +7,7 @@ dependencias_entrada: 09-microservices/event-catalog.md, la BD de document-servi
 consumidores_siguientes: document-lifecycle-worker (pendiente reconciliación de eventos producidos, ver halts)
 tldr: Worker que consume document-generation-queue, renderiza el PDF, lo sube a object storage, registra la versión y publica document.document.generated y document.version.created.
 decisiones_clave: storage_key determinista; idempotencia por correlation_id; reintentos con backoff y DLQ pdf-renderer.dlq.
-halts_registrados: document.render.requested, document.render.completed y document.render.failed no están en event-catalog.md (pendiente reconciliación)
+halts_registrados: ninguno. document.render.requested/completed/failed existen en event-catalog.md como eventos internos del servicio; la implementación de HU-DOC-004 no los usa
 -->
 
 # Contrato — pdf-renderer-worker
@@ -17,7 +17,7 @@ halts_registrados: document.render.requested, document.render.completed y docume
 
 > **Fuente de verdad:** el inventario de eventos lo gobierna [`event-catalog.md`](../../../../event-catalog.md) y el envelope estándar [`_template/service/events.md`](../../../../_template/service/events.md). Ante discrepancia, esos documentos prevalecen sobre este contrato.
 
-> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
+> **Implementado (HU-DOC-004)** en `design-software-document-service`. Contrato de mensajería. Lo que esa HU no usa, los eventos internos `document.render.*`, se indica más abajo.
 
 ## Mensaje consumido
 
@@ -44,7 +44,7 @@ Topic `document-events` (exchange de tipo topic; la routing key es el tipo del e
 | `document.document.generated` | Se genera la primera versión del documento | `audit-service` |
 | `document.version.created` | Se crea cualquier versión (incluida la primera) | `audit-service` |
 
-> Los eventos internos `document.render.requested/completed/failed` del catálogo no se utilizan en esta implementación: el worker consume la cola de generación directamente y publica los dos eventos de integración anteriores.
+> Los eventos internos `document.render.requested/completed/failed` **sí existen** en [`event-catalog.md`](../../../../event-catalog.md) (sección "Eventos internos de servicio"), pero quedan fuera del flujo implementado en HU-DOC-004: el worker consume la cola de generación directamente y publica los dos eventos de integración anteriores.
 
 ## Envelope (estándar)
 

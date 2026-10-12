@@ -3,8 +3,7 @@
 > Estado: 🟡 En progreso | Última actualización: 2026-08-01
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-> **Diseño previsto — no implementado.** Contrato a nivel de protocolo (REST/JSON). Sin
-> lenguaje ni framework elegido; válido para cualquier backend.
+> **Parcialmente implementado** en `design-software-document-service` (HU-DOC-002 y HU-DOC-003): `POST /documents/generate`, `GET /documents`, `GET /documents/{id}`, versiones y `download-url`. Siguen como diseño previsto `POST /documents`, `PATCH` y `DELETE` de documentos, la carga de versiones y `/reports/document-status`. Contrato a nivel de protocolo (REST/JSON).
 
 ## Tipo de componente
 

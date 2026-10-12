@@ -7,7 +7,7 @@ dependencias_entrada: 09-microservices/event-catalog.md, la BD de document-servi
 consumidores_siguientes: audit-service (pendiente reconciliación de eventos producidos, ver halts)
 tldr: Worker que gestiona el ciclo de vida del documento (DRAFT → EMITIDO → ARCHIVADO) según renders completados y política de retención.
 decisiones_clave: Borrado lógico (soft delete); transición hacia un estado ya alcanzado es no-op; DLQ document-lifecycle.dlq.
-halts_registrados: document.render.completed, document.lifecycle.tick, document.status.changed y document.archived no están en event-catalog.md (pendiente reconciliación)
+halts_registrados: document.render.completed y document.lifecycle.tick existen en event-catalog.md como eventos internos, y document.status.changed y document.archived como eventos publicados; pendiente reconciliar los estados de este contrato (DRAFT, EMITIDO, ARCHIVADO) con los del modelo de datos
 -->
 
 # Contrato — document-lifecycle-worker

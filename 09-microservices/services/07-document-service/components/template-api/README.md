@@ -3,8 +3,7 @@
 > Estado: 🟡 En progreso | Última actualización: 2026-08-01
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-> **Diseño previsto — no implementado.** Contrato a nivel de protocolo (REST/JSON). Sin
-> lenguaje ni framework elegido; válido para cualquier backend.
+> **Implementado** en `design-software-document-service` (HU-DOC-001). Contrato a nivel de protocolo (REST/JSON).
 
 ## Tipo de componente
 

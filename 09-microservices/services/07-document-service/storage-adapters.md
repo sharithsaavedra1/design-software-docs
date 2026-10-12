@@ -3,8 +3,8 @@
 > Estado: 🟡 En progreso | Última actualización: 2026-08-01
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-> **Diseño previsto — no implementado.** El adaptador se describe como **contrato de
-> operaciones** (interfaz), no como código de ningún lenguaje. Es válido para cualquier
+> **Parcialmente implementado** en `design-software-document-service`: las operaciones `put` (pdf-renderer-worker) y `signed_url` (document-api) ya existen; `get` y `delete` siguen
+> como diseño previsto. El adaptador se describe como **contrato de operaciones** (interfaz), no como código de ningún lenguaje. Es válido para cualquier
 > backend que hable el protocolo S3.
 
 ## Estrategia
