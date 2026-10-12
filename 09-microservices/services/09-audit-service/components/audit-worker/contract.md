@@ -17,10 +17,11 @@ halts_registrados: ninguno — al consumir por wildcard, el worker no depende de
 
 > **Fuente de verdad:** el inventario de eventos lo gobierna [`event-catalog.md`](../../../../event-catalog.md) y el envelope estándar [`_template/service/events.md`](../../../../_template/service/events.md). Ante discrepancia, esos documentos prevalecen sobre este contrato.
 
-> **Diseño previsto — no implementado.** Contrato de mensajería, agnóstico de lenguaje.
+> **Implementación base — HU-AUD-002.** Contrato de mensajería para el worker Go/RabbitMQ.
 
 ## Eventos consumidos
-Fan-out a **todos** los topics del broker (`#` / wildcard) — no hay una tabla cerrada de eventos: el worker no filtra por origen, audita todo evento publicado por cualquier servicio (ver inventario completo en [`event-catalog.md`](../../../../event-catalog.md)).
+
+Fan-out a **todos** los eventos mediante el topic exchange global durable `audit-events`. La cola durable propia se nombra con `BROKER_CONSUMER_GROUP` y se enlaza con routing key `#`; por tanto no hay una lista cerrada de exchanges ni `event_type` en código. Los productores enlazan sus eventos al exchange global como responsabilidad de infraestructura.
 
 ## Eventos producidos
 Ninguno. El `audit-worker` es un **consumidor terminal** (sink): solo consume y persiste, no publica eventos (así lo confirma la nota del [catálogo](../../../../event-catalog.md#audit-service)).
@@ -49,8 +50,19 @@ Inserta un `audit_record` extrayendo `event_type`, `source_service`, `actor_id`,
 
 ## Reglas
 - **Append-only:** solo `INSERT`. Sin `UPDATE`/`DELETE` ni endpoint de escritura externo.
-- **Idempotencia:** `event_id` UNIQUE; conflicto → se ignora (no error).
+- **Idempotencia:** la transacción inserta primero `event_id` en `audit.audit_event_seen` con `ON CONFLICT DO NOTHING`; si no gana esa reserva, no inserta `audit_record` y confirma la entrega como duplicada.
 - **Sin FKs:** el registro es autónomo (sink desacoplado entre servicios).
+- **Ack:** el ack AMQP se envía solo después del commit o de confirmar que se trata de un duplicado.
+- **Privacidad:** `payload` se persiste como JSONB opaco, pero nunca se escribe en logs; los headers se usan para trazabilidad y no se añaden como columnas de `audit_record`.
 
 ## Política de reintentos
-Fallo de persistencia → reintento con backoff; agotado → **DLQ** `audit.dlq` (no se pierde el evento).
+
+La cola principal dead-letterea fallos transitorios hacia `audit.retry`; la cola de retry aplica TTL (`WORKER_RETRY_DELAY_MS`) y devuelve el mensaje al exchange global. Se cuentan las muertes de cola y, al alcanzar `WORKER_MAX_RETRIES`, el worker publica el cuerpo y headers originales en la cola durable **`audit.dlq`** con una causa técnica saneada. Los envelopes inválidos se envían directamente a esa DLQ. Ninguna de estas rutas confirma el mensaje antes de que el broker acepte su destino.
+
+| Variable | Significado | Valor por defecto no secreto |
+| --- | --- | --- |
+| `AUDIT_EVENTS_EXCHANGE` | Exchange topic global de auditoría | `audit-events` |
+| `BROKER_CONSUMER_GROUP` | Nombre de la cola durable compartida por réplicas | obligatorio |
+| `BROKER_TOPIC_PATTERN` | Binding AMQP | `#` (obligatorio) |
+| `WORKER_MAX_RETRIES` | Reintentos transitorios antes de DLQ | `3` |
+| `WORKER_RETRY_DELAY_MS` | Backoff TTL de retry | `5000` |
