@@ -41,16 +41,17 @@ Documento generado en el sistema. Los binarios NO se almacenan aquí.
 | `template_id` | UUID | Sí | FK → document_template (null si doc libre) |
 | `title` | VARCHAR(300) | No | Nombre del archivo |
 | `domain` | VARCHAR(50) | No | Contexto: `SCHEDULE`, `FICHA`, `CERTIFICATE`, `ACTOR`, `REPORT` |
-| `owner_service` | VARCHAR(50) | No | Servicio solicitante |
+| `owner_service` | VARCHAR(100) | No | Servicio solicitante |
 | `owner_entity_id` | UUID | No | ID de la entidad de negocio que lo originó |
-| `storage_key` | TEXT | No | Ruta en object storage (S3/MinIO) |
-| `mime_type` | VARCHAR(100) | No | `application/pdf`, etc. |
+| `storage_key` | TEXT | Sí | Ruta en object storage (S3/MinIO). Null mientras `status` sea `GENERATING` o `GENERATION_FAILED` |
+| `mime_type` | VARCHAR(100) | Sí | `application/pdf`, etc. Null mientras `status` sea `GENERATING` o `GENERATION_FAILED` |
 | `size_bytes` | BIGINT | Sí | |
 | `status` | VARCHAR(20) | No | GENERATING / AVAILABLE / ARCHIVED / EXPIRED / GENERATION_FAILED |
 | `row_version` | INT | No | Bloqueo optimista (DEFAULT 0) |
 | `created_by` | UUID | No | ID de usuario (iam-service) |
 | `created_at` | TIMESTAMPTZ | No | |
 | `updated_at` | TIMESTAMPTZ NOT NULL | No | |
+| `training_center_id` | UUID | Sí | Centro de formación del solicitante (claim `training_center_id` del JWT, que `POST /documents/generate` guarda). Define el acceso con scope `TRAINING_CENTER`; null si el token no lo trae (solo lo ve el scope `GLOBAL`). Referencia lógica cross-service, sin FK |
 
 **Invariante**: Los archivos binarios **nunca** se almacenan en `document_db`. Solo `storage_key` referencia el archivo en object storage.
 
@@ -59,6 +60,8 @@ Documento generado en el sistema. Los binarios NO se almacenan aquí.
 **Valores permitidos (`status`):** GENERATING, AVAILABLE, ARCHIVED, EXPIRED, GENERATION_FAILED. Enforced via CHECK constraint: CHECK (status IN ('GENERATING','AVAILABLE','ARCHIVED','EXPIRED','GENERATION_FAILED')). El estado `GENERATION_FAILED` es coherente con el manejo de fallos del pdf-renderer-worker.
 
 **CHECK (`size_bytes`):** CHECK (size_bytes >= 0).
+
+**CHECK (`storage_key` / `mime_type`):** el documento se persiste en `GENERATING` antes de que exista el archivo, por lo que ambos campos son nullable. `ck_document_storage_when_available`: CHECK (status IN ('GENERATING','GENERATION_FAILED') OR (storage_key IS NOT NULL AND mime_type IS NOT NULL)). Changeset `hu-doc-002-document-generating-nullable-storage-972`.
 
 **Relación `storage_key` ↔ `document_version`:** `document.storage_key` apunta siempre a la versión vigente; `document_version` guarda el historial. Es una desnormalización intencional para evitar un JOIN al leer la versión actual (ver decisions.md).
 
@@ -87,8 +90,14 @@ Historial de versiones de un documento.
 |-------|--------|------|--------|
 | `document_template` | `code` | UNIQUE | Lookup por código de plantilla |
 | `document` | `(owner_service, owner_entity_id)` | B-Tree | Documentos por entidad de negocio |
-| `document` | `status` | B-Tree | Filtro por estado |
+| `document` | `(domain, status)` | B-Tree | Filtros por dominio y estado (`ix_document_domain_status`) |
+| `document` | `training_center_id` | B-Tree | Acceso por scope `TRAINING_CENTER` (`ix_document_training_center`) |
 | `document_version` | `(document_id, version_number)` | UNIQUE | Versión única por documento |
+
+## Cambios por HU-DOC-002 y HU-DOC-003 (2026-10)
+
+- `hu-doc-002-document-generating-nullable-storage-972`: `storage_key` y `mime_type` nullable con el CHECK `ck_document_storage_when_available`.
+- `hu-doc-003-document-access-and-filters-973`: columna `document.training_center_id` e índices `ix_document_owner` (`owner_service`, `owner_entity_id`), `ix_document_training_center` y `ix_document_domain_status`.
 
 ## Remediación de congruencia — R3 (2026-08-06)
 
