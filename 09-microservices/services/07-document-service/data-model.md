@@ -78,6 +78,7 @@ Historial de versiones de un documento.
 | `created_by` | UUID | No | ID de usuario (iam-service) |
 | `created_at` | TIMESTAMPTZ | No | |
 | `notes` | TEXT | Sí | Observaciones sobre esta versión |
+| `correlation_id` | VARCHAR(100) | Sí | `correlation_id` del mensaje de generación que creó la versión; idempotencia del `pdf-renderer-worker` |
 
 ## Notas
 
@@ -93,11 +94,13 @@ Historial de versiones de un documento.
 | `document` | `(domain, status)` | B-Tree | Filtros por dominio y estado (`ix_document_domain_status`) |
 | `document` | `training_center_id` | B-Tree | Acceso por scope `TRAINING_CENTER` (`ix_document_training_center`) |
 | `document_version` | `(document_id, version_number)` | UNIQUE | Versión única por documento |
+| `document_version` | `(document_id, correlation_id)` WHERE `correlation_id IS NOT NULL` | UNIQUE parcial | Idempotencia del worker (`uq_document_version_correlation`) |
 
-## Cambios por HU-DOC-002 y HU-DOC-003 (2026-10)
+## Cambios por HU-DOC-002, HU-DOC-003 y HU-DOC-004 (2026-10)
 
 - `hu-doc-002-document-generating-nullable-storage-972`: `storage_key` y `mime_type` nullable con el CHECK `ck_document_storage_when_available`.
 - `hu-doc-003-document-access-and-filters-973`: columna `document.training_center_id` e índices `ix_document_owner` (`owner_service`, `owner_entity_id`), `ix_document_training_center` y `ix_document_domain_status`.
+- `hu-doc-004-version-idempotency-974`: columna `document_version.correlation_id` e índice único parcial `uq_document_version_correlation`.
 
 ## Remediación de congruencia — R3 (2026-08-06)
 

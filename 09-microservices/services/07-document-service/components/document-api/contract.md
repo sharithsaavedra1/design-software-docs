@@ -21,7 +21,7 @@ halts_registrados: ninguno
 > `document.yaml`**. Convenciones transversales en
 > [07-api/guidelines.md](../../../../../07-api/guidelines.md).
 
-> **Diseño previsto — no implementado.** Contrato a nivel de protocolo (REST/JSON). Sin
+> **Parcialmente implementado** en `design-software-document-service` (HU-DOC-002 y HU-DOC-003): `POST /documents/generate`, `GET /documents`, `GET /documents/{id}`, versiones y `download-url`. Siguen como diseño previsto `POST /documents`, `PATCH` y `DELETE` de documentos, la carga de versiones y `/reports/document-status`. Contrato a nivel de protocolo (REST/JSON). Sin
 > código de ningún lenguaje. Las entidades y campos son los reales de [data-model.md](../../data-model.md).
 
 ## Autenticación
