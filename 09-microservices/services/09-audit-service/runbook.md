@@ -1,29 +1,20 @@
 # Runbook — audit-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-11
 
 ---
 
 ## Healthcheck
 
-El `audit-service` no tiene endpoint HTTP. Es un consumidor puro de broker; su estado de salud se determina exclusivamente por el lag del consumer group sobre los topics `*-events`.
+El `audit-worker` es un consumidor RabbitMQ; su estado se determina por la profundidad de su cola durable, la tasa de ack y el crecimiento de `audit.dlq`. La API de consulta de solo lectura es un componente independiente.
 
 | Metrica | Herramienta | Umbral saludable | Umbral de alerta |
 |---------|-------------|-----------------|-----------------|
-| Consumer lag total (suma de todos los topics) | `kafka-consumer-groups` / RabbitMQ management | < 100 mensajes | > 500 mensajes |
-| Tiempo desde el ultimo commit de offset | Logs del worker | < 60 s | > 5 min |
+| Profundidad de cola durable | RabbitMQ management | < 100 mensajes | > 500 mensajes |
+| Tiempo desde el último ack | Logs/métricas del worker | < 60 s | > 5 min |
 | Tasa de INSERT exitosos en `audit_record` | Metricas de BD | > 0 inserts/min (si hay trafico) | 0 inserts por > 5 min con cola no vacia |
 
-**Verificacion de lag (Kafka):**
-
-```bash
-kafka-consumer-groups.sh \
-  --bootstrap-server <broker>:9092 \
-  --group audit-worker \
-  --describe
-```
-
-La salida muestra el lag por particion. La suma de la columna `LAG` es el indicador principal. Si el `audit-worker` esta sano, este numero debe mantenerse cercano a cero o decrecer.
+**Verificación de cola (RabbitMQ):** inspeccionar la cola cuyo nombre es `BROKER_CONSUMER_GROUP` y `audit.dlq` en RabbitMQ Management. La profundidad debe mantenerse cercana a cero o decrecer cuando hay consumidor activo.
 
 **Verificacion alternativa via BD:**
 
@@ -50,8 +41,11 @@ El `audit-worker` es el unico componente desplegable del servicio. Una variable 
 |----------|-------------|---------|
 | `DATABASE_URL` | Cadena de conexion a `audit_db` | `postgresql://user:pass@host:5432/audit_db` |
 | `MESSAGE_BROKER_URL` | URL del broker de mensajes | `amqp://user:pass@broker:5672` |
-| `BROKER_TOPIC_PATTERN` | Patron wildcard de suscripcion | `*-events` |
-| `BROKER_CONSUMER_GROUP` | Nombre del consumer group | `audit-worker` |
+| `AUDIT_EVENTS_EXCHANGE` | Exchange topic global | `audit-events` |
+| `BROKER_TOPIC_PATTERN` | Binding wildcard AMQP | `#` |
+| `BROKER_CONSUMER_GROUP` | Nombre de la cola durable compartida | `audit-worker` |
+| `WORKER_MAX_RETRIES` | Reintentos antes de enviar a DLQ | `3` |
+| `WORKER_RETRY_DELAY_MS` | TTL/backoff de `audit.retry` en ms | `5000` |
 | `LOG_LEVEL` | Nivel de log (`debug`, `info`, `warn`, `error`) | `info` |
 | `SERVICE_ENV` | Entorno de ejecucion | `production` |
 | `DB_POOL_MAX_CONNECTIONS` | Tamano maximo del pool de conexiones | `10` |
