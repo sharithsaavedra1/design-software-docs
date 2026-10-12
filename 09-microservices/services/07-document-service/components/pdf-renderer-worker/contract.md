@@ -80,6 +80,10 @@ Topic `document-events` (exchange de tipo topic; la routing key es el tipo del e
 - Fallo definitivo: un documento que esperaba su primer archivo queda `GENERATION_FAILED` (una regeneración fallida conserva la versión vigente), el mensaje original se envía a la **DLQ** `pdf-renderer.dlq` con la cabecera `x-failure-reason` y no se publica `document.document.generated`.
 - Sin reintento (DLQ directa): mensaje inválido, documento inexistente o archivado/expirado, plantilla inexistente o inactiva, `output_type` distinto de PDF y plantilla que no produce contenido.
 
+## Seguridad del render
+
+La plantilla no puede cargar nada fuera del propio documento: el motor de PDF aplica una política estricta de recursos (sin acceso a la red para evitar SSRF, sin lectura de archivos locales y con límites de tamaño y de tiempo). Solo se admiten recursos incrustados (`data:`); cualquier otro se omite del PDF y se registra en los logs.
+
 ## Observabilidad
 
 Métricas Prometheus en `:METRICS_PORT/metrics`: `document_render_messages_total{outcome}` (`success`, `duplicate`, `failed`), `document_render_duration_seconds`, `document_render_retries_total`, `document_render_dead_lettered_total` y `document_generation_queue_depth` (backlog). Logs JSON con `document_id`, `correlation_id`, `outcome` y `reason`.
