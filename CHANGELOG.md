@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed — pdf-renderer-worker (HU-DOC-004)
+
+- `09-microservices/services/07-document-service/components/pdf-renderer-worker/contract.md` y `README.md`: alineados con la implementación. El worker consume `document-generation-queue`, publica `document.document.generated` y `document.version.created` en el topic `document-events`, es idempotente por `correlation_id` y aplica reintentos con backoff y DLQ `pdf-renderer.dlq`. Los eventos internos `document.render.*` del catálogo no se usan en esta implementación
+- `events.md` del servicio: envelope estándar del catálogo (`event_id`, `event_type`, `payload`) en lugar del formato CloudEvents, payloads con identificadores UUID y dominios válidos, mensaje de la cola de generación y política de reintentos real
+- `data-model.md`: `document_version.correlation_id` e índice único parcial (changeset `hu-doc-004-version-idempotency-974`)
+- Pendiente de reconciliación: `document-lifecycle-worker/contract.md` conserva estados (`DRAFT`, `EMITIDO`) que ya no existen
+
 ### Fixed — Contrato OpenAPI de document-service (HU-DOC-002 / HU-DOC-003)
 
 - `07-api/contracts/openapi/document.yaml`: restaurado como "Document Service API" (`/documents`, `/documents/generate`, `/documents/{id}`, `/download-url`, `/versions`, `/reports/document-status`). El commit `0ac94c6` lo había sobrescrito con el contenido de la API de plantillas, que sigue en `template.yaml`

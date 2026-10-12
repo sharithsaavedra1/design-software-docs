@@ -18,18 +18,20 @@ Se publica cuando un documento ha sido generado exitosamente y su binario esta d
 
 ```json
 {
-  "document_id": "doc_01HXYZ123456",
-  "template_code": "schedule-pdf-v2",
-  "domain": "academic",
-  "owner_entity_id": "student_00987",
-  "owner_service": "academic-service",
-  "storage_key": "documents/academic/2026/06/doc_01HXYZ123456.pdf",
+  "document_id": "8f3c0000-0000-0000-0000-000000000001",
+  "template_code": "SCHEDULE_CERTIFICATE",
+  "domain": "SCHEDULE",
+  "owner_entity_id": "5c1a0000-0000-0000-0000-000000000002",
+  "owner_service": "scheduling-service",
+  "storage_key": "SCHEDULE/2026/06/5c1a0000-0000-0000-0000-000000000002/8f3c0000-0000-0000-0000-000000000001-v1.pdf",
   "mime_type": "application/pdf",
   "size_bytes": 204800,
   "generated_by": "pdf-renderer-worker",
   "generated_at": "2026-06-20T14:32:00Z"
 }
 ```
+
+Se publica solo con la primera version del documento.
 
 | Campo | Tipo | Descripcion |
 |---|---|---|
@@ -56,14 +58,16 @@ Se publica cuando se crea una nueva version de un documento existente (actualiza
 
 ```json
 {
-  "version_id": "ver_01HABCDEF789",
-  "document_id": "doc_01HXYZ123456",
+  "version_id": "0a1b2c3d-0000-0000-0000-00000000000a",
+  "document_id": "8f3c0000-0000-0000-0000-000000000001",
   "version_number": 2,
-  "storage_key": "documents/academic/2026/06/doc_01HXYZ123456_v2.pdf",
+  "storage_key": "SCHEDULE/2026/06/5c1a0000-0000-0000-0000-000000000002/8f3c0000-0000-0000-0000-000000000001-v2.pdf",
   "created_by": "pdf-renderer-worker",
   "created_at": "2026-06-20T15:10:00Z"
 }
 ```
+
+Se publica con cada version, incluida la primera.
 
 | Campo | Tipo | Descripcion |
 |---|---|---|
@@ -79,6 +83,18 @@ Se publica cuando se crea una nueva version de un documento existente (actualiza
 ---
 
 ## Eventos consumidos
+
+---
+
+### `document-generation-queue` (cola interna)
+
+**Origen:** `POST /documents/generate` de document-api.
+
+```json
+{ "document_id": "uuid", "template_code": "SCHEDULE_CERTIFICATE", "data_payload": {}, "correlation_id": "corr-5b0f6f0e" }
+```
+
+El `pdf-renderer-worker` consume este mensaje, renderiza el PDF, lo sube a MinIO/S3, registra el `document_version`, deja el documento en `AVAILABLE` y publica `document.document.generated` y `document.version.created`. Un mensaje para un documento ya `AVAILABLE` crea una nueva version y solo publica `document.version.created`. La idempotencia es por `correlation_id`.
 
 ---
 
@@ -124,23 +140,23 @@ Cuando se abre una ficha de matricula para un estudiante, `document-service` gen
 
 ## Formato de envelope
 
-Todos los eventos siguen el envelope estandar de la plataforma:
+Todos los eventos siguen el envelope estandar de la plataforma ([`_template/service/events.md`](../../_template/service/events.md) y [`event-catalog.md`](../../event-catalog.md)):
 
 ```json
 {
-  "specversion": "1.0",
-  "type": "document.document.generated",
-  "source": "document-service",
-  "id": "evt_01HXYZ000001",
-  "time": "2026-06-20T14:32:00Z",
-  "datacontenttype": "application/json",
-  "data": {
-    "document_id": "doc_01HXYZ123456",
-    "template_code": "schedule-pdf-v2",
-    "domain": "academic",
-    "owner_entity_id": "student_00987",
-    "owner_service": "academic-service",
-    "storage_key": "documents/academic/2026/06/doc_01HXYZ123456.pdf",
+  "event_id": "5b0f6f0e-7c0a-5d4e-9a41-0f0e6a1b2c3d",
+  "event_type": "document.document.generated",
+  "version": "1.0",
+  "timestamp": "2026-06-20T14:32:00Z",
+  "source_service": "document-service",
+  "correlation_id": "corr-5b0f6f0e",
+  "payload": {
+    "document_id": "8f3c0000-0000-0000-0000-000000000001",
+    "template_code": "SCHEDULE_CERTIFICATE",
+    "domain": "SCHEDULE",
+    "owner_entity_id": "5c1a0000-0000-0000-0000-000000000002",
+    "owner_service": "scheduling-service",
+    "storage_key": "SCHEDULE/2026/06/5c1a0000-0000-0000-0000-000000000002/8f3c0000-0000-0000-0000-000000000001-v1.pdf",
     "mime_type": "application/pdf",
     "size_bytes": 204800,
     "generated_by": "pdf-renderer-worker",
@@ -151,51 +167,53 @@ Todos los eventos siguen el envelope estandar de la plataforma:
 
 | Campo | Descripcion |
 |---|---|
-| `specversion` | Version del estandar CloudEvents (siempre `1.0`) |
-| `type` | Nombre completo del evento |
-| `source` | Servicio emisor |
-| `id` | Identificador unico del evento (ULID) |
-| `time` | Timestamp de emision en ISO 8601 UTC |
-| `datacontenttype` | Siempre `application/json` |
-| `data` | Payload especifico del evento |
+| `event_id` | UUID determinista (derivado del `id` de la version y del tipo): un evento republicado conserva su identidad; los consumidores deduplican por `event_id` |
+| `event_type` | Nombre completo del evento; es la routing key del topic `document-events` |
+| `version` | Version del envelope (`1.0`) |
+| `timestamp` | Timestamp de emision en ISO 8601 UTC |
+| `source_service` | Servicio emisor (`document-service`) |
+| `correlation_id` | Se propaga desde el `X-Correlation-Id` de `POST /documents/generate` |
+| `payload` | Payload especifico del evento |
 
 ---
 
 ## Politica de reintentos
 
-La generacion de PDFs puede fallar por errores transitorios en el renderizador, indisponibilidad de MinIO/S3, o datos de plantilla malformados. La politica aplica al `pdf-renderer-worker`.
+La generacion de PDFs puede fallar por errores transitorios en el renderizador, indisponibilidad de MinIO/S3 o del broker. La politica aplica al `pdf-renderer-worker` (ver [contrato](./components/pdf-renderer-worker/contract.md)).
 
 | Parametro | Valor |
 |---|---|
-| Maximo de intentos | 3 |
-| Delay entre intentos | 60 segundos (fijo) |
-| Comportamiento en fallo definitivo | `status=GENERATION_FAILED` + alerta |
+| Reintentos | `RENDER_MAX_RETRIES` (3 por defecto) |
+| Espera entre intentos | Exponencial desde `RENDER_BACKOFF_SECONDS` (1 s por defecto, tope 30 s) |
+| Comportamiento en fallo definitivo | `status=GENERATION_FAILED` + mensaje a la DLQ `pdf-renderer.dlq` |
 
 **Flujo de reintentos:**
 
 ```
-Intento 1 → falla → esperar 60s
-Intento 2 → falla → esperar 60s
-Intento 3 → falla → marcar documento status=GENERATION_FAILED
-                   → emitir alerta a canal de operaciones
+Intento 1 → falla → esperar 1s
+Intento 2 → falla → esperar 2s
+Intento 3 → falla → esperar 4s
+Intento 4 → falla → marcar documento status=GENERATION_FAILED
+                   → enviar el mensaje original a pdf-renderer.dlq (cabecera x-failure-reason)
                    → NO se publica document.document.generated
 ```
 
 **Errores que activan reintento:**
-- Timeout de renderizado (umbral: 30s por pagina, max 300s total)
+- Falla del motor de PDF
 - Error de conexion a MinIO/S3 al subir el binario
-- Error 5xx del motor de renderizado interno
+- Broker o base de datos no disponibles
 
-**Errores que NO activan reintento (fallo inmediato):**
-- Plantilla no encontrada (`template_code` invalido)
-- Datos de entrada con schema invalido
-- Error 4xx del motor de renderizado interno
+**Errores que NO activan reintento (DLQ inmediata):**
+- Mensaje de generacion invalido
+- Documento inexistente, archivado o expirado
+- Plantilla no encontrada o inactiva (`template_code` invalido)
+- `output_type` distinto de PDF
+- Plantilla que no produce contenido (sintaxis Handlebars invalida)
 
 **Acciones post-fallo definitivo:**
-- El campo `status` del registro de documento se actualiza a `GENERATION_FAILED`.
-- Se registra el motivo del fallo en el campo `failure_reason`.
-- Se envia una alerta al canal de monitoreo de operaciones (configurado via variable de entorno `ALERT_WEBHOOK_URL`).
-- El evento que origino la generacion queda en estado `dead-letter` para revision manual.
+- El campo `status` del registro de documento se actualiza a `GENERATION_FAILED` (una regeneracion fallida conserva la version vigente).
+- El motivo del fallo viaja en la cabecera `x-failure-reason` del mensaje en la DLQ y en los logs del worker.
+- El mensaje que origino la generacion queda en la DLQ para revision manual.
 
 ---
 
