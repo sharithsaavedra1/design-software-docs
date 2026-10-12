@@ -217,7 +217,9 @@ Evento entrante (p.ej. scheduling.schedule.published)
         |
         v
 Mensaje encolado en `document-generation-queue`
-        { document_id, template_code, data_payload }
+        { document_id, template_code, data_payload, correlation_id }
+        (correlation_id: se propaga desde el header X-Correlation-Id de POST /documents/generate;
+         si el cliente no lo envía, document-api genera uno)
         |
         v
 [pdf-renderer-worker] toma el mensaje de la cola

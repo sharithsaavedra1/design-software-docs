@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed — Contrato OpenAPI de document-service (HU-DOC-002 / HU-DOC-003)
+
+- `07-api/contracts/openapi/document.yaml`: restaurado como "Document Service API" (`/documents`, `/documents/generate`, `/documents/{id}`, `/download-url`, `/versions`, `/reports/document-status`). El commit `0ac94c6` lo había sobrescrito con el contenido de la API de plantillas, que sigue en `template.yaml`
+- Alineado con la implementación: header `X-Correlation-Id`, `404 TEMPLATE_NOT_FOUND` y `503` en `generate`, `409 DOCUMENT_NOT_AVAILABLE` y `503 STORAGE_UNAVAILABLE` en `download-url`, `sort` permitido en el listado, `mime_type` nullable mientras el documento no tiene archivo, `owner_service` hasta 100 caracteres y acceso por scope (`GLOBAL` / `TRAINING_CENTER`)
+- `09-microservices/services/07-document-service`: `data-model.md` (columna `training_center_id`, `storage_key` y `mime_type` nullable, índices), `events.md` (`correlation_id` en el mensaje de `document-generation-queue`) y `components/document-api/contract.md`
+
 ### Added — Estándar transversal de estados parametrizables y auditoría (ADR-004)
 
 **Estándar autoritativo:**

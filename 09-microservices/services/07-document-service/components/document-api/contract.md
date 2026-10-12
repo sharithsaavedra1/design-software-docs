@@ -36,6 +36,12 @@ La autorización se resuelve por scope/rol del token. Roles referenciados: `coor
 `admin`, `sistema` (servicio a servicio). `*` = cualquier usuario autenticado con acceso a la
 entidad propietaria.
 
+El acceso a los datos se resuelve por el scope de los pares `FEATURE:SCOPE` del token: `GLOBAL` ve todos
+los documentos y `TRAINING_CENTER` solo los de su centro de formación (claim `training_center_id`, que
+`POST /documents/generate` guarda en `document.training_center_id`). Un documento fuera del scope responde
+`404`, igual que uno inexistente; un feature o scope que no concede acceso a documentos responde `403`.
+Features: `DOC_VIEW` (consulta), `DOC_CREATE` (generar/registrar) y `DOC_DOWNLOAD` (URL de descarga).
+
 ## Base URL
 
 `/api/v1/documents`
@@ -80,6 +86,11 @@ siempre vía `GET /documents/{id}/download-url`.
 
 - `domain`: `SCHEDULE`, `FICHA`, `CERTIFICATE`, `ACTOR`, `REPORT`.
 - `status`: `GENERATING`, `AVAILABLE`, `ARCHIVED`, `EXPIRED`, `GENERATION_FAILED`.
+
+`mime_type` y el archivo asociado no existen mientras `status` sea `GENERATING` o `GENERATION_FAILED`: `mime_type`
+es `null` en esos estados. El listado `GET /documents` admite `sort=<campo>:<asc|desc>` con `created_at`,
+`updated_at`, `title`, `status`, `domain` y `owner_service` (por defecto `created_at:desc`; otro valor responde
+`400 INVALID_SORT`). `GET /documents/{id}/versions` retorna un arreglo ordenado por `version_number` descendente.
 
 ## Carga de nueva versión — `POST /documents/{id}/versions`
 
@@ -127,6 +138,15 @@ El endpoint crea el registro `document` con `status = GENERATING`, encola la sol
 hasta que `status = AVAILABLE` (o `GENERATION_FAILED`). La generación es **siempre asíncrona**
 (decisión 02 de [decisions.md](../../decisions.md)).
 
+- `data` es opcional (por defecto `{}`).
+- Si no existe una plantilla **activa** para `template_code` responde `404` con code `TEMPLATE_NOT_FOUND` y no
+  se encola ningún mensaje.
+- Header `X-Correlation-Id` (opcional): se propaga como `correlation_id` al mensaje de `document-generation-queue`
+  (`{ document_id, template_code, data_payload, correlation_id }`) y se devuelve en la respuesta. Si no llega,
+  el servicio genera uno.
+- Si el broker no acepta el mensaje responde `503` con code `GENERATION_QUEUE_UNAVAILABLE` y el documento queda
+  en `GENERATION_FAILED`.
+
 ## Descarga — `GET /documents/{id}/download-url`
 
 **Response — `200 OK`:**
@@ -142,7 +162,8 @@ hasta que `status = AVAILABLE` (o `GENERATION_FAILED`). La generación es **siem
 La URL firmada se genera solo tras validar el scope del usuario. TTL por defecto **300 s**
 (5 min, [ADR-003](../../../../../05-architecture/decisions/records/ADR-003-object-storage.md)).
 Nunca se expone `storage_key` al cliente. Requiere `status = AVAILABLE`; en otro caso se
-responde `409 Conflict`.
+responde `409 Conflict` con code `DOCUMENT_NOT_AVAILABLE`. Si el object storage no permite firmar la URL
+responde `503` con code `STORAGE_UNAVAILABLE`.
 
 ## Reportes (dominio propio)
 
