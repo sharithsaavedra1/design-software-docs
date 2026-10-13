@@ -853,6 +853,58 @@ paths:
               schema:
                 $ref: '_shared.yaml#/components/schemas/Error'
 
+  /internal/learners/by-user/{user_id}/active-ficha:
+    servers:
+      - url: /
+    get:
+      operationId: getActiveFichaByLearnerUser
+      tags: [learners]
+      summary: Consulta la ficha activa de un aprendiz por user_id de IAM.
+      description: >-
+        Endpoint interno servicio-a-servicio consumido exclusivamente por
+        iam-service para resolver la ficha activa de un aprendiz sin acceder
+        directamente a la base de datos de actors-service. El flujo posterior
+        hacia scheduling-service usa el JWT emitido por IAM y su claim
+        ficha_id; scheduling-service no consume este endpoint directamente.
+        La operación es de solo lectura y debe protegerse exclusivamente con
+        mTLS entre servicios; no usa Bearer JWT ni features RBAC.
+      security:
+        - mutualTLS: []
+      x-internal: true
+      x-authentication: mtls
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: Identificador del usuario en iam-service.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aprendiz activo con exactamente una ficha activa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveFichaByLearnerUser'
+              examples:
+                active_ficha:
+                  value:
+                    learner_id: 00000000-0000-4000-8000-000000000101
+                    ficha_id: 00000000-0000-4000-8000-000000000201
+        '204':
+          description: Aprendiz activo sin ficha activa.
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '500':
+          description: Error tecnico controlado; no debe interpretarse como ausencia de ficha.
+          content:
+            application/json:
+              schema:
+                $ref: '_shared.yaml#/components/schemas/Error'
+
   # ---------------------------------------------------------------- tracking (own domain)
   /productive-stages:
     get:
@@ -1938,12 +1990,28 @@ components:
           minimum: 0
           description: Numero de aprendices activos con inscripcion vigente en la ficha.
 
+    ActiveFichaByLearnerUser:
+      type: object
+      required: [learner_id, ficha_id]
+      properties:
+        learner_id:
+          type: string
+          format: uuid
+          description: Identificador del perfil de aprendiz en actors-service.
+        ficha_id:
+          type: string
+          format: uuid
+          description: Identificador de la ficha activa del aprendiz.
+
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
+    mutualTLS:
+      type: mutualTLS
+      description: Autenticacion mTLS obligatoria para endpoints internos servicio-a-servicio.
 
 
 

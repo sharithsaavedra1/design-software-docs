@@ -68,6 +68,7 @@ Cliente                  API Gateway              iam-service
 | `actor_type` | `USER` / `INSTRUCTOR` / `LEARNER` — tipo de actor en el sistema |
 | `actor_id` | UUID del perfil en actors-service (null si actor_type = USER) |
 | `training_center_id` | UUID del centro; null si el usuario tiene alcance global |
+| `ficha_id` | UUID de la ficha activa del aprendiz. Solo se emite cuando `actor_type=LEARNER` y existe una ficha activa; no se emite para otros perfiles ni se conserva desde un token anterior. |
 | `roles` | Lista de nombres de rol activos del usuario |
 | `features` | Lista pre-calculada de `FEATURE_CODE:SCOPE_TYPE` |
 
@@ -85,6 +86,13 @@ login y en cada refresh.
 **Claims adicionales no listados en la tabla** (uso interno de iam-service, no forman parte del
 contrato de autorización que consumen los servicios downstream): `sid` (session id, para que
 `/auth/logout` identifique la sesión a revocar), `email`, `name`.
+
+`ficha_id` es un claim contractual de integración entre IAM y los consumidores autorizados. IAM
+lo obtiene de Actors mediante el endpoint interno protegido por mTLS y lo incluye únicamente en
+JWT emitidos para perfiles `LEARNER`. El valor siempre representa el UUID de la ficha activa
+resuelta para el usuario; ante ausencia de ficha, perfil inexistente o fallo controlado de Actors,
+el login puede continuar, pero el JWT no contiene `ficha_id`. Scheduling consume este claim del
+JWT y no consulta directamente el endpoint interno de Actors.
 
 ---
 

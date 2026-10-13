@@ -6,6 +6,20 @@ estado: accepted
 dependencias_entrada: 09-microservices/services/01-iam-service/data-model.md, 07-api/guidelines.md, 07-api/contracts/openapi/_shared.yaml
 consumidores_siguientes: backend iam-service, frontend, pruebas de contrato
 tldr: Autenticación JWT + RBAC (users/roles/features/scope-overrides/sessions) con paginación y reporte login-audit por cursor. La fuente de verdad es openapi.yaml.
+
+## Claim `ficha_id` para aprendices
+
+Cuando IAM emite un JWT para un usuario cuyo perfil es exclusivamente `LEARNER`,
+consulta a Actors mediante el endpoint interno protegido por mTLS
+`GET /internal/learners/by-user/{user_id}/active-ficha`. Si existe una ficha
+activa válida, IAM incluye `ficha_id` como un UUID en el JWT. El claim representa
+la ficha activa actual del aprendiz y no debe conservarse de un token anterior.
+
+Para perfiles distintos de `LEARNER`, IAM no consulta Actors y no emite
+`ficha_id`. Si Actors responde sin ficha, con un perfil inexistente o con un
+error controlado, el login puede continuar sin ese claim. Scheduling consume el
+JWT de IAM y aplica `ficha_id` para el alcance propio del aprendiz; no consulta
+directamente el endpoint interno de Actors.
 decisiones_clave: OpenAPI publicable en 07-api/contracts/openapi/iam.yaml; envelope de error estándar (guidelines §7); reportes por servicio
 halts_registrados: ninguno
 -->

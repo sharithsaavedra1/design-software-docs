@@ -26,6 +26,10 @@ Todos los endpoints requieren `Authorization: Bearer <JWT>` emitido por `iam-ser
 autorización se resuelve por **feature + scope** (RBAC), features del módulo `MOD_ACTORS`
 (ver [rbac-design.md](../../../01-iam-service/rbac-design.md)).
 
+Excepción interna servicio-a-servicio: los endpoints bajo
+`/internal/learners/**` se protegen exclusivamente con **mTLS** entre servicios y no usan
+Bearer JWT ni features RBAC.
+
 ## Base URL
 `/api/v1`
 
@@ -75,6 +79,12 @@ fichas, no tiene sentido fuera del aprendiz).
 `learner` no tiene columna `is_active` en el modelo de datos: `DELETE /learners/{id}` es un
 soft delete implementado como `enrollment_status = CANCELLED`. Crear una inscripción de
 ficha dispara `actors.learner.enrolled`.
+
+### Endpoints internos de aprendices
+
+| Método | Path | Descripción | Seguridad |
+|--------|------|-------------|-----------|
+| `GET` | `/internal/learners/by-user/{user_id}/active-ficha` | Resuelve la ficha activa de un aprendiz activo a partir del `user_id` de IAM. Retorna `200` con `learner_id` y `ficha_id`, `204` si no tiene ficha activa, `404` si no existe perfil activo de aprendiz, `409` si hay más de una ficha activa y `500` ante error técnico controlado. | mTLS |
 
 ### Seguimiento (tracking)
 `company_visit` se anida bajo `/productive-stages/{id}` (la visita solo existe en el
