@@ -156,6 +156,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Unexpected server or persistence failure.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     Conflict:
       description: Conflicto de estado (p. ej. choque de horario, versión concurrente).
       content:
