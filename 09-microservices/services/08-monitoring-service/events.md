@@ -67,6 +67,8 @@ Se publica cuando una medición de KPI cruza el umbral configurado y otros consu
 | `scheduling.class_session.cancelled` | `scheduling-service` | Reevalúa KPI afectados. |
 | `actors.company_visit.completed` | `actors-service` | Actualiza KPI de etapa productiva. |
 
+Los eventos `academic.ficha.opened` y `academic.ficha.closed` se consumen con el envelope común (`event_id`, `event_type`, `version`, `timestamp`, `source_service`, `payload` y `correlation_id` opcional); sus datos de ficha van dentro de `payload`.
+
 ## Evento retirado
 
 `monitoring.notification.sent` **no es un contrato vigente**. Tras ADR-005:
