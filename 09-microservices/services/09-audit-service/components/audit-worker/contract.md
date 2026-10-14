@@ -35,16 +35,17 @@ Ninguno. El `audit-worker` es un **consumidor terminal** (sink): solo consume y 
   "timestamp": "2026-08-01T14:00:00Z",
   "source_service": "scheduling-service",
   "correlation_id": "uuid-v4",
-  "actor_id": "uuid",
-  "entity_type": "class_session",
-  "entity_id": "uuid",
-  "training_center_id": "uuid | null",
-  "payload": { }
+  "payload": {
+    "actor_id": "uuid",
+    "entity_type": "class_session",
+    "entity_id": "uuid",
+    "training_center_id": "uuid | null"
+  }
 }
 ```
 
 ## Efecto (persistencia)
-Inserta un `audit_record` extrayendo `event_type`, `source_service`, `actor_id`, `entity_type`, `entity_id` y `timestamp` para indexar, y conserva el `payload` completo como `JSONB` (schema-on-read).
+Inserta un `audit_record` extrayendo `event_type`, `source_service` y `timestamp` del envelope. `actor_id`, `entity_type`, `entity_id` y `training_center_id` se proyectan desde `payload` cuando el evento origen los incluye, y se conserva el `payload` completo como `JSONB` (schema-on-read). El worker no amplía el envelope común con campos de auditoría en el nivel superior.
 
 `training_center_id` es nullable y se proyecta únicamente para seguridad de scope y consulta: eventos GLOBAL o sin centro se persisten con `null`. Si el campo está presente debe ser UUID válido; un valor inválido se rechaza antes de reservar `audit_event_seen` o insertar `audit_record`. El worker no infiere el centro consultando otros servicios o bases de datos.
 
