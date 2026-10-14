@@ -798,7 +798,17 @@ paths:
       summary: Actualiza los datos operativos de la ficha (no el estado).
       description: >-
         No modifica `status`; los cambios de estado se realizan vía
-        `PATCH /fichas/{id}/status` respetando la máquina de estados.
+        `PATCH /fichas/{id}/status` respetando la máquina de estados. El
+        contrato de entrada es cerrado: no acepta propiedades adicionales y
+        requiere `row_version` para control de concurrencia. `expected_end_date`
+        puede enviarse como `null`; su semántica final queda abierta en las
+        decisiones del contrato. `max_capacity` solo puede reducirse si no queda
+        por debajo de aprendices activos; una validación fallida responde 422 y
+        no guarda cambios ni publica eventos. Un conflicto de `row_version` o un
+        estado terminal (`COMPLETED`/`CANCELLED`) responde 409 sin sobrescribir
+        la edición concurrente. Timeouts o no disponibilidad de dependencias
+        externas responden 503; el mapeo de un 404 recibido desde Actors queda
+        pendiente de decisión.
       x-required-feature: ACADEMIC_FICHA_MANAGE
       requestBody:
         required: true
@@ -817,13 +827,18 @@ paths:
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '503': { $ref: '_shared.yaml#/components/responses/ServiceUnavailable' }
     delete:
       operationId: deleteFicha
       tags: [fichas]
       summary: Baja lógica de la ficha (transición a CANCELLED).
       description: >-
-        No elimina físicamente el registro. Aplica la transición de estado a `CANCELLED`
-        (guidelines ADR-004); falla con 409 si la ficha ya está en un estado terminal.
+        No elimina físicamente el registro. Equivale a cancelar la ficha:
+        aplica la transición de estado a `CANCELLED` y reutiliza las
+        validaciones de `PATCH /fichas/{id}/status` (guidelines ADR-004).
+        `COMPLETED` y `CANCELLED` son estados terminales; falla con 409 si la
+        ficha ya está en cualquiera de ellos. La cancelación publica el mismo
+        evento `academic.ficha.closed` que la transición a `CANCELLED`.
       x-required-feature: ACADEMIC_FICHA_STATUS
       responses:
         '204':
@@ -843,6 +858,12 @@ paths:
       description: >-
         Transiciones válidas: INDUCTION → EXECUTION|CANCELLED; EXECUTION → PRODUCTIVE_STAGE|CANCELLED;
         PRODUCTIVE_STAGE → COMPLETED|CANCELLED. COMPLETED y CANCELLED son terminales.
+        Las transiciones inválidas o desde estados terminales responden 409.
+        La cancelación está reservada a CENTER_DIRECTOR según RN-ACAD-05, sin
+        retirar el feature compartido `ACADEMIC_FICHA_STATUS` de otras
+        transiciones. Las precondiciones externas para EXECUTION →
+        PRODUCTIVE_STAGE (Scheduling) y PRODUCTIVE_STAGE → COMPLETED (Actors)
+        quedan abiertas hasta definir las APIs/HUs correspondientes.
       x-required-feature: ACADEMIC_FICHA_STATUS
       requestBody:
         required: true
@@ -872,7 +893,11 @@ paths:
         Reporte propio del dominio académico sobre la tabla `enrollment_ficha` (con datos
         derivados de `training_program`). Solo lectura. Inventario — Usuarios: coordinadores
         académicos y dashboards de centro; Frecuencia: on-demand/diaria; Formato: JSON;
-        Fuente: `enrollment_ficha` + `training_program`.
+        Fuente: `enrollment_ficha` + `training_program`. Conserva filtros,
+        paginación y alcance por rol de HU-ACAD-09: TRAINING_CENTER limita al
+        centro propio; otros scopes de ficha propia dependen de IAM/Actors y no
+        se inventan en este contrato. `from` es inclusivo y `to` exclusivo sobre
+        `start_date`.
       x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -928,7 +953,13 @@ paths:
         Reporte propio del dominio académico sobre la tabla `enrollment_ficha`. Calcula el avance
         temporal a partir de `start_date`, `expected_end_date` y `actual_end_date`. Solo lectura.
         Inventario — Usuarios: coordinadores académicos y subdirectores de centro; Frecuencia:
-        on-demand/semanal; Formato: JSON; Fuente: `enrollment_ficha`.
+        on-demand/semanal; Formato: JSON; Fuente: `enrollment_ficha`. Conserva
+        filtros, paginación y alcance por rol de HU-ACAD-09: TRAINING_CENTER
+        limita al centro propio; otros scopes de ficha propia dependen de
+        IAM/Actors y no se inventan en este contrato. `from` es inclusivo y `to`
+        exclusivo sobre `start_date`. La semántica de `expected_end_date: null`
+        y los campos nullable finales del reporte quedan como decisiones
+        abiertas.
       x-required-feature: ACADEMIC_FICHA_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
@@ -1259,11 +1290,13 @@ components:
 
     FichaUpdate:
       type: object
+      additionalProperties: false
+      required: [row_version]
       properties:
+        row_version:
+          type: integer
+          minimum: 0
         expected_end_date:
-          type: [string, 'null']
-          format: date
-        actual_end_date:
           type: [string, 'null']
           format: date
         training_shift:
