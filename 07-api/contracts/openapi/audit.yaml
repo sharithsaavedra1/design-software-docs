@@ -164,6 +164,8 @@ paths:
                 items: { $ref: '#/components/schemas/AuditRecord' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '500': { $ref: '_shared.yaml#/components/responses/InternalServerError' }
 
   /health:
     get:
