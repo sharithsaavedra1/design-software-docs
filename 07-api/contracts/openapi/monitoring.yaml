@@ -868,6 +868,36 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
+
+  /ready:
+    get:
+      operationId: readiness
+      tags: [health]
+      summary: Readiness probe del servicio.
+      description: Valida conectividad con `monitoring_db` y RabbitMQ/AMQP antes de recibir tráfico.
+      security: []
+      responses:
+        '200':
+          description: Servicio listo para recibir tráfico.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, components]
+                properties:
+                  status:
+                    type: string
+                    enum: [ready]
+                  components:
+                    type: object
+                    additionalProperties: true
+        '503':
+          description: Alguna dependencia requerida no está lista.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
 components:
   parameters:
     KpiTypeId:
