@@ -58,7 +58,7 @@ Se emite cuando una ficha de formación es abierta y queda habilitada para la in
   "program_id": "prog-7f3a1c",
   "program_code": "228101",
   "training_center_id": "tc-regional-bogota",
-  "training_shift": "MORNING",
+  "training_shift": "DAY",
   "training_modality": "IN_PERSON",
   "start_date": "2026-08-01",
   "max_capacity": 30,
@@ -74,8 +74,8 @@ Se emite cuando una ficha de formación es abierta y queda habilitada para la in
 | `program_id` | `string` | Referencia al programa de formación |
 | `program_code` | `string` | Código del programa para facilitar joins downstream |
 | `training_center_id` | `string` | Centro de formación donde se ejecuta la ficha |
-| `training_shift` | `enum` | `MORNING`, `AFTERNOON`, `EVENING`, `WEEKEND` |
-| `training_modality` | `enum` | `IN_PERSON`, `REMOTE`, `BLENDED` |
+| `training_shift` | `enum` | `DAY`, `NIGHT`, `MIXED` |
+| `training_modality` | `enum` | `IN_PERSON`, `VIRTUAL`, `HYBRID` |
 | `start_date` | `string (ISO 8601 date)` | Fecha de inicio de la formación |
 | `max_capacity` | `integer` | Cupo máximo de aprendices |
 | `opened_by` | `string` | ID del usuario que abrió la ficha |
@@ -143,26 +143,25 @@ Se emite cuando una competencia de un programa de formación es creada, modifica
 
 ## Formato de envelope
 
-Todos los eventos siguen el envelope estándar del sistema. El payload del negocio se incluye en el campo `data`.
+Todos los eventos siguen el envelope canónico del sistema. El payload del negocio se incluye en el campo `payload` y se valida contra [`07-api/contracts/schemas/event-envelope.schema.json`](../../../07-api/contracts/schemas/event-envelope.schema.json), que prohíbe propiedades adicionales en el envelope. `correlation_id` es opcional.
 
 **Ejemplo completo con `academic.ficha.opened`:**
 
 ```json
 {
-  "event_id": "evt-c3d7e9f1-4a2b-4c8d-b5e6-f7a8b9c0d1e2",
+  "event_id": "c3d7e9f1-4a2b-4c8d-b5e6-f7a8b9c0d1e2",
   "event_type": "academic.ficha.opened",
+  "version": "1.0",
+  "timestamp": "2026-06-20T10:00:00Z",
   "source_service": "academic-management-service",
-  "source_port": 8003,
-  "schema_version": "1.0",
-  "occurred_at": "2026-06-20T10:00:00Z",
-  "correlation_id": "req-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "data": {
+  "correlation_id": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
+  "payload": {
     "ficha_id": "ficha-9b2d4e",
     "ficha_number": "2758369",
     "program_id": "prog-7f3a1c",
     "program_code": "228101",
     "training_center_id": "tc-regional-bogota",
-    "training_shift": "MORNING",
+    "training_shift": "DAY",
     "training_modality": "IN_PERSON",
     "start_date": "2026-08-01",
     "max_capacity": 30,
@@ -176,12 +175,13 @@ Todos los eventos siguen el envelope estándar del sistema. El payload del negoc
 |--------------------|------|-------------|
 | `event_id` | `string (UUID v4)` | Identificador único del evento; garantiza idempotencia en consumidores |
 | `event_type` | `string` | Nombre canónico del evento (`dominio.entidad.accion`) |
+| `version` | `string` | Versión del contrato del evento |
+| `timestamp` | `string (ISO 8601)` | Momento en que ocurrió el hecho de negocio |
 | `source_service` | `string` | Nombre del servicio emisor |
-| `source_port` | `integer` | Puerto del servicio emisor (8003) |
-| `schema_version` | `string` | Versión del esquema del payload; permite evolución sin breaking changes |
-| `occurred_at` | `string (ISO 8601)` | Momento en que ocurrió el hecho de negocio |
-| `correlation_id` | `string` | ID de la solicitud HTTP que originó el evento; útil para trazabilidad |
-| `data` | `object` | Payload específico del evento (ver secciones anteriores) |
+| `payload` | `object` | Payload específico del evento (ver secciones anteriores) |
+| `correlation_id` | `string` | Opcional. ID de la solicitud HTTP que originó el evento; útil para trazabilidad |
+
+No se usan `schema_version`, `occurred_at`, `data` ni `source_port` como campos del envelope. Cualquier dato adicional del evento debe ir dentro de `payload` o esperar una extensión explícita del contrato.
 
 ---
 
@@ -190,21 +190,22 @@ Todos los eventos siguen el envelope estándar del sistema. El payload del negoc
 | Parámetro | Valor |
 |-----------|-------|
 | Topic principal | `academic-events` |
-| Dead Letter Queue | `academic-events.dlq` |
-| Intentos máximos | 3 |
-| Backoff entre intentos | Exponencial: 1s → 4s → 16s |
-| Retención en DLQ | 7 días |
-| Acción tras agotar reintentos | El mensaje se mueve a `academic-events.dlq` con metadatos de error |
+| Dead Letter Queue | Pendiente decidir si será `academic-events.dlq` común o una DLQ por consumidor |
+| Reintentos del publicador Academic | 3 reintentos después del intento original |
+| Backoff del publicador Academic | 1s → 4s → 16s |
+| Reintentos de consumo | Pendiente por consumidor; no equivalen al retry del publicador |
+| Retención en DLQ | Pendiente de decisión |
+| Reprocesamiento | Pendiente de decisión |
 
-Los consumidores que fallen al procesar un mensaje deben dejar que el broker gestione los reintentos. No se debe hacer ACK de mensajes que no pudieron ser procesados correctamente.
+El publicador de Academic usa reintentos 1s → 4s → 16s tras el intento original. Esa política cubre la publicación hacia el broker y no define por sí sola el retry de consumo; cada consumidor debe documentar su cola, DLQ y reprocesamiento. No se debe hacer ACK de mensajes que no pudieron ser procesados correctamente.
 
-Los mensajes en `academic-events.dlq` deben ser monitorizados por `monitoring-service` y revisados manualmente cuando acumulen más de 10 mensajes sin procesar.
+La decisión sobre DLQ común o por consumidor, retención y reprocesamiento queda abierta. Hasta cerrarla, este documento no afirma una política operativa única de DLQ.
 
 ---
 
 ## Invariantes de negocio
 
-Las siguientes reglas se validan **antes** de persistir el cambio y emitir el evento correspondiente. Si alguna falla, la operación se rechaza con error 422 y no se publica ningún evento.
+Las siguientes reglas se validan **antes** de persistir el cambio y emitir el evento correspondiente. Si alguna falla, la operación se rechaza con error 422, no se guarda el cambio de negocio y no se inserta ni publica ningún evento. Con Outbox, la escritura de negocio y la fila de Outbox se confirman o revierten juntas; la publicación ocurre después mediante relay.
 
 ### Para `academic.program.created`
 - El `program_code` debe ser único en todo el sistema; no puede existir otro programa activo con el mismo código.
@@ -220,7 +221,7 @@ Las siguientes reglas se validan **antes** de persistir el cambio y emitir el ev
 - El `training_center_id` debe corresponder a un centro de formación existente y activo (verificado via HTTP).
 
 ### Para `academic.ficha.closed`
-- La ficha debe estar en estado `OPEN` para poder cerrarse; no se puede cerrar una ficha ya cerrada.
+- La ficha debe estar en un estado no terminal (`INDUCTION`, `EXECUTION` o `PRODUCTIVE_STAGE`) para poder cerrarse; no se puede cerrar una ficha en `COMPLETED` o `CANCELLED`.
 - Si `close_reason` es `COMPLETED`, `actual_end_date` no puede ser una fecha futura.
 - Si `close_reason` es `CANCELLED`, debe registrarse una justificación en el campo interno `cancellation_notes` (no incluido en el evento, solo en el registro interno).
 

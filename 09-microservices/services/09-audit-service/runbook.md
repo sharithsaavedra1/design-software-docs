@@ -237,16 +237,11 @@ ORDER BY ar.event_occurred_at ASC;
 Usado cuando mensajes fallidos deben recuperarse despues de que la causa raiz fue resuelta.
 
 ```bash
-# Kafka — reinyectar mensajes de la DLQ al topic de origen
+# RabbitMQ / AMQP — reinyectar mensajes de audit.dlq al exchange global
 # IMPORTANTE: verificar primero que la causa raiz (BD, schema) esta resuelta
-kafka-console-consumer.sh \
-  --bootstrap-server <broker>:9092 \
-  --topic audit-worker.dlq \
-  --from-beginning \
-  --max-messages 500 | \
-kafka-console-producer.sh \
-  --bootstrap-server <broker>:9092 \
-  --topic <topic-origen>  # ej: iam-events, scheduling-events
+rabbitmqadmin get queue=audit.dlq count=500 requeue=false
+rabbitmqadmin publish exchange=audit-events routing_key=<routing-key-origen> \
+  payload='<mensaje_original>' properties='{"content_type":"application/json"}'
 ```
 
 > El `audit-worker` es idempotente: `INSERT INTO audit_record ON CONFLICT (event_id) DO NOTHING`. Reinyectar eventos ya persistidos no genera duplicados.

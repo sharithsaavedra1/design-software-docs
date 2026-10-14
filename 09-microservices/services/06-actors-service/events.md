@@ -172,6 +172,8 @@ Visita de seguimiento del instructor a la empresa registrada como completada.
 
 **Acción:** actors-service revisa todas las asignaciones de competencia (`asignacion_competencia`) que referencian la `competency_id` modificada. Si el cambio afecta el código, nombre o nivel de la competencia, las asignaciones vigentes se marcan con `requires_review = true` para que el coordinador confirme o revoque la habilitación del instructor. No se desactivan automáticamente — el instructor permanece habilitado hasta revisión explícita.
 
+**Contrato recibido:** `academic.competency.updated` usa el envelope común de Academic (`event_id`, `event_type`, `version`, `timestamp`, `source_service`, `payload` y `correlation_id` opcional). La implementación del consumidor de Actors depende de su HU propia; esta documentación solo registra la integración esperada.
+
 ---
 
 ## Formato de envelope
