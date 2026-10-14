@@ -16,8 +16,11 @@ tldr: Evalúa hechos/KPIs, persiste alertas y publica monitoring.alert.triggered
 
 | Evento | Origen | Acción |
 |--------|--------|--------|
-| `academic.ficha.opened` / cambios equivalentes vigentes | Academic | Inicializar/recalcular seguimiento. |
+| `academic.ficha.opened` | Academic | Inicializar/recalcular seguimiento. |
+| `academic.ficha.closed` | Academic | Cerrar o ignorar seguimiento activo según estado terminal. |
 | `scheduling.schedule.published` | Scheduling | Evaluar cobertura/KPIs relacionados. |
+| `scheduling.class_session.cancelled` | Scheduling | Recalcular KPIs afectados por la cancelación. |
+| `actors.company_visit.completed` | Actors | Actualizar KPI de etapa productiva. |
 | `monitoring.kpi.tick` | Scheduler interno | Recalcular umbrales periódicos. |
 
 ## Evento producido
@@ -53,8 +56,15 @@ tldr: Evalúa hechos/KPIs, persiste alertas y publica monitoring.alert.triggered
 ## Idempotencia
 
 La redelivery del mismo `event_id` no puede generar una segunda alerta equivalente.
+La deduplicación se basa en `source_event_id` para alertas y en la medición equivalente
+(`ficha_tracking_id`, `kpi_type_id`, `measured_at`) para KPI.
 
 ## Reintentos
 
 Fallo persistente al consumir → backoff → DLQ propia de Monitoring. Fallo del broker al
 publicar desde `monitoring.outbox` → reintento del relay; la DLQ de Notification es independiente.
+
+El evento principal publicado por el worker es `monitoring.alert.triggered`. El contrato
+`monitoring.kpi.threshold_breached` se mantiene documentado para consumidores que lo requieran,
+pero no es obligatorio para la publicación inicial del `alert-worker` mientras no exista una
+regla explícita de consumo.
