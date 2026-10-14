@@ -98,7 +98,7 @@ publicador los conozca ni los espere.
 
 ### Envelope estándar
 
-Todos los eventos usan el mismo envelope (ver [`_template/service/events.md`](./_template/service/events.md)):
+Todos los eventos usan el mismo envelope (ver [`_template/service/events.md`](./_template/service/events.md)). Para eventos de Academic, el schema canónico es [`07-api/contracts/schemas/event-envelope.schema.json`](../07-api/contracts/schemas/event-envelope.schema.json); prohíbe propiedades adicionales en el envelope y deja `correlation_id` como opcional:
 
 ```json
 {
@@ -107,10 +107,12 @@ Todos los eventos usan el mismo envelope (ver [`_template/service/events.md`](./
   "version": "1.0",
   "timestamp": "2026-01-01T00:00:00Z",
   "source_service": "<nombre-servicio>",
-  "correlation_id": "uuid-v4",
-  "payload": {}
+  "payload": {},
+  "correlation_id": "uuid-v4"
 }
 ```
+
+Los campos propios del evento van dentro de `payload`. No se usan `schema_version`, `occurred_at`, `data` ni `source_port` como campos de envelope.
 
 ### Garantías de entrega
 
@@ -119,7 +121,7 @@ Todos los eventos usan el mismo envelope (ver [`_template/service/events.md`](./
 | **At-least-once** | El broker reintenta hasta recibir `ack` del consumidor. Un evento puede llegar **más de una vez**. |
 | **Idempotencia** | Cada consumidor deduplica por `event_id` (registro de eventos procesados). Procesar dos veces el mismo `event_id` no produce efecto adicional. Requisito para tolerar el at-least-once. |
 | **Orden** | Solo garantizado dentro de una partición lógica (por `ficha_id`) cuando se configura consumidor único. Entre particiones no hay orden global. |
-| **Dead Letter Queue** | Cada consumidor tiene una **DLQ**: los mensajes que fallan tras agotar reintentos se apartan para inspección, sin bloquear la cola principal. |
+| **Dead Letter Queue** | Decisión abierta para Academic: falta acordar si se usará una DLQ común (`academic-events.dlq`) o una DLQ por consumidor, con su retención y reprocesamiento. |
 
 ### Patrón Outbox (publicación confiable)
 
@@ -136,18 +138,18 @@ escritura, y que **nunca** se publica un evento de una transacción que se revir
 la idempotencia del consumidor (dedup por `event_id`), entrega semántica **efectivamente una vez**
 sobre un transporte at-least-once.
 
-> **Diseño previsto — no implementado.** La tabla `outbox` y el relay son parte del diseño de la
-> capa de aplicación; se materializan al construir cada servicio publicador (prioritariamente
-> `scheduling-service`, cuyos eventos alimentan monitoring/audit y read models — ver
-> [ADR-001](../05-architecture/decisions/records/ADR-001-message-broker.md)).
+> **Diseño previsto — no implementado por Docs.** Docs especifica el patrón, pero no implementa ni
+> demuestra el Outbox. La tabla `outbox` y el relay se materializan en cada servicio publicador.
+> Para Academic, el publicador documentado usa reintentos `1s → 4s → 16s` (tres reintentos tras
+> el intento original) para publicar hacia el broker; eso es distinto del retry de consumo.
 
 ### Resiliencia en el consumo de eventos
 
 | Mecanismo | Detalle |
 |-----------|---------|
 | **Ack manual** | El consumidor confirma (`ack`) solo tras procesar con éxito; si falla, `nack` y el broker reintenta. |
-| **Reintentos con backoff** | Reintentos limitados con backoff antes de enviar a DLQ. |
-| **DLQ + reproceso** | Los mensajes en DLQ se inspeccionan y se reprocesan tras corregir la causa. |
+| **Reintentos con backoff** | Reintentos limitados con backoff antes de enviar a DLQ; en Academic queda abierta la política de consumo por consumidor. |
+| **DLQ + reproceso** | Los mensajes en DLQ se inspeccionan y se reprocesan tras corregir la causa; retención y mecanismo de reprocesamiento quedan abiertos para Academic. |
 | **Dedup por `event_id`** | Neutraliza los duplicados inherentes al at-least-once. |
 | **Poblado inicial de read models** | Un servicio nuevo bootstrapea su read model vía snapshot del servicio dueño, y luego se mantiene por eventos (ADR-002). |
 

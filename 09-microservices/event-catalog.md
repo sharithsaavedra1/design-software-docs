@@ -35,15 +35,17 @@ Ejemplo: `scheduling.class_session.created`
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
 | `academic.program.created` | Programa de formación creado | `audit-service` |
-| `academic.enrollment_ficha.created` | Ficha de caracterización creada | `audit-service`, `scheduling-service`, `monitoring-service` |
-| `academic.ficha.opened` | Ficha de caracterización en ejecución | `audit-service`, `monitoring-service` |
-| `academic.enrollment_ficha.status_changed` | Cambio de estado de la ficha (máquina de estados) | `audit-service`, `monitoring-service`, `actors-service` |
+| `academic.ficha.opened` | Ficha de caracterización abierta o habilitada | `audit-service`, `monitoring-service` |
 | `academic.ficha.closed` | Ficha cerrada | `audit-service`, `monitoring-service` |
 | `academic.competency.updated` | Competencia modificada | `audit-service`, `actors-service` |
+| `academic.enrollment_ficha.created` | Evento histórico fuera del contrato HU-ACAD-10 a HU-ACAD-15; no renombrar sin revisar consumidores | `audit-service`, `scheduling-service`, `monitoring-service` |
+| `academic.enrollment_ficha.status_changed` | Evento histórico fuera del contrato HU-ACAD-10 a HU-ACAD-15; no renombrar sin revisar consumidores | `audit-service`, `monitoring-service`, `actors-service` |
 
-> **Nota de naming:** la entidad real es `enrollment_ficha`. Los eventos históricos
-> `academic.ficha.opened`/`closed` se conservan por compatibilidad; los nuevos usan
-> `enrollment_ficha`. Pendiente decidir si se unifican todos a `enrollment_ficha`.
+> **Nota de naming HU-ACAD-10 a HU-ACAD-15:** el contrato acordado usa
+> `academic.program.created`, `academic.ficha.opened`, `academic.ficha.closed` y
+> `academic.competency.updated`. Los eventos `academic.enrollment_ficha.created` y
+> `academic.enrollment_ficha.status_changed` se mantienen como históricos hasta revisar
+> compatibilidad/deprecación con consumidores.
 
 ### training-environment-service
 
@@ -125,7 +127,7 @@ parte del inventario cross-servicio de arriba. Se documentan aquí para trazabil
 ## Normalización pendiente
 
 - `monitoring.alert.triggered` es el nombre canónico y ya debe usarse en los contratos de Monitoring y Notification. `monitoring.alert.generated` queda retirado.
-- Decidir si `academic.ficha.opened/closed` se renombran a `enrollment_ficha.*` (ver nota arriba).
+- Definir compatibilidad/deprecación de `academic.enrollment_ficha.created` y `academic.enrollment_ficha.status_changed` sin cambiar los nombres acordados para HU-ACAD-10 a HU-ACAD-15.
 
 ## Nota de migración
 

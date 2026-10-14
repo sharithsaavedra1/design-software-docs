@@ -58,7 +58,7 @@ Variables ausentes al arrancar producen fallo inmediato con log `FATAL: missing 
 | **reference-data-service no responde** | Timeout HTTP a `:8002` > 3 s durante 1 minuto | P1 | Las operaciones de apertura de ficha fallarán (requieren validar `training_center_id`). Lectura de fichas/programas existentes no se ve afectada. Verificar estado de reference-data-service. |
 | **Fichas en estado incorrecto (bloqueo operacional)** | `scheduling-service` reporta 404 en fichas que deberían estar `EXECUTION` | P1 | Consultar estado real de la ficha en BD. Ver procedimiento de reabrir ficha bloqueada. |
 | **Tasa de error 5xx > 2 %** | Más de 2 % de respuestas 5xx en ventana de 5 min | P1 | Revisar logs por traza de error. Verificar estado de `academic_db`. |
-| **DLQ con mensajes** | `academic-events.dlq` acumula > 10 mensajes sin procesar | P2 | Revisar mensajes en DLQ; identificar evento fallido y causa. Ver procedimiento de DLQ en Escenarios de falla. |
+| **DLQ con mensajes** | La DLQ operativa definida para Academic acumula > 10 mensajes sin procesar | P2 | Revisar mensajes en DLQ; identificar evento fallido y causa. Ver procedimiento de DLQ en Escenarios de falla. |
 | **Programa sin competencias activas** | Programa en `is_active = true` con cero competencias activas | P2 | Posible inconsistencia de datos. Auditar el programa afectado. Las fichas abiertas con ese programa pueden quedar sin asignación de horas. |
 | **Pool de conexiones agotado** | `db_pool_waiting > 0` durante más de 1 minuto | P2 | Revisar si hay transacciones largas abiertas; identificar fichas con operaciones pendientes en vuelo. |
 
@@ -323,9 +323,20 @@ HAVING COUNT(c.id) = 0;
 3. Si la desactivación es válida (programa actualizado), el coordinador académico debe registrar las nuevas competencias a través del módulo M5 antes de abrir nuevas fichas para ese programa.
 4. **Restriccion de negocio:** No se puede reactivar una competencia desactivada si existen fichas abiertas con resultados de aprendizaje asociados a ella (invariante del dominio). En ese caso, debe crearse una nueva competencia con distinto código.
 
-### Escenario 5: Mensajes en DLQ (academic-events.dlq)
+### Escenario 5: Mensajes en DLQ de Academic
 
-**Síntoma:** Alerta por más de 10 mensajes en `academic-events.dlq`.
+**Síntoma:** Alerta por más de 10 mensajes en la DLQ operativa definida para Academic.
+
+> Decisión abierta: la arquitectura debe confirmar si Academic usará una DLQ común
+> (`academic-events.dlq`) o DLQ por consumidor, su retención y el procedimiento de
+> reprocesamiento. Este runbook describe el punto operativo a verificar, pero no
+> debe leerse como implementación demostrada por Docs.
+
+**Publicación confiable:** el patrón esperado inserta el evento en Outbox dentro
+de la misma transacción que modifica el dato de negocio; un relay publica al
+broker y marca la fila como publicada después del ACK. El publicador de Academic
+usa reintentos `1s → 4s → 16s` (tres tras el intento original), distintos del
+retry de consumo.
 
 **Consumidores del topic `academic-events`:**
 
@@ -338,7 +349,7 @@ HAVING COUNT(c.id) = 0;
 
 **Pasos de recuperación:**
 
-1. Inspeccionar los mensajes en la DLQ:
+1. Inspeccionar los mensajes en la DLQ operativa definida:
    ```bash
    kafka-console-consumer.sh \
      --bootstrap-server kafka:9092 \
@@ -350,7 +361,7 @@ HAVING COUNT(c.id) = 0;
 3. Verificar el estado del consumidor fallido (`audit-service`, `monitoring-service` o `actors-service`).
 4. Si el error es transitorio (consumidor temporalmente caído), el consumidor puede reprocesar al recuperarse.
 5. Si el error es permanente (payload malformado), registrar en el sistema de incidencias. Si el evento es crítico para auditoría, notificar al equipo de auditoría para registro manual.
-6. Retención máxima en DLQ: 7 días.
+6. Retención máxima en DLQ: pendiente de decisión.
 
 ### Escenario 6: Inconsistencia de datos — ficha con training_center_id inexistente
 
