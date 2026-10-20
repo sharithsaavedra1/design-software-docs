@@ -26,3 +26,9 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-002](./records/ADR-002-scheduling-read-models.md) | Read models para reducir dependencias síncronas de scheduling | PROPOSED |
 | [ADR-003](./records/ADR-003-object-storage.md) | Estrategia de almacenamiento de objetos (MinIO/S3) | PROPOSED |
 | [ADR-004](./records/ADR-004-status-parametrization-and-audit-standard.md) | Parametrización de estados y estándar de auditoría | PROPOSED |
+| [ADR-005](./records/ADR-005-microservices-topology-and-transversal-capabilities.md) | Topología de microservicios y capacidades transversales | ACCEPTED |
+| [ADR-006](./records/ADR-006-polyglot-stack-strategy.md) | Estrategia de stack polyglot (Go, Java, Python, Node) | ACCEPTED |
+| [ADR-007](./records/ADR-007-edge-gateway-and-port-convention.md) | Edge gateway y convención de puertos | ACCEPTED |
+| [ADR-008](./records/ADR-008-observability-opentelemetry.md) | Observabilidad — OpenTelemetry + Grafana (LGTM) | ACCEPTED |
+| [ADR-009](./records/ADR-009-frontend-framework-and-build-strategy.md) | Framework de frontend y estrategia de compilación | ACCEPTED |
+| [ADR-011](./records/ADR-011-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
