@@ -1,6 +1,6 @@
 # ADR-011: Outbox transaccional e inbox idempotente para document-service
 
-**Estado:** PROPOSED
+**Estado:** ACCEPTED (2026-10-20)
 **Fecha:** 2026-10-20
 **Autores:** Danna Valentina Barrios Penagos
 **Equipos involucrados:** Arquitectura, Backend (document-service), Base de datos (document-db), DevOps
