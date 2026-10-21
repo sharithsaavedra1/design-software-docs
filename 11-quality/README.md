@@ -21,7 +21,6 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 |---------|-------------|--------|
 | [testing-strategy.md](./testing-strategy.md) | Estrategia de pruebas por nivel y tipo | 🟡 |
 | [code-review.md](./code-review.md) | Criterios y flujo para revisiones de código | 🟡 |
-| [plan-mejoramiento/](./plan-mejoramiento/README.md) | Seguimiento documental de planes de mejoramiento individuales (Acta 02) | 🟢 |
 
 ## Plantillas
 

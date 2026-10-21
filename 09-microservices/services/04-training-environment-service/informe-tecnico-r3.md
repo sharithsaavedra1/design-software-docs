@@ -101,7 +101,7 @@ Implementados mediante `log/slog` direccionado a `stdout`. Cada registro incluye
 
 Prueba automatizada dentro de contenedor Docker aislando el entorno de compilación de Go con el SDK OpenTelemetry cargado:
 
-![Ejecución de Pruebas Unitarias Docker](../../../assets/images/r3-observabilidad-training-environment/Captura%20de%20pantalla%202026-10-18%20200900.png)
+> **Evidencia visual:** [Ver captura en repositorio del microservicio: Ejecución de Tests con Docker Go Runtime](https://github.com/code-sena/design-software-training-environment-service/blob/feature/r3-observability/docs/img/Captura%20de%20pantalla%202026-10-18%20200900.png)
 
 ```text
 === RUN   TestTraceContext_ParseTraceparent
@@ -114,7 +114,7 @@ Prueba automatizada dentro de contenedor Docker aislando el entorno de compilaci
 
 Prueba automatizada de integración (`TestDistributedTracing_MFE_To_Service_To_Database`) que ejecuta una consulta SQL real sobre PostgreSQL utilizando una conexión instrumentada con `OpenTracedPostgresDB()` (`otelsql`). Se valida que el span de base de datos es generado automáticamente por `otelsql` sin instrumentación manual, compartiendo el `trace_id`, enlazando la jerarquía padre-hijo e incluyendo los atributos semánticos de la consulta ejecutada:
 
-![Verificación de Traza Distribuida MFE a DB](../../../assets/images/r3-observabilidad-training-environment/Captura%20de%20pantalla%202026-10-18%20200918.png)
+> **Evidencia visual:** [Ver captura en repositorio del microservicio: Verificación de Traza Distribuida MFE a DB](https://github.com/code-sena/design-software-training-environment-service/blob/feature/r3-observability/docs/img/Captura%20de%20pantalla%202026-10-18%20200918.png)
 
 ```text
 === RUN   TestREDMetricsRegistry
@@ -149,7 +149,7 @@ PASS
 
 Respuesta HTTP emitida al consultar el servicio activo con la cabecera W3C `traceparent`:
 
-![Respuesta cURL con Métricas RED y Headers W3C](../../../assets/images/r3-observabilidad-training-environment/Captura%20de%20pantalla%202026-10-18%20201524.png)
+> **Evidencia visual:** [Ver captura en repositorio del microservicio: Respuesta cURL con Métricas RED y Headers W3C](https://github.com/code-sena/design-software-training-environment-service/blob/feature/r3-observability/docs/img/Captura%20de%20pantalla%202026-10-18%20201524.png)
 
 ```text
 # HELP http_requests_total Total number of HTTP requests processed (RED Rate metric)
@@ -174,7 +174,7 @@ X-Trace-Id: 4bf92f3577b34da6a3ce929d0e0e4736
 
 Levantamiento de los contenedores de Grafana y Prometheus utilizando `docker compose`:
 
-![Despliegue Docker Compose Grafana y Prometheus](../../../assets/images/r3-observabilidad-training-environment/Captura%20de%20pantalla%202026-10-18%20203115.png)
+> **Evidencia visual:** [Ver captura en repositorio del microservicio: Despliegue Docker Compose Grafana y Prometheus](https://github.com/code-sena/design-software-training-environment-service/blob/feature/r3-observability/docs/img/Captura%20de%20pantalla%202026-10-18%20203115.png)
 
 ```text
 [+] up 25/25
@@ -188,7 +188,7 @@ Levantamiento de los contenedores de Grafana y Prometheus utilizando `docker com
 
 Visualización gráfica en tiempo real en Grafana con los paneles de Tasa (Rate), Errores (Errors %), Latencia (P50, P95, P99) y Umbral de Alerta al 5%:
 
-![Tablero Grafana RED y Alerta de Error](../../../assets/images/r3-observabilidad-training-environment/Captura%20de%20pantalla%202026-10-18%20204407.png)
+> **Evidencia visual:** [Ver captura en repositorio del microservicio: Tablero Grafana RED y Alerta de Error](https://github.com/code-sena/design-software-training-environment-service/blob/feature/r3-observability/docs/img/Captura%20de%20pantalla%202026-10-18%20204407.png)
 
 ---
 
