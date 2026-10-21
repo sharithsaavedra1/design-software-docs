@@ -32,7 +32,9 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-008](./records/ADR-008-observability-opentelemetry.md) | Observabilidad — OpenTelemetry + Grafana (LGTM) | ACCEPTED |
 | [ADR-009](./records/ADR-009-frontend-framework-and-build-strategy.md) | Framework de frontend y estrategia de compilación | ACCEPTED |
 | [ADR-010](./records/ADR-010-monitoring-r3-observability.md) | Observabilidad de Monitoring para R3 | PROPOSED |
+| [ADR-011](./records/ADR-011-document-outbox-inbox-resilience.md) | Outbox transaccional e inbox idempotente para document-service | ACCEPTED |
 | [ADR-011](./records/ADR-011-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
+- [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
 - [ADR-011: Observabilidad de Training Environment para R3](./records/ADR-011-training-environment-r3-observability.md) — aceptada.
